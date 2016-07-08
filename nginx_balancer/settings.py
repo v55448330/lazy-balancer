@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'nginx',
     'main',
     'proxy',
 ]
@@ -53,6 +54,8 @@ MIDDLEWARE_CLASSES = [
 ]
 
 ROOT_URLCONF = 'nginx_balancer.urls'
+
+NGINX_TEMPLATES = os.path.join(BASE_DIR, 'resource/nginx')
 
 TEMPLATES = [
     {

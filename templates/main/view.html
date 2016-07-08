@@ -1,6 +1,78 @@
 {% extends "base.html" %}
 {% block content %}
 
+<div class="row">
+    <div class="col-md-12">
+        <!-- Horizontal Form -->
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Nginx 配置</h3>
+            </div>
+            <!-- /.box-header -->
+            <!-- form start -->
+            <form class="form-horizontal">
+                <div class="box-body">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">进程数量</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="input_worker_processes" placeholder="用于处理请求的进程数量">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" id="check_worker_processes"> 自动检测
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">最大连接数</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="input_worker_connections" placeholder="系统支持的最大并发连接数">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">超时时间</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="input_keepalive_timeout" placeholder="请求超时时间（秒）">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">请求正文大小</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="input_client_max_body_size" placeholder="请求正文大小限制（MB）">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">请求日志</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="input_access_log" placeholder="全局请求日志路径">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">错误日志</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="input_error_log" placeholder="全局错误日志路径">
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    <!-- <button type="submit" class="btn btn-default">Cancel</button> -->
+                    <button type="submit" class="btn btn-info pull-right">保存</button>
+                </div>
+                <!-- /.box-footer -->
+            </form>
+        </div>
+        <!-- /.box -->
+    </div>
+</div>
 
 
 <script>

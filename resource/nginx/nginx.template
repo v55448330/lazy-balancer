@@ -1,0 +1,49 @@
+user www-data;
+worker_processes {{ worker_processes }};
+pid /run/nginx.pid;
+
+events {
+    worker_connections {{ worker_connections }};
+    # multi_accept on;
+}
+
+http {
+
+    ##
+    # Basic Settings
+    ##
+
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout {{ keepalive_timeout }};
+    types_hash_max_size 2048;
+    client_max_body_size {{ client_max_body_size }};
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # Logging Settings
+    ##
+
+    #access_log /dev/stdout;
+    #error_log /dev/stdout;
+
+    access_log {{ access_log }};
+    error_log {{ error_log }};
+
+    ##
+    # Gzip Settings
+    ##
+
+    gzip on;
+    gzip_disable "msie6";
+
+    ##
+    # Virtual Host Configs
+    ##
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*.conf;
+}
