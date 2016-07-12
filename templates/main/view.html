@@ -5,10 +5,10 @@
 <div class="row">
     <div class="col-md-12">
         <!-- Horizontal Form -->
-        <div class="box box-info">
+        <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title"></h3>
-                <small>最后更新时间：{{ main_config.update_time | timestamp_to_date }}</small>
+                <small>最后更新时间[{{ main_config.config_id }}]：{{ main_config.update_time | timestamp_to_date }}</small>
             </div>
             <!-- /.box-header -->
             <!-- form start -->
@@ -18,7 +18,7 @@
                         <label class="col-sm-2 control-label">进程数量</label>
                         <div class="col-sm-9">
                             <div id="div_worker_processes">
-                                <input type="text" class="form-control" name="worker_processes" id="input_worker_processes" placeholder="用于处理请求的进程数量，建议参照CPU内核数量（1-999）" onblur="checkForm(this)" value="">
+                                <input type="text" class="form-control" name="worker_processes" id="input_worker_processes" placeholder="用于处理请求的进程数量，建议参照 CPU 核心数量（1-99）" onblur="checkForm(this)" value="">
                             </div>
                             <div class="checkbox">
                                 <label>
@@ -53,7 +53,7 @@
                         <div class="col-sm-9">
                             <div class="input-group">
                                 <div id="div_client_max_body_size">
-                                    <input type="text" class="form-control" name="client_max_body_size" id="input_client_max_body_size" placeholder="请求正文大小限制（1-9999）" onblur="checkForm(this)">
+                                    <input type="text" class="form-control" name="client_max_body_size" id="input_client_max_body_size" placeholder="请求正文大小限制（1-999）" onblur="checkForm(this)">
                                 </div>
                                 <div class="input-group-addon">
                                     <span><b>MB</b></span>
@@ -62,7 +62,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">请求日志</label>
+                        <label class="col-sm-2 control-label">访问日志</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="access_log" id="input_access_log" placeholder="全局请求日志路径">
                         </div>
@@ -114,7 +114,7 @@ $('#input_error_log').val('{{ main_config.error_log }}')
 $('#input_worker_processes').inputmask({"mask":"9",'repeat': 2, 'greedy' : false})
 $('#input_worker_connections').inputmask({"mask":"9",'repeat': 5, 'greedy' : false})
 $('#input_keepalive_timeout').inputmask({"mask":"9",'repeat': 3, 'greedy' : false})
-$('#input_client_max_body_size').inputmask({"mask":"9",'repeat': 4, 'greedy' : false})
+$('#input_client_max_body_size').inputmask({"mask":"9",'repeat': 3, 'greedy' : false})
 
 function checkAutoProcess(){
     if ($('#check_worker_processes')[0].checked == true){

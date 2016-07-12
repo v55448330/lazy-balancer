@@ -1,10 +1,188 @@
 {% extends "base.html" %}
 {% block content %}
+<!-- Modal -->
+<div class="modal fade" id="edit_balancer" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="edit_balancer_title"></h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="form_main_config">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <ul class="timeline">
+                                <li>
+                                <i class="fa fa-cog bg-green"></i>
+                                <div class="timeline-item">
+                                    <span class="time">负载均衡器基础配置（* 为可选项）</span>
+                                    <h3 class="timeline-header">基础配置</h3>
+                                    <div class="timeline-body">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">名称</label>
+                                            <div class="col-sm-9" id="div_proxy_name">
+                                                <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="checkForm(this)">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">服务端口</label>
+                                            <div class="col-sm-9" id="div_listen">
+                                                <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="checkForm(this)">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">访问域名</label>
+                                            <div class="col-sm-9" id="div_service_name">
+                                                <input type="text" class="form-control" name="proxy_service_name" id="input_proxy_service_name" placeholder="用于配置访问负载均衡器的域名" onblur="checkForm(this)">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">* 访问日志</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" name="proxy_access_log" id="input_proxy_access_log" placeholder="此负载均衡器请求日志路径">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">* 错误日志</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" name="proxy_error_log" id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">* ip_hash</label>
+                                            <div class="col-sm-9">
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="proxy_ip_hash" id="check_proxy_ip_hash"> 启用根据源地址引导流量
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </li>
+                                <li>
+                                <i class="fa fa-server bg-blue"></i>
+                                <div class="timeline-item">
+                                    <span class="time">后端服务器节点配置</span>
+                                    <h3 class="timeline-header">节点配置</h3>
+                                    <div class="timeline-body">
 
+                                        <div class="form-group">
+                                            <div class="col-sm-12">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>地址</th>
+                                                            <th>端口</th>
+                                                            <th>权重</th>
+                                                            <th>重试</th>
+                                                            <th>超时</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <input type="text" class="form-control" name="upstream_address" id="input_upstream_address" placeholder="IP地址">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" name="upstream_port" id="input_upstream_port" placeholder="服务端口">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" name="upstream_weight" id="input_upstream_weight" placeholder="1-100">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" name="upstream_max_fails" id="input_upstream_max_fails" placeholder="重试次数">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control" name="upstream_fail_timeout" id="input_upstream_fail_timeout" placeholder="失败判定时间">
+                                                        </td>
+
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                    <div class="timeline-footer">
+                                        <a class="btn btn-primary btn-xs"> 
+                                            <i class="fa fa-plus bg-blue"> 增加节点</i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <button type="button" class="btn btn-primary pull-left" onclick="edit_balancer(1)">创建负载均衡器</button>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px">编号</th>
+                                <th>名称</th>
+                                <th>协议</th>
+                                <th>端口</th>
+                                <th>状态</th>
+                                <th>更新时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer clearfix">
+                <ul class="pagination pagination-sm no-margin pull-right">
+                    <li><a href="#">&laquo;</a></li>
+                    <li><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">&raquo;</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
+$('#menu_proxy_config').addClass('active')
 $('#page_header').text('负载均衡配置')
 $('#page_header_descript').text('用于管理 Nginx 虚拟主机相关配置')
 $('#page_nav').text('服务管理')
 $('#page_name').text('负载均衡配置')
+
+function edit_balancer(_create){
+    if (_create == 1){
+        $('#edit_balancer_title').text('创建负载均衡器')
+        $('#edit_balancer').modal('show')   
+    }
+}
+
+
+
 </script>
 {% endblock %}

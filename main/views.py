@@ -6,6 +6,7 @@ from nginx.views import *
 import json
 import uuid
 import time
+import os
  
 def view(request):
     _main_config = main_config.objects.all()
@@ -35,6 +36,14 @@ def save(request):
         try:
             _config_id = str(uuid.uuid1())
             _config_test_path = "/tmp/nginx_%s.conf" % _config_id
+            _config_path= "/etc/nginx/nginx.conf"
+            
+            if not access_log:
+                access_log = "/var/log/nginx/access.log"
+
+            if not error_log:
+                error_log = "/var/log/nginx/error.log"
+
             _main_config = {
                 'config_id' : _config_id,
                 'worker_processes' : int(worker_processes),
@@ -49,13 +58,24 @@ def save(request):
             _config_content = build_main_config(_main_config)
             write_config(_config_test_path,_config_content)
 
-            main_config.objects.all().delete()
-            _c = main_config(**_main_config)
-            _c.save()
-            content = "Success" 
+            _test_ret = test_config(_config_test_path)
+            if _test_ret['status'] == 0:
+                os.remove(_config_test_path)
+                write_config(_config_path,_config_content)
+                main_config.objects.all().delete()
+                _c = main_config(**_main_config)
+                _c.save()
+
+                _reload_ret = reload_config()
+                if _reload_ret['status'] == 0:
+                    content = "Success" 
+                else:
+                    content = _reload_ret['output']
+            else:
+                content = _test_ret['output']
+
         except Exception, e:
             content = str(e)
-        
     else:
         content = "ArgsError"
 

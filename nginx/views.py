@@ -1,6 +1,7 @@
 from jinja2 import Environment, FileSystemLoader
 from multiprocessing import cpu_count
 from django.conf import settings
+import commands
 
 def build_main_config(_config):
     env = Environment(
@@ -29,7 +30,23 @@ def build_main_config(_config):
 
     return template.render(nginx_main_config)
 
-def write_config(conf_path,conf_content):
-    f = open(conf_path, 'w')
-    f.write(conf_content)
-    f.close()
+def write_config(_conf_path,_conf_content):
+    _f = open(_conf_path, 'w')
+    _f.write(_conf_content)
+    _f.close()
+
+def run_shell(_cmd):
+    (_status,_output) = commands.getstatusoutput(_cmd)
+    _content = {
+        'status':_status,
+        'output':_output,
+    }
+    return _content
+
+def test_config(_path):
+    return run_shell('nginx -t -c %s' % _path)
+
+def reload_config():
+    return run_shell('nginx -s reload')
+
+
