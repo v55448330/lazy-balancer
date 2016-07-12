@@ -1,71 +1,84 @@
 {% extends "base.html" %}
 {% block content %}
+{% load custom_filter %}
 
 <div class="row">
     <div class="col-md-12">
         <!-- Horizontal Form -->
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title">Nginx 配置</h3>
+                <h3 class="box-title"></h3>
+                <small>最后更新时间：{{ main_config.update_time | timestamp_to_date }}</small>
             </div>
             <!-- /.box-header -->
             <!-- form start -->
-            <form class="form-horizontal">
+            <form class="form-horizontal" id="form_main_config">
                 <div class="box-body">
                     <div class="form-group">
                         <label class="col-sm-2 control-label">进程数量</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="input_worker_processes" placeholder="用于处理请求的进程数量">
+                            <div id="div_worker_processes">
+                                <input type="text" class="form-control" name="worker_processes" id="input_worker_processes" placeholder="用于处理请求的进程数量，建议参照CPU内核数量（1-999）" onblur="checkForm(this)" value="">
+                            </div>
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox" id="check_worker_processes"> 自动检测
+                                    <input type="checkbox" onchange="checkAutoProcess()" name="auto_worker_processes" id="check_worker_processes" > 自动检测（CPU 核心数量）
                                 </label>
                             </div>
-
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">最大连接数</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="input_worker_connections" placeholder="系统支持的最大并发连接数">
+                        <div class="col-sm-9" >
+                            <div id="div_worker_connections">
+                                <input type="text" class="form-control" name="worker_connections" id="input_worker_connections" placeholder="系统支持的最大并发连接数（1-99999）" onblur="checkForm(this)">
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">超时时间</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="input_keepalive_timeout" placeholder="请求超时时间（秒）">
+                            <div class="input-group">
+                                <div id="div_keepalive_timeout">
+                                    <input type="text" class="form-control" name="keepalive_timeout" id="input_keepalive_timeout" placeholder="请求超时时间（1-999）" onblur="checkForm(this)">
+                                </div>
+                                <div class="input-group-addon">
+                                    <span><b>秒</b></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">请求正文大小</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="input_client_max_body_size" placeholder="请求正文大小限制（MB）">
+                            <div class="input-group">
+                                <div id="div_client_max_body_size">
+                                    <input type="text" class="form-control" name="client_max_body_size" id="input_client_max_body_size" placeholder="请求正文大小限制（1-9999）" onblur="checkForm(this)">
+                                </div>
+                                <div class="input-group-addon">
+                                    <span><b>MB</b></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">请求日志</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="input_access_log" placeholder="全局请求日志路径">
+                            <input type="text" class="form-control" name="access_log" id="input_access_log" placeholder="全局请求日志路径">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label">错误日志</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" id="input_error_log" placeholder="全局错误日志路径">
+                            <input type="text" class="form-control" name="error_log" id="input_error_log" placeholder="全局错误日志路径">
                         </div>
                     </div>
-
-
-
-
-
-
 
                 </div>
                 <!-- /.box-body -->
                 <div class="box-footer">
                     <!-- <button type="submit" class="btn btn-default">Cancel</button> -->
-                    <button type="submit" class="btn btn-info pull-right">保存</button>
+                    <button type="button" class="btn btn-info pull-right" onclick="saveConfig()" >保存</button>
                 </div>
                 <!-- /.box-footer -->
             </form>
@@ -76,9 +89,80 @@
 
 
 <script>
+//init page
+$('#menu_main_config').addClass('active')
 $('#page_header').text('全局配置')
 $('#page_header_descript').text('用于管理 Nginx 全局配置')
 $('#page_nav').text('服务管理')
 $('#page_name').text('全局配置')
+
+//init form
+{% if main_config.worker_processes == 0 %}
+    $('#check_worker_processes').attr('checked','checked')
+    $('#input_worker_processes').attr('disabled','disabled')
+{% else %}
+    $('#input_worker_processes').val('{{ main_config.worker_processes }}')
+{% endif %}
+$('#input_worker_connections').val('{{ main_config.worker_connections }}')
+$('#input_keepalive_timeout').val('{{ main_config.keepalive_timeout }}')
+$('#input_client_max_body_size').val('{{ main_config.client_max_body_size }}')
+$('#input_access_log').val('{{ main_config.access_log }}')
+$('#input_error_log').val('{{ main_config.error_log }}')
+
+
+//input filter 
+$('#input_worker_processes').inputmask({"mask":"9",'repeat': 2, 'greedy' : false})
+$('#input_worker_connections').inputmask({"mask":"9",'repeat': 5, 'greedy' : false})
+$('#input_keepalive_timeout').inputmask({"mask":"9",'repeat': 3, 'greedy' : false})
+$('#input_client_max_body_size').inputmask({"mask":"9",'repeat': 4, 'greedy' : false})
+
+function checkAutoProcess(){
+    if ($('#check_worker_processes')[0].checked == true){
+        $('#input_worker_processes').val('')
+        $('#input_worker_processes').attr('disabled','disabled')
+        $('#div_worker_processes').removeClass('has-error')
+        $('#div_worker_processes').addClass('has-success')
+    }else{
+        $('#input_worker_processes').removeAttr('disabled')
+        $('#div_worker_processes').removeClass('has-success')
+        $('#div_worker_processes').addClass('has-error')
+    }
+}
+
+function checkForm(_input){
+    var _input_div = $(_input.closest("div"))
+    _input_div.removeClass('has-error')
+    _input_div.removeClass('has-success')
+    if ($(_input).val() == ""){
+        _input_div.addClass('has-error')
+    }else{
+        _input_div.addClass('has-success')
+    }
+}
+
+function saveConfig(){
+    if (confirm("确认要保存这样的配置？"))  {
+        jQuery.ajax({
+            type: 'post',
+            url: '/main/save/',
+            data: $('#form_main_config').serialize(),
+            success: function(p) {
+                if (p == "Success"){
+                    alert("保存成功!")
+                    top.location = '/main/'
+                }else if (p == "ArgsError"){
+                    alert('保存失败！配置项填写错误！')
+                }else{
+                    alert('保存错误！其他错误：'+p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+
 </script>
 {% endblock %}

@@ -19,5 +19,5 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.view),
-    #url(r'^/(?P<action>.*)$', views.action),
+    url(r'^save/$', views.save),
 ]
