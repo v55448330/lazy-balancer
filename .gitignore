@@ -1,3 +1,4 @@
+.zcache
 *.DS_Store
 *.log
 *.sqlite3
