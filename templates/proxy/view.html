@@ -108,7 +108,7 @@
 </div>
 
 <div class="modal fade" id="edit_balancer_ssl" tabindex="-1" role="dialog">
-    <div class="modal-dialog" style="width:620px">
+    <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -144,13 +144,13 @@
                             <div class="form-group">
                                 <label>证书：</label>
                                 <div id="div_ssl_cert_body">
-                                    <textarea class="form-control" rows="10" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace"></textarea>
+                                    <textarea class="form-control" rows="9" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>私钥：</label>
                                 <div id="div_ssl_key_body">
-                                    <textarea class="form-control" rows="10" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace"></textarea>
+                                    <textarea class="form-control" rows="9" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -250,9 +250,7 @@ function check_balancer_ssl(_self){
         $('#txt_ssl_key_body').removeAttr('disabled')
         $('#check_ssl_port').removeAttr('disabled')
         $('#div_ssl_cert_body').removeClass('has-success')
-        $('#div_ssl_cert_body').addClass('has-error')
         $('#div_ssl_key_body').removeClass('has-success')
-        $('#div_ssl_key_body').addClass('has-error')
     }else{
         $('#txt_ssl_cert_body').text('')
         $('#txt_ssl_key_body').text('')
