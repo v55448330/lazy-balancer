@@ -18,11 +18,11 @@
                         <label class="col-sm-2 control-label">进程数量</label>
                         <div class="col-sm-9">
                             <div id="div_worker_processes">
-                                <input type="text" class="form-control" name="worker_processes" id="input_worker_processes" placeholder="用于处理请求的进程数量，建议参照 CPU 核心数量（1-99）" onblur="checkForm(this)" value="">
+                                <input type="text" class="form-control" name="worker_processes" id="input_worker_processes" placeholder="用于处理请求的进程数量，建议参照 CPU 核心数量（1-99）" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,2}'" data-mask>
                             </div>
                             <div class="checkbox">
                                 <label>
-                                    <input type="checkbox" onchange="checkAutoProcess()" name="auto_worker_processes" id="check_worker_processes" > 自动检测（CPU 核心数量）
+                                    <input type="checkbox" onchange="check_auto_process()" name="auto_worker_processes" id="check_worker_processes" > 自动检测（CPU 核心数量）
                                 </label>
                             </div>
                         </div>
@@ -31,7 +31,7 @@
                         <label class="col-sm-2 control-label">最大连接数</label>
                         <div class="col-sm-9" >
                             <div id="div_worker_connections">
-                                <input type="text" class="form-control" name="worker_connections" id="input_worker_connections" placeholder="系统支持的最大并发连接数（1-99999）" onblur="checkForm(this)">
+                                <input type="text" class="form-control" name="worker_connections" id="input_worker_connections" placeholder="系统支持的最大并发连接数（1-99999）" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
                             </div>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                         <div class="col-sm-9">
                             <div class="input-group">
                                 <div id="div_keepalive_timeout">
-                                    <input type="text" class="form-control" name="keepalive_timeout" id="input_keepalive_timeout" placeholder="请求超时时间（1-999）" onblur="checkForm(this)">
+                                    <input type="text" class="form-control" name="keepalive_timeout" id="input_keepalive_timeout" placeholder="请求超时时间（1-999）" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,3}'" data-mask>
                                 </div>
                                 <div class="input-group-addon">
                                     <span><b>秒</b></span>
@@ -53,7 +53,7 @@
                         <div class="col-sm-9">
                             <div class="input-group">
                                 <div id="div_client_max_body_size">
-                                    <input type="text" class="form-control" name="client_max_body_size" id="input_client_max_body_size" placeholder="请求正文大小限制（1-999）" onblur="checkForm(this)">
+                                    <input type="text" class="form-control" name="client_max_body_size" id="input_client_max_body_size" placeholder="请求正文大小限制（1-999）" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,3}'" data-mask>
                                 </div>
                                 <div class="input-group-addon">
                                     <span><b>MB</b></span>
@@ -78,7 +78,7 @@
                 <!-- /.box-body -->
                 <div class="box-footer">
                     <!-- <button type="submit" class="btn btn-default">Cancel</button> -->
-                    <button type="button" class="btn btn-info pull-right" onclick="saveConfig()" >保存</button>
+                    <button type="button" class="btn btn-info pull-right" onclick="save_config()" >保存</button>
                 </div>
                 <!-- /.box-footer -->
             </form>
@@ -111,12 +111,9 @@ $('#input_error_log').val('{{ main_config.error_log }}')
 
 
 //input filter 
-$('#input_worker_processes').inputmask({"mask":"9",'repeat': 2, 'greedy' : false})
-$('#input_worker_connections').inputmask({"mask":"9",'repeat': 5, 'greedy' : false})
-$('#input_keepalive_timeout').inputmask({"mask":"9",'repeat': 3, 'greedy' : false})
-$('#input_client_max_body_size').inputmask({"mask":"9",'repeat': 3, 'greedy' : false})
+$("[data-mask]").inputmask();
 
-function checkAutoProcess(){
+function check_auto_process(){
     if ($('#check_worker_processes')[0].checked == true){
         $('#input_worker_processes').val('')
         $('#input_worker_processes').attr('disabled','disabled')
@@ -129,7 +126,7 @@ function checkAutoProcess(){
     }
 }
 
-function checkForm(_input){
+function check_form(_input){
     var _input_div = $(_input.closest("div"))
     _input_div.removeClass('has-error')
     _input_div.removeClass('has-success')
@@ -140,12 +137,12 @@ function checkForm(_input){
     }
 }
 
-function saveConfig(){
+function save_config(){
     if (confirm("确认要保存这样的配置？"))  {
         jQuery.ajax({
             type: 'post',
             url: '/main/save/',
-            data: $('#form_main_config').serialize(),
+            data: JSON.stringify($('#form_main_config').serializeObject()),
             success: function(p) {
                 if (p == "Success"){
                     alert("保存成功!")

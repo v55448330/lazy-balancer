@@ -19,5 +19,9 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.view),
+    url(r'^save/$', views.save),
+    url(r'^status/$', views.change_status),
+    url(r'^delete/$', views.delete_proxy),
+    url(r'^query/$', views.query_proxy),
     #url(r'^/(?P<action>.*)$', views.action),
 ]

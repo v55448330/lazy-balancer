@@ -17,25 +17,25 @@ def view(request):
     pass
 
 def save(request):
-    print request.POST
-
     content = "" 
+    try:
+        _post = json.loads(request.body)
 
-    if request.POST.has_key('auto_worker_processes'):
-        worker_processes = "0"
-    else:
-        worker_processes = request.POST.get('worker_processes')
+        print _post
 
-    worker_connections = request.POST.get('worker_connections')
-    keepalive_timeout = request.POST.get('keepalive_timeout')
-    client_max_body_size = request.POST.get('client_max_body_size')
-    access_log = request.POST.get('access_log')
-    error_log = request.POST.get('error_log')
+        if _post.has_key('auto_worker_processes'):
+            worker_processes = "0"
+        else:
+            worker_processes = _post.get('worker_processes').replace('_','')
 
-    if worker_processes and worker_connections and keepalive_timeout and client_max_body_size:
-        try:
+        worker_connections = _post.get('worker_connections').replace('_','')
+        keepalive_timeout = _post.get('keepalive_timeout').replace('_','')
+        client_max_body_size = _post.get('client_max_body_size').replace('_','')
+        access_log = _post.get('access_log')
+        error_log = _post.get('error_log')
+
+        if worker_processes and worker_connections and keepalive_timeout and client_max_body_size:
             _config_id = str(uuid.uuid1())
-            _config_test_path = "/tmp/nginx_%s.conf" % _config_id
             _config_path= "/etc/nginx/nginx.conf"
             
             if not access_log:
@@ -56,31 +56,23 @@ def save(request):
             }
             print _main_config
             _config_content = build_main_config(_main_config)
-            write_config(_config_test_path,_config_content)
+            write_config(_config_path,_config_content)
 
-            _test_ret = test_config(_config_test_path)
+            _test_ret = test_config()
             if _test_ret['status'] == 0:
-                os.remove(_config_test_path)
                 write_config(_config_path,_config_content)
                 main_config.objects.all().delete()
-                _c = main_config(**_main_config)
-                _c.save()
-
-                _reload_ret = reload_config()
-                if _reload_ret['status'] == 0:
-                    content = "Success" 
-                else:
-                    content = _reload_ret['output']
+                main_config.objects.create(**_main_config)
+                content = "Success" 
             else:
                 content = _test_ret['output']
 
-        except Exception, e:
-            content = str(e)
-    else:
-        content = "ArgsError"
+            reload_config()
+        else:
+            content = "ArgsError"
+    except Exception, e:
+        content = str(e)
 
-    #conf_content = build_main_config()
-    #write_config("/home/ubuntu/nginx.conf",conf_content)
     return HttpResponse(content)
     pass
 #

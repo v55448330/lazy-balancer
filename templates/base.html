@@ -30,8 +30,10 @@
 <!-- AdminLTE App -->
 <script src="{% static "dist/js/app.min.js" %}"></script>
 <!-- Inputmask -->
-<script src="{% static "plugins/input-mask/jquery.inputmask.js" %}"></script>
-<script src="{% static "plugins/input-mask/jquery.inputmask.extensions.js" %}"></script>
+<script src="{% static "plugins/input-mask/inputmask.min.js" %}"></script>
+<script src="{% static "plugins/input-mask/jquery.inputmask.min.js" %}"></script>
+<script src="{% static "plugins/input-mask/inputmask.extensions.min.js" %}"></script>
+<script src="{% static "plugins/input-mask/inputmask.numeric.extensions.min.js" %}"></script>
 
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -157,5 +159,23 @@
 </div>
 <!-- ./wrapper -->
 
+<script>
+$.fn.serializeObject = function()    
+{    
+    var o = {};    
+    var a = this.serializeArray();    
+    $.each(a, function() {    
+        if (o[this.name]) {    
+            if (!o[this.name].push) {    
+                o[this.name] = [o[this.name]];    
+            }    
+            o[this.name].push(this.value || '');    
+        } else {    
+            o[this.name] = this.value || '';    
+        }    
+    });    
+    return o;    
+};
+</script>
 </body>
 </html>

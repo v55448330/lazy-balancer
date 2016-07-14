@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+{% load custom_filter %}
 <!-- Modal -->
 <div class="modal fade" id="edit_balancer" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -9,32 +10,33 @@
                 <h4 class="modal-title" id="edit_balancer_title"></h4>
             </div>
             <div class="modal-body">
-                <form class="form-horizontal" id="form_main_config">
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <ul class="timeline">
-                                <li>
-                                <i class="fa fa-cog bg-green"></i>
-                                <div class="timeline-item">
-                                    <span class="time">负载均衡器基础配置（* 为可选项）</span>
-                                    <h3 class="timeline-header">基础配置</h3>
-                                    <div class="timeline-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <ul class="timeline">
+                            <li>
+                            <i class="fa fa-cog bg-green"></i>
+                            <div class="timeline-item" id="timeline_base_config">
+                                <span class="time">负载均衡器基础配置（* 为可选项）</span>
+                                <h3 class="timeline-header">基础配置</h3>
+                                <div class="timeline-body">
+                                    <form class="form-horizontal" id="form_base_config">
+                                        <input type="text" name="proxy_config_id" id="input_config_id" hidden>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">名称</label>
                                             <div class="col-sm-9" id="div_proxy_name">
-                                                <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="checkForm(this)">
+                                                <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="check_form(this)">
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">服务端口</label>
                                             <div class="col-sm-9" id="div_listen">
-                                                <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="checkForm(this)">
+                                                <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">访问域名</label>
-                                            <div class="col-sm-9" id="div_service_name">
-                                                <input type="text" class="form-control" name="proxy_service_name" id="input_proxy_service_name" placeholder="用于配置访问负载均衡器的域名" onblur="checkForm(this)">
+                                            <div class="col-sm-9" id="div_server_name">
+                                                <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）" onblur="check_form(this)">
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -59,70 +61,47 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                    </form>
+                                </div>
+                            </div>
+                            </li>
+                            <li>
+                            <i class="fa fa-server bg-blue"></i>
+                            <div class="timeline-item" id="timeline_upstream_config">
+                                <span class="time">后端服务器节点配置（* 为可选项）</span>
+                                <h3 class="timeline-header">节点配置</h3>
+                                <div class="timeline-body" style="overflow:hidden">
+                                    <div class="col-sm-12">
+                                        <table class="table table-bordered" style="margin-bottom:0px">
+                                            <tr>
+                                                <td class="col-sm-3">地址</td>
+                                                <td class="col-sm-2">端口</td>
+                                                <td class="col-sm-2">权重</td>
+                                                <td class="col-sm-2">重试</td>
+                                                <td class="col-sm-2">超时</td>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-12" id="div_upstream_list">
                                     </div>
                                 </div>
-                                </li>
-                                <li>
-                                <i class="fa fa-server bg-blue"></i>
-                                <div class="timeline-item">
-                                    <span class="time">后端服务器节点配置</span>
-                                    <h3 class="timeline-header">节点配置</h3>
-                                    <div class="timeline-body">
-
-                                        <div class="form-group">
-                                            <div class="col-sm-12">
-                                                <table class="table table-bordered">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>地址</th>
-                                                            <th>端口</th>
-                                                            <th>权重</th>
-                                                            <th>重试</th>
-                                                            <th>超时</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="upstream_address" id="input_upstream_address" placeholder="IP地址">
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="upstream_port" id="input_upstream_port" placeholder="服务端口">
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="upstream_weight" id="input_upstream_weight" placeholder="1-100">
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="upstream_max_fails" id="input_upstream_max_fails" placeholder="重试次数">
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" class="form-control" name="upstream_fail_timeout" id="input_upstream_fail_timeout" placeholder="失败判定时间">
-                                                        </td>
-
-                                                    </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-                                    <div class="timeline-footer">
-                                        <a class="btn btn-primary btn-xs"> 
-                                            <i class="fa fa-plus bg-blue"> 增加节点</i>
-                                        </a>
-                                    </div>
+                                <div class="timeline-footer">
+                                    <a class="btn btn-primary btn-xs" href="#" onclick="edit_upstream(1,null)"> 
+                                        <i class="fa fa-plus"> 增加节点</i>
+                                    </a>
                                 </div>
+                            </div>
 
-                                </li>
-                            </ul>
-                        </div>
+                            </li>
+                        </ul>
                     </div>
-                </form>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-primary" onclick="save_balancer()">保存</button>
             </div>
         </div>
     </div>
@@ -139,7 +118,7 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th style="width: 60px">编号</th>
+                                <th>编号</th>
                                 <th>名称</th>
                                 <th>协议</th>
                                 <th>端口</th>
@@ -149,8 +128,25 @@
                             </tr>
                         </thead>
                         <tbody>
+                        {% for server in proxy %}
                         <tr>
+                            <td class="col-sm-4"><button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.config_id }}</button></td>
+                            <td>{{ server.proxy_name }}</td>
+                            {% if server.protocols %}
+                            <td><button type="button" class="btn btn-warning btn-xs">HTTPS</button></td>
+                            {% else %}
+                            <td><button type="button" class="btn btn-info btn-xs">HTTP</button></td>
+                            {% endif %}
+                            <td>{{ server.listen }}</td>
+                            {% if server.status %}
+                            <td><button type="button" class="btn btn-success btn-xs" onclick="change_status('{{ server.pk }}',0)">启用</button></td>
+                            {% else %}
+                            <td><button type="button" class="btn btn-danger btn-xs" onclick="change_status('{{ server.pk }}',1)">禁用</button></td>
+                            {% endif %}
+                            <td>{{ server.update_time | timestamp_to_date }}</td>
+                            <td><button type="button" class="btn btn-default btn-xs" onclick="delete_proxy('{{ server.pk }}','{{ server.proxy_name }}')">删除</button></td>
                         </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -175,14 +171,178 @@ $('#page_header_descript').text('用于管理 Nginx 虚拟主机相关配置')
 $('#page_nav').text('服务管理')
 $('#page_name').text('负载均衡配置')
 
-function edit_balancer(_create){
-    if (_create == 1){
-        $('#edit_balancer_title').text('创建负载均衡器')
-        $('#edit_balancer').modal('show')   
+function check_form(_input){
+    var _input_div = $(_input.closest("div"))
+    _input_div.removeClass('has-error')
+    _input_div.removeClass('has-success')
+    if ($(_input).val() == ""){
+        _input_div.addClass('has-error')
+    }else{
+        _input_div.addClass('has-success')
     }
 }
 
+function edit_upstream(_add,_upstream){
+    if (_add == 1){
+        if (_upstream == null){
+            _upstream ={ 
+                address:null,
+                port:null,
+                weight:null,
+                max_fails:null,
+                fail_timeout:null
+            }
+        }
 
+        _tb = '<form class="form-horizontal"><table class="table table-bordered" style="margin-bottom:0px"><tr>'
+        _tb += '<td class="col-sm-3"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_address" placeholder="IP地址" data-inputmask="\'alias\': \'ip\'" data-mask value="'+_upstream.address+'"></div></td>'
+        _tb += '<td class="col-sm-2"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_port" placeholder="服务端口" data-inputmask="\'mask\':\'[9]{1,5}\'" data-mask value="'+_upstream.port+'"></div></td>'
+        _tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_weight" placeholder="*权重(1-100)" data-inputmask="\'mask\':\'[9]{1,3}\'" data-mask value="'+_upstream.weight+'"></td>'
+        _tb += '<td  class="col-sm-2"><input type="text" class="form-control" name="upstream_max_fails" placeholder="*重试次数(1-99)"data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="'+_upstream.max_fails+'"></td>'
+        _tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_fail_timeout" placeholder="*超时时间(秒)" data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="'+_upstream.fail_timeout+'"></td>'
+        _tb += '<td><a href="#" onclick="edit_upstream(0,this)"><i class="fa fa-remove"></i></a></td>'
+        _tb += '</tr></table></form>'
+        $('#div_upstream_list').append(_tb)
+        $("[data-mask]").inputmask()
+    }else{
+        $(_upstream).parents('form')[0].remove()
+    }
+}
+
+function edit_balancer(_create,_config_id){
+    if (_create == 1){
+        $('#edit_balancer_title').text('创建负载均衡器')
+        $('#input_config_id').val('0')
+        $('#input_proxy_proxy_name').val('')
+        $('#input_proxy_listen').val('')
+        $('#input_proxy_server_name').val('')
+        $('#input_proxy_access_log').val('')
+        $('#input_proxy_error_log').val('')
+        $('#check_proxy_ip_hash').attr('checked',false)
+        $('#div_upstream_list').empty()
+        $("[data-mask]").inputmask()
+        $('#edit_balancer').modal('show')   
+    }else{
+        var _post = {config_id:_config_id}
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/query/',
+            data: JSON.stringify(_post),
+            dataType: "json",
+            success: function(p) {
+                if (p.flag == "Success"){
+                    console.log(p)
+                    $('#edit_balancer_title').text('编辑负载均衡器')
+                    $('#input_config_id').val(_config_id)
+                    $('#div_upstream_list').empty()
+
+                    $('#input_proxy_proxy_name').val(p.proxy.proxy_name)
+                    $('#input_proxy_listen').val(p.proxy.listen)
+                    $('#input_proxy_server_name').val(p.proxy.server_name)
+                    $('#input_proxy_access_log').val(p.proxy.access_log)
+                    $('#input_proxy_error_log').val(p.proxy.error_log)
+                    if (p.proxy.balancer_type == "ip_hash"){
+                        $('#check_proxy_ip_hash').prop('checked',true)
+                    }else{
+                        $('#check_proxy_ip_hash').prop('checked',false)
+                    }
+
+                    for (var f in p.upstream){
+                        edit_upstream(1,p.upstream[f])
+                    }
+
+
+                    $('#edit_balancer').modal('show')   
+
+                }else{
+                    alert('查询失败！'+p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+
+    }
+}
+
+function delete_proxy(_pk,_name){
+    if (confirm("确认删除负载均衡["+_name+"]？"))  {
+        var _post = {pk:_pk}
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/delete/',
+            data: JSON.stringify(_post),
+            success: function(p) {
+                if (p == "Success"){
+                    alert("删除成功!")
+                    top.location = '/proxy/'
+                }else{
+                    alert('删除错误！'+p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+function change_status(_pk,_status){
+    if (confirm("确认要变更状态？"))  {
+        var _post = {pk:_pk,status:_status}
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/status/',
+            data: JSON.stringify(_post),
+            success: function(p) {
+                if (p == "Success"){
+                    alert("变更成功!")
+                    top.location = '/proxy/'
+                }else{
+                    alert('变更错误！'+p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+function save_balancer(){
+    if (confirm("确认要保存这样的配置？"))  {
+        var _base_config = $('#form_base_config').serializeObject()
+        var _upstream_list = []
+        $('#div_upstream_list form').each(function (){
+            _upstream_list.push($(this).serializeObject())
+        })
+        var _post = {
+            'base_config' : _base_config,
+            'upstream_list' : _upstream_list
+        }
+
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/save/',
+            data: JSON.stringify(_post),
+            success: function(p) {
+                if (p == "Success"){
+                    alert("保存成功!")
+                    top.location = '/proxy/'
+                }else if (p == "ArgsError"){
+                    alert('保存失败！配置项填写错误！')
+                }else{
+                    alert('保存错误！其他错误：'+p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+
+}
 
 </script>
 {% endblock %}
