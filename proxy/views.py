@@ -14,6 +14,68 @@ def view(request):
     return render_to_response('proxy/view.html',{ 'proxy' : _proxy_config })
     pass
 
+def proxy_ssl(request):
+    try:
+        _post = json.loads(request.body)
+
+        if _post['balancer_ssl'].has_key('ssl_proxy_config_id'):
+            _config_id = _post['balancer_ssl']['ssl_proxy_config_id']
+            _config_proxy_path = "/etc/nginx/conf.d/%s.conf" % _config_id
+            _cert_path = "/etc/nginx/conf.d/%s.crt" % _config_id
+            _key_path = "/etc/nginx/conf.d/%s.key" % _config_id
+            _proxy = proxy_config.objects.get(config_id=_config_id)
+            if _post['balancer_ssl'].has_key('ssl_status'):
+                _cert_body = _post['balancer_ssl']['ssl_cert_body']
+                _key_body = _post['balancer_ssl']['ssl_key_body']
+                if _cert_body and _key_body:
+                    _proxy.protocols = True
+                    _proxy.ssl_cert = _cert_body
+                    _proxy.ssl_key = _key_body
+                    if not _post['balancer_ssl'].has_key('ssl_port'):
+                        _proxy.listen = 443
+
+                    if os.path.exists(_config_proxy_path):
+                        os.remove(_config_proxy_path)
+                    if os.path.exists(_cert_path):
+                        os.remove(_cert_path)
+                    if os.path.exists(_key_path):
+                        os.remove(_key_path)
+
+                    _u_list = []
+                    for _u in _proxy.upstream_list.all():
+                        _u_list.append(_u.__dict__)
+
+                    _proxy_config = { 'proxy' : _proxy.__dict__ , 'upstream' : _u_list }
+                    _proxy_config['proxy']['ssl_cert_path'] = _cert_path
+                    _proxy_config['proxy']['ssl_key_path'] = _key_path
+                    write_config(_config_proxy_path,build_proxy_config(_proxy_config))
+                    write_config(_cert_path,_proxy.ssl_cert)
+                    write_config(_key_path,_proxy.ssl_key)
+
+                    _test_ret = test_config()
+                    if _test_ret['status'] == 0:
+                        _proxy.save()
+                        content = "Success"
+                    else:
+                        content = _test_ret['output']
+                else:
+                    content = "ArgsError"
+            else:
+                _proxy.protocols = False
+                _proxy.listen = 80
+                _proxy.ssl_cert = None
+                _proxy.ssl_key = None 
+                _proxy.save()
+                content = "Success"
+
+            #reload_config()
+    except Exception, e:
+        content = str(e)
+    return HttpResponse(content)
+    pass
+
+
+
 def query_proxy(request):
     try:
         _post = json.loads(request.body)
@@ -25,6 +87,9 @@ def query_proxy(request):
             'server_name':_proxy.server_name,
             'access_log':_proxy.access_log,
             'error_log':_proxy.error_log,
+            'protocols':_proxy.protocols,
+            'ssl_cert':_proxy.ssl_cert,
+            'ssl_key':_proxy.ssl_key,
             'balancer_type':_proxy.balancer_type,
         }
         _u = []

@@ -69,15 +69,21 @@ def reload_config():
 
     _proxy_config_list = proxy_config.objects.filter(status=True)
     for _p in _proxy_config_list:
+        _cert_path = "/etc/nginx/conf.d/%s.crt" % _p.config_id
+        _key_path = "/etc/nginx/conf.d/%s.key" % _p.config_id
         _u_list = []
         for _u in _p.upstream_list.all():
             _u_list.append(_u.__dict__)
             pass
         _proxy_config = { 'proxy' : _p.__dict__ , 'upstream' : _u_list }
         _config_proxy_path = "/etc/nginx/conf.d/%s.conf" % _p.config_id
-        write_config(_config_proxy_path,build_proxy_config(_proxy_config))
+        if _p.protocols:
+            write_config(_cert_path,_p.ssl_cert)
+            write_config(_key_path,_p.ssl_key)
+            _proxy_config['proxy']['ssl_cert_path'] = _cert_path
+            _proxy_config['proxy']['ssl_key_path'] = _key_path
         pass
-
+        write_config(_config_proxy_path,build_proxy_config(_proxy_config))
 
     return run_shell('nginx -s reload')
 

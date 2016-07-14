@@ -20,7 +20,7 @@
                                 <h3 class="timeline-header">基础配置</h3>
                                 <div class="timeline-body">
                                     <form class="form-horizontal" id="form_base_config">
-                                        <input type="text" name="proxy_config_id" id="input_config_id" hidden>
+                                        <input type="text" name="proxy_config_id" id="input_proxy_config_id" hidden>
                                         <div class="form-group">
                                             <label class="col-sm-2 control-label">名称</label>
                                             <div class="col-sm-9" id="div_proxy_name">
@@ -106,6 +106,68 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="edit_balancer_ssl" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="edit_balancer_ssl_title"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="box-body">
+                    <form class="form-horizontal" id="form_balancer_ssl">
+                        <input type="text" name="ssl_proxy_config_id" id="ssl_input_proxy_config_id" hidden>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>证书状态：</label>
+                                <div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl(this)">  启用
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>保留原端口：</label>
+                                <div>
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="ssl_port" id="check_ssl_port">  启用
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+ 
+                            <div class="form-group">
+                                <label>证书：</label>
+                                <div id="div_ssl_cert_body">
+                                    <textarea class="form-control" rows="10" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>私钥：</label>
+                                <div id="div_ssl_key_body">
+                                    <textarea class="form-control" rows="10" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="update_ssl(0,null)">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
 <div class="row">
     <div class="col-md-12">
         <div class="box box-primary">
@@ -133,9 +195,9 @@
                             <td class="col-sm-4"><button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.config_id }}</button></td>
                             <td>{{ server.proxy_name }}</td>
                             {% if server.protocols %}
-                            <td><button type="button" class="btn btn-warning btn-xs">HTTPS</button></td>
+                            <td><button type="button" class="btn btn-warning btn-xs" onclick="update_ssl(1,'{{ server.config_id }}')">HTTPS</button></td>
                             {% else %}
-                            <td><button type="button" class="btn btn-info btn-xs">HTTP</button></td>
+                            <td><button type="button" class="btn btn-info btn-xs" onclick="update_ssl(1,'{{ server.config_id }}')">HTTP</button></td>
                             {% endif %}
                             <td>{{ server.listen }}</td>
                             {% if server.status %}
@@ -182,6 +244,28 @@ function check_form(_input){
     }
 }
 
+function check_balancer_ssl(_self){
+    if ($(_self)[0].checked == true){
+        $('#txt_ssl_cert_body').removeAttr('disabled')
+        $('#txt_ssl_key_body').removeAttr('disabled')
+        $('#check_ssl_port').removeAttr('disabled')
+        $('#div_ssl_cert_body').removeClass('has-success')
+        $('#div_ssl_cert_body').addClass('has-error')
+        $('#div_ssl_key_body').removeClass('has-success')
+        $('#div_ssl_key_body').addClass('has-error')
+    }else{
+        $('#txt_ssl_cert_body').text('')
+        $('#txt_ssl_key_body').text('')
+        $('#check_ssl_port').attr('disabled','disabled')
+        $('#txt_ssl_cert_body').attr('disabled','disabled')
+        $('#txt_ssl_key_body').attr('disabled','disabled')
+        $('#div_ssl_cert_body').removeClass('has-error')
+        $('#div_ssl_cert_body').addClass('has-success')
+        $('#div_ssl_key_body').removeClass('has-error')
+        $('#div_ssl_key_body').addClass('has-success')
+    }
+}
+
 function edit_upstream(_add,_upstream){
     if (_add == 1){
         if (_upstream == null){
@@ -209,10 +293,63 @@ function edit_upstream(_add,_upstream){
     }
 }
 
+function update_ssl(_edit,_config_id){
+    if (_edit == 1){
+        $('#edit_balancer_ssl_title').text('编辑 SSL 证书')
+        $('#ssl_input_proxy_config_id').val('')
+        var _post = {config_id:_config_id}
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/query/',
+            data: JSON.stringify(_post),
+            dataType: "json",
+            success: function(p) {
+                if (p.flag == "Success"){
+                    $('#ssl_input_proxy_config_id').val(_config_id)
+                    if (p.proxy.protocols == true){
+                        $('#check_ssl_status').prop('checked',true)
+                        $('#txt_ssl_cert_body').text(p.proxy.ssl_cert)
+                        $('#txt_ssl_key_body').text(p.proxy.ssl_key)
+                    }else{
+                        $('#check_ssl_status').prop('checked',false)
+                    }
+                    check_balancer_ssl($('#check_ssl_status'))
+                    $('#edit_balancer_ssl').modal('show')   
+                }else{
+                    alert('查询失败！'+p.content)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+    else{
+        var _post = {balancer_ssl:$('#form_balancer_ssl').serializeObject()}
+        console.log(_post)
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/ssl/',
+            data: JSON.stringify(_post),
+            success: function(p) {
+                if (p == "Success"){
+                    alert("保存成功!")
+                    top.location = '/proxy/'
+                }else{
+                    alert('保存失败！'+p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
 function edit_balancer(_create,_config_id){
     if (_create == 1){
         $('#edit_balancer_title').text('创建负载均衡器')
-        $('#input_config_id').val('0')
+        $('#input_proxy_config_id').val('0')
         $('#input_proxy_proxy_name').val('')
         $('#input_proxy_listen').val('')
         $('#input_proxy_server_name').val('')
@@ -233,7 +370,7 @@ function edit_balancer(_create,_config_id){
                 if (p.flag == "Success"){
                     console.log(p)
                     $('#edit_balancer_title').text('编辑负载均衡器')
-                    $('#input_config_id').val(_config_id)
+                    $('#input_proxy_config_id').val(_config_id)
                     $('#div_upstream_list').empty()
 
                     $('#input_proxy_proxy_name').val(p.proxy.proxy_name)
@@ -255,7 +392,7 @@ function edit_balancer(_create,_config_id){
                     $('#edit_balancer').modal('show')   
 
                 }else{
-                    alert('查询失败！'+p)
+                    alert('查询失败！'+p.content)
                 }
             },
             error: function(e) {
