@@ -7,72 +7,120 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="edit_balancer_title"></h4>
+                <h4 class="modal-title" id="edit_balancer_title"></h4><small id="edit_balancer_mtitle"></small>
             </div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <ul class="timeline">
-                            <li>
-                            <i class="fa fa-cog bg-green"></i>
-                            <div class="timeline-item" id="timeline_base_config">
-                                <span class="time">负载均衡器基础配置（* 为可选项）</span>
-                                <h3 class="timeline-header">基础配置</h3>
-                                <div class="timeline-body">
-                                    <form class="form-horizontal" id="form_base_config">
-                                        <input type="text" name="proxy_config_id" id="input_proxy_config_id" hidden>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">名称</label>
-                                            <div class="col-sm-9" id="div_proxy_name">
-                                                <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="check_form(this)">
+                <div class="col-sm-12 nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab_base_config" data-toggle="tab" id="a_default_conf">基础配置</a></li>
+                        <li><a href="#tab_ssl_config" data-toggle="tab">证书配置</a></li>
+                        <li><a href="#tab_proxy_config" data-toggle="tab">节点配置</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab_base_config">
+                            <form class="form-horizontal" id="form_base_config">
+                                <div class="col-sm-12">
+                                    <input type="text" name="proxy_config_id" id="input_proxy_config_id" hidden>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">名称</label>
+                                        <div class="col-sm-9" id="div_proxy_name">
+                                            <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="check_form(this)">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">服务端口</label>
+                                        <div class="col-sm-9" id="div_listen">
+                                            <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">访问域名</label>
+                                        <div class="col-sm-9" id="div_server_name">
+                                            <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）" onblur="check_form(this)">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">* 访问日志</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="proxy_access_log" id="input_proxy_access_log" placeholder="此负载均衡器请求日志路径">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">* 错误日志</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="proxy_error_log" id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">* ip_hash</label>
+                                        <div class="col-sm-9">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="proxy_ip_hash" id="check_proxy_ip_hash"> 启用根据源地址引导流量
+                                                </label>
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">服务端口</label>
-                                            <div class="col-sm-9" id="div_listen">
-                                                <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
-                                            </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">* 描述</label>
+                                        <div class="col-sm-9">
+                                            <textarea class="form-control" rows="4" name="proxy_description" id="input_proxy_description" placeholder="此负载均衡详细描述"></textarea>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">访问域名</label>
-                                            <div class="col-sm-9" id="div_server_name">
-                                                <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）" onblur="check_form(this)">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">* 访问日志</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" class="form-control" name="proxy_access_log" id="input_proxy_access_log" placeholder="此负载均衡器请求日志路径">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">* 错误日志</label>
-                                            <div class="col-sm-9">
-                                                <input type="text" class="form-control" name="proxy_error_log" id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="col-sm-2 control-label">* ip_hash</label>
-                                            <div class="col-sm-9">
-                                                <div class="checkbox">
-                                                    <label>
-                                                        <input type="checkbox" name="proxy_ip_hash" id="check_proxy_ip_hash"> 启用根据源地址引导流量
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </form>
+                                    </div>
+                                    <div class="form-group">
+                                        <span class="col-sm-12 control-label">
+                                            <small>负载均衡器基础配置（* 为可选项）</small>
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            </li>
-                            <li>
-                            <i class="fa fa-server bg-blue"></i>
-                            <div class="timeline-item" id="timeline_upstream_config">
-                                <span class="time">后端服务器节点配置（* 为可选项）</span>
-                                <h3 class="timeline-header">节点配置</h3>
-                                <div class="timeline-body" style="overflow:hidden">
-                                    <div class="col-sm-12">
+                            </form>
+                        </div>
+                        <div class="tab-pane" id="tab_ssl_config">
+                            <form class="form-horizontal" id="form_ssl_config">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">证书状态</label>
+                                        <div class="col-sm-9">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl(this)">  启用
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">保留原端口</label>
+                                        <div class="col-sm-9">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="ssl_port" id="check_ssl_port">  启用
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">证书</label>
+                                        <div id="div_ssl_cert_body" class="col-sm-9">
+                                            <textarea class="form-control" rows="8" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">私钥</label>
+                                        <div id="div_ssl_key_body" class="col-sm-9">
+                                            <textarea class="form-control" rows="8" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- /.tab-pane -->
+                        <div class="tab-pane" id="tab_proxy_config">
+                            <form class="form-horizontal" id="form_ssl_config">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <a class="btn btn-primary btn-xs" href="#" onclick="edit_upstream(1,null)"><i class="fa fa-plus"> 增加节点</i></a>
+                                    </div>
+                                    <div class="form-group">
                                         <table class="table table-bordered" style="margin-bottom:0px">
                                             <tr>
                                                 <td class="col-sm-3">地址</td>
@@ -83,19 +131,17 @@
                                                 <td></td>
                                             </tr>
                                         </table>
+                                        <div id="div_upstream_list">
+                                        </div>
                                     </div>
-                                    <div class="col-sm-12" id="div_upstream_list">
+                                    <div class="form-group">
+                                        <span class="col-sm-12 control-label">
+                                            <small>后端服务器节点配置（* 为可选项）</small>
+                                        </span>
                                     </div>
                                 </div>
-                                <div class="timeline-footer">
-                                    <a class="btn btn-primary btn-xs" href="#" onclick="edit_upstream(1,null)"> 
-                                        <i class="fa fa-plus"> 增加节点</i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            </li>
-                        </ul>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -106,66 +152,6 @@
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="edit_balancer_ssl" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="edit_balancer_ssl_title"></h4>
-            </div>
-            <div class="modal-body">
-                <div class="box-body">
-                    <form class="form-horizontal" id="form_balancer_ssl">
-                        <input type="text" name="ssl_proxy_config_id" id="ssl_input_proxy_config_id" hidden>
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label>证书状态：</label>
-                                <div>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl(this)">  启用
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>保留原端口：</label>
-                                <div>
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" name="ssl_port" id="check_ssl_port">  启用
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
- 
-                            <div class="form-group">
-                                <label>证书：</label>
-                                <div id="div_ssl_cert_body">
-                                    <textarea class="form-control" rows="9" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>私钥：</label>
-                                <div id="div_ssl_key_body">
-                                    <textarea class="form-control" rows="9" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" onclick="update_ssl(0,null)">保存</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 
 
 <div class="row">
@@ -180,7 +166,6 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>编号</th>
                                 <th>名称</th>
                                 <th>协议</th>
                                 <th>端口</th>
@@ -192,12 +177,11 @@
                         <tbody>
                         {% for server in proxy %}
                         <tr>
-                            <td class="col-sm-4"><button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.config_id }}</button></td>
-                            <td>{{ server.proxy_name }}</td>
+                            <td class="col-sm-3"><button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.proxy_name }}</button></td>
                             {% if server.protocols %}
-                            <td><button type="button" class="btn btn-warning btn-xs" onclick="update_ssl(1,'{{ server.config_id }}')">HTTPS</button></td>
+                            <td><span class="label label-warning">HTTPS</span></td>
                             {% else %}
-                            <td><button type="button" class="btn btn-info btn-xs" onclick="update_ssl(1,'{{ server.config_id }}')">HTTP</button></td>
+                            <td><span class="label label-primary">HTTP</span></td>
                             {% endif %}
                             <td>{{ server.listen }}</td>
                             {% if server.status %}
@@ -254,13 +238,10 @@ function check_balancer_ssl(_self){
     }else{
         $('#txt_ssl_cert_body').text('')
         $('#txt_ssl_key_body').text('')
+        $('#check_ssl_port').prop('checked',false)
         $('#check_ssl_port').attr('disabled','disabled')
         $('#txt_ssl_cert_body').attr('disabled','disabled')
         $('#txt_ssl_key_body').attr('disabled','disabled')
-        $('#div_ssl_cert_body').removeClass('has-error')
-        $('#div_ssl_cert_body').addClass('has-success')
-        $('#div_ssl_key_body').removeClass('has-error')
-        $('#div_ssl_key_body').addClass('has-success')
     }
 }
 
@@ -291,60 +272,9 @@ function edit_upstream(_add,_upstream){
     }
 }
 
-function update_ssl(_edit,_config_id){
-    if (_edit == 1){
-        $('#edit_balancer_ssl_title').text('编辑 SSL 证书')
-        $('#ssl_input_proxy_config_id').val('')
-        var _post = {config_id:_config_id}
-        jQuery.ajax({
-            type: 'post',
-            url: '/proxy/query/',
-            data: JSON.stringify(_post),
-            dataType: "json",
-            success: function(p) {
-                if (p.flag == "Success"){
-                    $('#ssl_input_proxy_config_id').val(_config_id)
-                    if (p.proxy.protocols == true){
-                        $('#check_ssl_status').prop('checked',true)
-                        $('#txt_ssl_cert_body').text(p.proxy.ssl_cert)
-                        $('#txt_ssl_key_body').text(p.proxy.ssl_key)
-                    }else{
-                        $('#check_ssl_status').prop('checked',false)
-                    }
-                    check_balancer_ssl($('#check_ssl_status'))
-                    $('#edit_balancer_ssl').modal('show')   
-                }else{
-                    alert('查询失败！'+p.content)
-                }
-            },
-            error: function(e) {
-                alert('请求失败!')
-            }
-        })
-    }
-    else{
-        var _post = {balancer_ssl:$('#form_balancer_ssl').serializeObject()}
-        console.log(_post)
-        jQuery.ajax({
-            type: 'post',
-            url: '/proxy/ssl/',
-            data: JSON.stringify(_post),
-            success: function(p) {
-                if (p == "Success"){
-                    alert("保存成功!")
-                    top.location = '/proxy/'
-                }else{
-                    alert('保存失败！'+p)
-                }
-            },
-            error: function(e) {
-                alert('请求失败!')
-            }
-        })
-    }
-}
 
 function edit_balancer(_create,_config_id){
+    $('#a_default_conf').trigger('click')
     if (_create == 1){
         $('#edit_balancer_title').text('创建负载均衡器')
         $('#input_proxy_config_id').val('0')
@@ -368,6 +298,7 @@ function edit_balancer(_create,_config_id){
                 if (p.flag == "Success"){
                     console.log(p)
                     $('#edit_balancer_title').text('编辑负载均衡器')
+                    $('#edit_balancer_mtitle').text(_config_id)
                     $('#input_proxy_config_id').val(_config_id)
                     $('#div_upstream_list').empty()
 
@@ -376,6 +307,7 @@ function edit_balancer(_create,_config_id){
                     $('#input_proxy_server_name').val(p.proxy.server_name)
                     $('#input_proxy_access_log').val(p.proxy.access_log)
                     $('#input_proxy_error_log').val(p.proxy.error_log)
+                    $('#input_proxy_description').text(p.proxy.description)
                     if (p.proxy.balancer_type == "ip_hash"){
                         $('#check_proxy_ip_hash').prop('checked',true)
                     }else{
@@ -386,6 +318,19 @@ function edit_balancer(_create,_config_id){
                         edit_upstream(1,p.upstream[f])
                     }
 
+                    if (p.proxy.protocols == true){
+                        $('#check_ssl_status').prop('checked',true)
+                        $('#txt_ssl_cert_body').text(p.proxy.ssl_cert)
+                        $('#txt_ssl_key_body').text(p.proxy.ssl_key)
+                    }else{
+                        $('#check_ssl_status').prop('checked',false)
+                    }
+                    if (p.proxy.listen == 443){
+                        $('#check_ssl_port').prop('checked',false)
+                    }else{
+                        $('#check_ssl_port').prop('checked',true)
+                    }
+                    check_balancer_ssl($('#check_ssl_status'))
 
                     $('#edit_balancer').modal('show')   
 
@@ -448,12 +393,14 @@ function change_status(_pk,_status){
 function save_balancer(){
     if (confirm("确认要保存这样的配置？"))  {
         var _base_config = $('#form_base_config').serializeObject()
+        var _ssl_config = $('#form_ssl_config').serializeObject()
         var _upstream_list = []
         $('#div_upstream_list form').each(function (){
             _upstream_list.push($(this).serializeObject())
         })
         var _post = {
             'base_config' : _base_config,
+            'ssl_config' : _ssl_config,
             'upstream_list' : _upstream_list
         }
 

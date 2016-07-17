@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+{% load custom_filter %}
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Horizontal Form -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">系统信息</h3>
+                <small>更新时间</small>
+            </div>
+            <form class="form-horizontal">
+                <div class="box-body">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">服务状态</label>
+                    <div class="col-sm-9">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- /.box -->
+    </div>
+</div>
+
+
+<script>
+//init page
+$('#menu_dashboard').addClass('active')
+$('#menu_service').removeClass('active')
+$('#page_header').text('服务状态')
+$('#page_header_descript').text('负载均衡系统状态展示')
+$('#page_nav').text('服务状态')
+$('#page_name').text('服务状态')
+
+</script>
+{% endblock %}

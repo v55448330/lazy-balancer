@@ -20,4 +20,5 @@ from django.conf.urls import url, include
 urlpatterns = [
     url(r'^proxy/', include('proxy.urls')),
     url(r'^main/', include('main.urls')),
+    url(r'^dashboard/', include('dashboard.urls')),
 ]
