@@ -139,6 +139,9 @@ def save(request):
                     _proxy['ssl_key_path'] = _key_path
                     if not _post['ssl_config'].has_key('ssl_port'):
                         _proxy['listen'] = 443
+            else:
+                if _proxy['listen'] == 443:
+                    _proxy['listen'] = 80 
 
             _upstream_list = []
 
