@@ -10,7 +10,7 @@
                 <h4 class="modal-title" id="edit_balancer_title"></h4><small id="edit_balancer_mtitle"></small>
             </div>
             <div class="modal-body">
-                <div class="col-sm-12 nav-tabs-custom">
+                <div class="nav-tabs-custom">
                     <ul class="nav nav-tabs">
                         <li class="active"><a href="#tab_base_config" data-toggle="tab" id="a_default_conf">基础配置</a></li>
                         <li><a href="#tab_ssl_config" data-toggle="tab">证书配置</a></li>
@@ -19,96 +19,92 @@
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab_base_config">
                             <form class="form-horizontal" id="form_base_config">
-                                <div class="col-sm-12">
-                                    <input type="text" name="proxy_config_id" id="input_proxy_config_id" hidden>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">名称</label>
-                                        <div class="col-sm-9" id="div_proxy_name">
-                                            <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="check_form(this)">
+                                <input type="text" name="proxy_config_id" id="input_proxy_config_id" hidden>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">名称</label>
+                                    <div class="col-sm-9" id="div_proxy_name">
+                                        <input type="text" class="form-control" name="proxy_proxy_name" id="input_proxy_proxy_name" placeholder="用于描述负载均衡器" onblur="check_form(this)">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">服务端口</label>
+                                    <div class="col-sm-9" id="div_listen">
+                                        <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">访问域名</label>
+                                    <div class="col-sm-9" id="div_server_name">
+                                        <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）" onblur="check_form(this)">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 访问日志</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" name="proxy_access_log" id="input_proxy_access_log" placeholder="此负载均衡器请求日志路径">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 错误日志</label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" name="proxy_error_log" id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* ip_hash</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="proxy_ip_hash" id="check_proxy_ip_hash"> 启用根据源地址引导流量
+                                            </label>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">服务端口</label>
-                                        <div class="col-sm-9" id="div_listen">
-                                            <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
-                                        </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 描述</label>
+                                    <div class="col-sm-9">
+                                        <textarea class="form-control" rows="4" name="proxy_description" id="input_proxy_description" placeholder="此负载均衡详细描述"></textarea>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">访问域名</label>
-                                        <div class="col-sm-9" id="div_server_name">
-                                            <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）" onblur="check_form(this)">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">* 访问日志</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="proxy_access_log" id="input_proxy_access_log" placeholder="此负载均衡器请求日志路径">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">* 错误日志</label>
-                                        <div class="col-sm-9">
-                                            <input type="text" class="form-control" name="proxy_error_log" id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">* ip_hash</label>
-                                        <div class="col-sm-9">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="proxy_ip_hash" id="check_proxy_ip_hash"> 启用根据源地址引导流量
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">* 描述</label>
-                                        <div class="col-sm-9">
-                                            <textarea class="form-control" rows="4" name="proxy_description" id="input_proxy_description" placeholder="此负载均衡详细描述"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <span class="col-sm-12 control-label">
-                                            <small>负载均衡器基础配置（* 为可选项）</small>
-                                        </span>
-                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <span class="col-sm-12 control-label">
+                                        <small>负载均衡器基础配置（* 为可选项）</small>
+                                    </span>
                                 </div>
                             </form>
                         </div>
                         <div class="tab-pane" id="tab_ssl_config">
                             <form class="form-horizontal" id="form_ssl_config">
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">证书状态</label>
-                                        <div class="col-sm-9">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl(this)">  启用
-                                                </label>
-                                            </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">证书状态</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl(this)">  启用
+                                            </label>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">保留原端口</label>
-                                        <div class="col-sm-9">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="ssl_port" id="check_ssl_port">  启用
-                                                </label>
-                                            </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">保留原端口</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="ssl_port" id="check_ssl_port">  启用
+                                            </label>
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">证书</label>
-                                        <div id="div_ssl_cert_body" class="col-sm-9">
-                                            <textarea class="form-control" rows="8" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
-                                        </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">证书</label>
+                                    <div id="div_ssl_cert_body" class="col-sm-9">
+                                        <textarea class="form-control" rows="8" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                     </div>
-                                    <div class="form-group">
-                                        <label class="col-sm-2 control-label">私钥</label>
-                                        <div id="div_ssl_key_body" class="col-sm-9">
-                                            <textarea class="form-control" rows="8" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
-                                        </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">私钥</label>
+                                    <div id="div_ssl_key_body" class="col-sm-9">
+                                        <textarea class="form-control" rows="8" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                     </div>
                                 </div>
                             </form>
@@ -116,11 +112,13 @@
                         <!-- /.tab-pane -->
                         <div class="tab-pane" id="tab_proxy_config">
                             <form class="form-horizontal" id="form_ssl_config">
-                                <div class="col-sm-12">
-                                    <div class="form-group">
+                                <div class="form-group">
+                                    <div class="col-sm-12">
                                         <a class="btn btn-primary btn-xs" href="#" onclick="edit_upstream(1,null)"><i class="fa fa-plus"> 增加节点</i></a>
                                     </div>
-                                    <div class="form-group">
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
                                         <table class="table table-bordered" style="margin-bottom:0px">
                                             <tr>
                                                 <td class="col-sm-3">地址</td>
@@ -134,8 +132,10 @@
                                         <div id="div_upstream_list">
                                         </div>
                                     </div>
-                                    <div class="form-group">
-                                        <span class="col-sm-12 control-label">
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <span class="control-label">
                                             <small>后端服务器节点配置（* 为可选项）</small>
                                         </span>
                                     </div>
