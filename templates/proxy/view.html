@@ -67,9 +67,11 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <span class="col-sm-12 control-label">
+                                    <div class="col-sm-12">
+                                    <span class="control-label pull-right">
                                         <small>负载均衡器基础配置（* 为可选项）</small>
                                     </span>
+                                </div>
                                 </div>
                             </form>
                         </div>
@@ -107,6 +109,14 @@
                                         <textarea class="form-control" rows="8" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                     </div>
                                 </div>
+ <div class="form-group">
+                                    <div class="col-sm-12">
+                                    <span class="control-label pull-right">
+                                        <small>启用 HTTPS 访问方式配置</small>
+                                    </span>
+                                </div>
+                                </div>
+
                             </form>
                         </div>
                         <!-- /.tab-pane -->
@@ -135,7 +145,7 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-12">
-                                        <span class="control-label">
+                                        <span class="control-label pull-right">
                                             <small>后端服务器节点配置（* 为可选项）</small>
                                         </span>
                                     </div>
@@ -263,7 +273,7 @@ function edit_upstream(_add,_upstream){
         _tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_weight" placeholder="*权重(1-100)" data-inputmask="\'mask\':\'[9]{1,3}\'" data-mask value="'+_upstream.weight+'"></td>'
         _tb += '<td  class="col-sm-2"><input type="text" class="form-control" name="upstream_max_fails" placeholder="*重试次数(1-99)"data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="'+_upstream.max_fails+'"></td>'
         _tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_fail_timeout" placeholder="*超时时间(秒)" data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="'+_upstream.fail_timeout+'"></td>'
-        _tb += '<td><a href="#" onclick="edit_upstream(0,this)"><i class="fa fa-remove"></i></a></td>'
+        _tb += '<td><a href="#" onclick="edit_upstream(0,this)"><h5><i class="fa fa-remove"></i></h5></a></td>'
         _tb += '</tr></table></form>'
         $('#div_upstream_list').append(_tb)
         $("[data-mask]").inputmask()
