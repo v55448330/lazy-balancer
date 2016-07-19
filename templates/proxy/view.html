@@ -178,47 +178,55 @@
             </div>
             <!-- /.box-header -->
             <div class="box-body no-padding">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>名称</th>
-                                <th>协议</th>
-                                <th>端口</th>
-                                <th>状态</th>
-                                <th>更新时间</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for server in proxy %}
+                <table class="table table-striped">
+                    <thead>
                         <tr>
-                            <td class="col-sm-3"><button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.proxy_name }}</button></td>
-                            {% if server.protocols %}
-                            <td><span class="label label-warning">HTTPS</span></td>
-                            {% else %}
-                            <td><span class="label label-primary">HTTP</span></td>
-                            {% endif %}
-                            <td>{{ server.listen }}</td>
-                            {% if server.status %}
-                            <td><button type="button" class="btn btn-success btn-xs" onclick="change_status('{{ server.pk }}',0)">启用</button></td>
-                            {% else %}
-                            <td><button type="button" class="btn btn-danger btn-xs" onclick="change_status('{{ server.pk }}',1)">禁用</button></td>
-                            {% endif %}
-                            <td>{{ server.update_time | timestamp_to_date }}</td>
-                            <td><button type="button" class="btn btn-default btn-xs" onclick="delete_proxy('{{ server.pk }}','{{ server.proxy_name }}')">删除</button></td>
+                            <th>名称</th>
+                            <th>协议</th>
+                            <th>端口</th>
+                            <th>状态</th>
+                            <th>更新时间</th>
+                            <th>操作</th>
                         </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    </thead>
+                    <tbody>
+                    {% for server in proxy %}
+                    <tr>
+                        <td class="col-sm-3"><button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.proxy_name }}</button></td>
+                        {% if server.protocols %}
+                        <td><span class="label label-warning">HTTPS</span></td>
+                        {% else %}
+                        <td><span class="label label-primary">HTTP</span></td>
+                        {% endif %}
+                        <td>{{ server.listen }}</td>
+                        {% if server.status %}
+                        <td><button type="button" class="btn btn-success btn-xs" onclick="change_status('{{ server.pk }}',0)">启用</button></td>
+                        {% else %}
+                        <td><button type="button" class="btn btn-danger btn-xs" onclick="change_status('{{ server.pk }}',1)">禁用</button></td>
+                        {% endif %}
+                        <td>{{ server.update_time | timestamp_to_date }}</td>
+                        <td><button type="button" class="btn btn-default btn-xs" onclick="delete_proxy('{{ server.pk }}','{{ server.proxy_name }}')">删除</button></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <!-- /.box-body -->
             <div class="box-footer clearfix">
                 <ul class="pagination pagination-sm no-margin pull-right">
-                    <li><a href="#">&laquo;</a></li>
-                    <li><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#">&raquo;</a></li>
+                    {% if proxy.has_previous %}
+                    <li><a href="?page={{ proxy.previous_page_number }}&filter={{ filter }}" class="prev">{{ previous_link_decorator|safe }}上一页</a></li>
+                    {% else %}
+                    <li class="paginate_button previous disabled"><span class="disabled prev">{{ previous_link_decorator|safe }}上一页</span></li>
+                    {% endif %}
+                    {% if proxy.has_next %}
+                    <li><a href="?page={{ proxy.next_page_number }}&filter={{ filter }}" class="next">下一页{{ next_link_decorator|safe }}</a></li>
+                    {% else %}
+                    <li class="paginate_button next disabled"><span class="disabled next">下一页{{ next_link_decorator|safe }}</span></li>
+                    {% endif %}
+                    <li class="paginate_button previous disabled">
+                        <span>第 {{ proxy.number }} 页 - 共 {{ proxy.paginator.num_pages }} 页</span>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -235,7 +243,7 @@ function check_form(_input){
     var _input_div = $(_input.closest("div"))
     _input_div.removeClass('has-error')
     _input_div.removeClass('has-success')
-    if ($(_input).val() == ""){
+    if (($(_input).val() == "") || ($(_input).attr('name')=="proxy_listen" && !$(_input).val().indexOf("8000"))){
         _input_div.addClass('has-error')
     }else{
         _input_div.addClass('has-success')

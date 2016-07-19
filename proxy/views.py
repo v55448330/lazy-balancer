@@ -1,5 +1,6 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
+from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import HttpResponse
 from django.db.models import Q
 from proxy.models import proxy_config,upstream_config
@@ -10,13 +11,24 @@ import time
 import os
  
 def view(request):
-    _filter = request.GET.get('filter')
+    _filter = request.GET.get('filter',"")
     if _filter:
         _proxy_config = proxy_config.objects.filter(Q(proxy_name__contains=_filter)|Q(server_name__contains=_filter))
     else:
         _proxy_config = proxy_config.objects.all()
 
-    return render_to_response('proxy/view.html',{ 'proxy' : _proxy_config })
+    _NUM_PER_PAGE = 10
+    _paginator = Paginator(_proxy_config, _NUM_PER_PAGE)
+    _page = request.GET.get('page',1)
+    
+    try:
+        _contents = _paginator.page(_page)
+    except PageNotAnInteger:
+        _contents = _paginator.page(1)
+    except EmptyPage:
+        _contents = _paginator.page(_paginator.num_pages)
+
+    return render_to_response('proxy/view.html',{ 'proxy' : _contents, 'filter' : _filter })
     pass
 
 def query_proxy(request):
@@ -83,7 +95,6 @@ def save(request):
     content = "" 
     try:
         _post = json.loads(request.body)
-        print _post
         _config_id = _post['base_config']['proxy_config_id']
         _access_log = _post['base_config']['proxy_access_log']
         _error_log = _post['base_config']['proxy_error_log']
@@ -93,7 +104,7 @@ def save(request):
         _description = _post['base_config']['proxy_description']
         _balancer_type = ""
         
-        if _proxy_name and _server_name and _listen and len(_post['upstream_list']):
+        if _proxy_name and _server_name and _listen and len(_post['upstream_list']) and not _listen=="8000":
             _create_flag = False
             if _config_id == "0":
                 _config_id = str(uuid.uuid1())
