@@ -1,3 +1,6 @@
 Django==1.9.7
+gunicorn==19.6.0
 Jinja2==2.8
 MarkupSafe==0.23
+meld3==1.0.2
+psutil==4.3.0

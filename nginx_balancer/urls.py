@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 #from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
+from django.conf import settings
 
 urlpatterns = [
     url(r'^proxy/', include('proxy.urls')),
@@ -23,3 +25,4 @@ urlpatterns = [
     url(r'^dashboard/', include('dashboard.urls')),
     url(r'^$', RedirectView.as_view(url='/dashboard/')),
 ]
+urlpatterns += staticfiles_urlpatterns()

@@ -4,6 +4,7 @@
 user www-data;
 worker_processes {{ worker_processes }};
 pid /run/nginx.pid;
+daemon off;
 
 events {
     worker_connections {{ worker_connections }};
