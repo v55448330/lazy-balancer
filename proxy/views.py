@@ -17,9 +17,9 @@ def view(request):
     else:
         _proxy_config = proxy_config.objects.all()
 
-    _NUM_PER_PAGE = 10
+    _NUM_PER_PAGE = 8
     _paginator = Paginator(_proxy_config, _NUM_PER_PAGE)
-    _page = request.GET.get('page',1)
+    _page = request.GET.get('page')
     
     try:
         _contents = _paginator.page(_page)
