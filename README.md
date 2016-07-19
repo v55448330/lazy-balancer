@@ -16,9 +16,9 @@
 * 系统状态监测
 
 ## 演示
-![image](1.jpg)
-![image](2.jpg)
-![image](3.jpg)
-![image](4.jpg)
-![image](5.jpg)
-![image](6.jpg)
+![image](readme_img/1.jpg)
+![image](readme_img/2.jpg)
+![image](readme_img/3.jpg)
+![image](readme_img/4.jpg)
+![image](readme_img/5.jpg)
+![image](readme_img/6.jpg)
