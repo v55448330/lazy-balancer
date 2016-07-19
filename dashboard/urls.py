@@ -19,6 +19,6 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.view),
-    url(r'^getinfo/$', views.get_sysinfo),
+    url(r'^getinfo/$', views.get_status_info),
     #url(r'^/(?P<action>.*)$', views.action),
 ]

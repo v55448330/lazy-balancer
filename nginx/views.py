@@ -5,6 +5,7 @@ from django.conf import settings
 from proxy.models import proxy_config,upstream_config
 from main.models import main_config
 import commands
+import platform
 import json
 import os
 import psutil
@@ -81,6 +82,7 @@ def reload_config():
 
 def get_statusinfo():
     _phymem = psutil.virtual_memory()
+    _disk = psutil.disk_usage('/')
     _conns = psutil.net_connections()
     _nginx_status = False
 
@@ -118,6 +120,10 @@ def get_statusinfo():
             'used' : _phymem.used/1024/1024, 
             'total' : _phymem.total/1024/1024 
         },
+        'disk_info' : {
+            'total' : round(_disk.total/1024.0/1024.0/1024.0,2),
+            'used' : round(_disk.used/1024.0/1024.0/1024.0,2),
+        },
         'connect_info' : {
             'total' : len(_conns),
             'established' : _conn_ESTABLISHED,
@@ -137,18 +143,15 @@ def get_sysinfo():
     _disk_info = psutil.disk_usage('/')
     _nic_info = []
     for nic,addrs in psutil.net_if_addrs().items():
-        _nic_info.append("%s : %s" % nic,addrs)
+        _nic_info.append({'nic':nic,'address':addrs[0].address})
     _sysinfo = {
-        'disk_info' : {
-            'total' : float("%.2f" % (_disk_info.total/1024.0/1024.0/1024.0)),
-            'used' : float("%.2f" % (_disk_info.used/1024.0/1024.0/1024.0)),
-            'free' : float("%.2f" % (_disk_info.free/1024.0/1024.0/1024.0))
+        'nic' : _nic_info,
+        'platform' : {
+            'node' : platform.node(),
+            'system' : platform.system(),
+            'release' : platform.release(),
+            'processor' : platform.processor()
         },
-        'mem_info' : {
-            'available' : _phymem.available/1024/1024,
-            'used' : _phymem.used/1024/1024, 
-            'total' : _phymem.total/1024/1024 
-        },
-        'nic_info' : _nic_info
+        'nginx' : run_shell('nginx -v')['output'].split(': ')[1]
     }
     return _sysinfo

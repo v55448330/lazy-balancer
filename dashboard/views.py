@@ -6,4 +6,12 @@ import json
 import time
 
 def view(request):
-    return render_to_response('dashboard/view.html')
+    _sysinfo = get_sysinfo()
+    return render_to_response('dashboard/view.html',{'sysinfo' : _sysinfo})
+
+def get_status_info(request):
+    content = {
+        'flag':"Success",
+        'content':get_statusinfo()
+    }
+    return HttpResponse(json.dumps(content))

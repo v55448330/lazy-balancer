@@ -1,6 +1,7 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.http import HttpResponse
+from django.db.models import Q
 from proxy.models import proxy_config,upstream_config
 from nginx.views import *
 import json
@@ -9,7 +10,11 @@ import time
 import os
  
 def view(request):
-    _proxy_config = proxy_config.objects.all()
+    _filter = request.GET.get('filter')
+    if _filter:
+        _proxy_config = proxy_config.objects.filter(Q(proxy_name__contains=_filter)|Q(server_name__contains=_filter))
+    else:
+        _proxy_config = proxy_config.objects.all()
 
     return render_to_response('proxy/view.html',{ 'proxy' : _proxy_config })
     pass

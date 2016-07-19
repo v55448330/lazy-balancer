@@ -68,10 +68,10 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-12">
-                                    <span class="control-label pull-right">
-                                        <small>负载均衡器基础配置（* 为可选项）</small>
-                                    </span>
-                                </div>
+                                        <span class="control-label pull-right">
+                                            <small>负载均衡器基础配置（* 为可选项）</small>
+                                        </span>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -109,12 +109,12 @@
                                         <textarea class="form-control" rows="8" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                     </div>
                                 </div>
- <div class="form-group">
+                                <div class="form-group">
                                     <div class="col-sm-12">
-                                    <span class="control-label pull-right">
-                                        <small>启用 HTTPS 访问方式配置</small>
-                                    </span>
-                                </div>
+                                        <span class="control-label pull-right">
+                                            <small>启用 HTTPS 访问方式配置</small>
+                                        </span>
+                                    </div>
                                 </div>
 
                             </form>
@@ -169,10 +169,15 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <button type="button" class="btn btn-primary pull-left" onclick="edit_balancer(1)">创建负载均衡器</button>
+                <div class="input-group pull-right" style="width: 250px;">
+                    <input type="text" name="proxy_filter" id="input_proxy_filter" class="form-control pull-right" placeholder="请输入名称或域名" onkeydown='if(event.keyCode==13){proxy_filter()}'>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default" onclick="proxy_filter()"><i class="fa fa-search"></i></button>
+                    </div>
+                </div>
             </div>
             <!-- /.box-header -->
-            <div class="box-body">
-                <div class="table-responsive">
+            <div class="box-body no-padding">
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -205,7 +210,6 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                </div>
             </div>
             <!-- /.box-body -->
             <div class="box-footer clearfix">
@@ -398,6 +402,10 @@ function change_status(_pk,_status){
             }
         })
     }
+}
+
+function proxy_filter(){
+    window.location = '/proxy/?filter=' + $('#input_proxy_filter').val()
 }
 
 function save_balancer(){
