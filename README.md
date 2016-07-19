@@ -5,13 +5,39 @@
 > 项目基于 [Django](https://www.djangoproject.com/) + [AdminLTE](https://www.almsaeedstudio.com/) 构建，在 Ubuntu 14.04 上测试通过
 
 ## 运行
-* 克隆代码 `git clone https://github.com/v55448330/nginx-balancer-web.git /app/nginx_balancer`
-* 安装 nginx `apt-get install nginx && update-rc.d nginx disable && service nginx stop`
-* 安装 supervisor `apt-get install supervisor && update-rc.d supervisor enable`
-* 配置 supervisor `cp -rf service/* /etc/supervisor/`
-* 安装依赖 `pip install -r requirements.txt`
-* 初始化数据库 `python manage.py makemigrations && python manage.py migrate`
-* 启动服务 `service supervisor start`
+* 克隆代码
+```
+mkdir -p /app
+git clone https://github.com/v55448330/nginx-balancer-web.git /app/nginx_balancer
+```
+* 安装 nginx
+```
+apt-get install nginx
+update-rc.d nginx disable
+service nginx stop
+```
+* 安装 supervisor
+```
+apt-get install supervisor
+update-rc.d supervisor enable
+```
+* 配置 supervisor
+```
+cp -rf service/* /etc/supervisor/
+```
+* 安装依赖
+```
+pip install -r requirements.txt
+```
+* 初始化数据库
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+* 启动服务
+```
+service supervisor start
+```
 
 ## 功能
 * Nginx 可视化配置
