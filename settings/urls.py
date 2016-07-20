@@ -13,20 +13,11 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
-#from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.views.generic.base import RedirectView
-from django.conf import settings
-from .views import *
+from django.conf.urls import url
+from . import views
+#from django.views.generic.base import RedirectView
 
 urlpatterns = [
-    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
-    url(r'^logout/$', logout_view),
-    url(r'^dashboard/', include('dashboard.urls')),
-    url(r'^main/', include('main.urls')),
-    url(r'^proxy/', include('proxy.urls')),
-    url(r'^settings/', include('settings.urls')),
-    url(r'^$', RedirectView.as_view(url='/dashboard/')),
+    url(r'^$', views.view),
+    url(r'^password/$', views.modify_pass),
 ]
-urlpatterns += staticfiles_urlpatterns()
