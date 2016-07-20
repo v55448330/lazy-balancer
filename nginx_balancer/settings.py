@@ -120,6 +120,7 @@ USE_L10N = True
 
 USE_TZ = False
 
+LOGIN_REDIRECT_URL = '/dashboard/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
