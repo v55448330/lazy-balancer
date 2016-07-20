@@ -1,5 +1,6 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import HttpResponse
 from django.db.models import Q
@@ -10,6 +11,7 @@ import uuid
 import time
 import os
  
+@login_required(login_url="/login/")
 def view(request):
     _filter = request.GET.get('filter',"")
     if _filter:
@@ -31,6 +33,7 @@ def view(request):
     return render_to_response('proxy/view.html',{ 'proxy' : _contents, 'filter' : _filter })
     pass
 
+@login_required(login_url="/login/")
 def query_proxy(request):
     try:
         _post = json.loads(request.body)
@@ -64,6 +67,7 @@ def query_proxy(request):
     return HttpResponse(json.dumps(content))
     pass
 
+@login_required(login_url="/login/")
 def delete_proxy(request):
     try:
         _post = json.loads(request.body)
@@ -76,6 +80,7 @@ def delete_proxy(request):
     return HttpResponse(content)
     pass
 
+@login_required(login_url="/login/")
 def change_status(request):
     try:
         _post = json.loads(request.body)
@@ -90,7 +95,7 @@ def change_status(request):
     return HttpResponse(content)
     pass
 
-
+@login_required(login_url="/login/")
 def save(request):
     content = "" 
     try:

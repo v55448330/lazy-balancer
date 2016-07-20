@@ -1,5 +1,6 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from main.models import main_config 
 from nginx.views import *
@@ -8,6 +9,7 @@ import uuid
 import time
 import os
  
+@login_required(login_url="/login/") 
 def view(request):
     _main_config = main_config.objects.all()
     if len(_main_config) != 0:
@@ -16,6 +18,7 @@ def view(request):
     return render_to_response('main/view.html',{ 'main_config' : _main_config })
     pass
 
+@login_required(login_url="/login/") 
 def save(request):
     content = "" 
     try:
