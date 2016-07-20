@@ -38,6 +38,10 @@ python manage.py migrate
 ```
 service supervisor start
 ```
+* 创建密码
+```
+python manage.py createsuperuser
+```
 
 ## 功能
 * Nginx 可视化配置
