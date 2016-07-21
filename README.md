@@ -38,7 +38,7 @@ python manage.py migrate
 ```
 service supervisor start
 ```
-* 创建用户（用户名需为 admin )
+* 创建用户
 ```
 python manage.py createsuperuser
 ```
