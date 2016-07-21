@@ -10,6 +10,7 @@ import json
 def view(request):
     return render_to_response('settings/view.html')
 
+@login_required(login_url="/login/") 
 def modify_pass(request):
     try:
         _post = json.loads(request.body)
