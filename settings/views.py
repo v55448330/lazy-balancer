@@ -18,7 +18,7 @@ def modify_pass(request):
         _new_pass = _post['new_password']
         _verify_pass = _post['verify_password']
         if _old_pass and _new_pass and _verify_pass:
-            _user = User.objects.get(username="admin")
+            _user = User.objects.get(username=request.user)
             if _user.check_password(_old_pass) and _new_pass == _verify_pass:
                 _user.set_password(_verify_pass)
                 _user.save()
