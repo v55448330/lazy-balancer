@@ -30,7 +30,12 @@ def view(request):
     except EmptyPage:
         _contents = _paginator.page(_paginator.num_pages)
 
-    return render_to_response('proxy/view.html',{ 'proxy' : _contents, 'filter' : _filter })
+    _user = {
+        'name':request.user,
+        'date':time.time()
+    }
+
+    return render_to_response('proxy/view.html',{ 'proxy' : _contents, 'filter' : _filter, 'user' : _user })
     pass
 
 @login_required(login_url="/login/")

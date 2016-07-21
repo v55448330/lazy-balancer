@@ -5,10 +5,15 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from nginx.views import *
 import json
+import time
  
 @login_required(login_url="/login/") 
 def view(request):
-    return render_to_response('settings/view.html')
+    _user = {
+        'name':request.user,
+        'date':time.time()
+    }
+    return render_to_response('settings/view.html',{ 'user' : _user })
 
 @login_required(login_url="/login/") 
 def modify_pass(request):

@@ -15,7 +15,12 @@ def view(request):
     if len(_main_config) != 0:
         _main_config = _main_config[0]
 
-    return render_to_response('main/view.html',{ 'main_config' : _main_config })
+    _user = {
+        'name':request.user,
+        'date':time.time()
+    }
+
+    return render_to_response('main/view.html',{ 'main_config' : _main_config, 'user' : _user })
     pass
 
 @login_required(login_url="/login/") 

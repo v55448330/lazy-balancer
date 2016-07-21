@@ -5,6 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>Nginx | 负载均衡管理</title>
 {% load staticfiles %}
+{% load custom_filter %}
 
 <!-- Bootstrap 3.3.6 -->
 <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
@@ -66,16 +67,15 @@
                         <!-- The user image in the navbar-->
                         <img src="{% static "dist/img/user2-160x160.jpg" %}" class="user-image" alt="User Image">
                         <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                        <span class="hidden-xs">Xiaobao Zhang</span>
+                        <span class="hidden-xs">{{ user.name }}</span>
                     </a>
                     <ul class="dropdown-menu">
                         <!-- The user image in the menu -->
                         <li class="user-header">
                         <img src="{% static "dist/img/user2-160x160.jpg" %}" class="img-circle" alt="User Image">
-
                         <p>
-                        Xiaobao Zhang - DevOps
-                        <small>Member since Jul. 2016</small>
+                        {{ user.name }}
+                        <small>{{ user.date | timestamp_to_date }}</small>
                         </p>
                         </li>
                         <!-- Menu Footer-->
@@ -150,7 +150,7 @@
     <footer class="main-footer">
         <!-- To the right -->
         <div class="pull-right hidden-xs">
-            Anything you want
+            <a href="mailto:crazy.zhang@outlook.com">crazy.zhang@outlook.com</a>
         </div>
         <!-- Default to the left -->
         <strong>Copyright &copy; 2016 <a href="#">Company</a>.</strong> All rights reserved.
