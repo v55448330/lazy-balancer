@@ -18,7 +18,7 @@ from django.conf.urls import url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 from django.conf import settings
-from .views import *
+from .views import logout_view
 
 urlpatterns = [
     url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'}),
