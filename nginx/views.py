@@ -143,7 +143,7 @@ def get_sysinfo():
     _disk_info = psutil.disk_usage('/')
     _nic_info = []
     for nic,addrs in psutil.net_if_addrs().items():
-        if ":" not in addrs:
+        if ":" not in addrs[0].address:
             _nic_info.append({'nic':nic,'address':addrs[0].address})
     _sysinfo = {
         'nic' : _nic_info,
