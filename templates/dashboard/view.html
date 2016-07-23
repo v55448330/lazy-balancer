@@ -1,6 +1,4 @@
-{% extends "base.html" %}
-{% block content %}
-{% load custom_filter %}
+{% extends "base.html" %} {% block content %} {% load custom_filter %}
 
 <div class="row">
     <div class="col-md-6">
@@ -12,30 +10,29 @@
                 <div class="col-sm-12">
                     <table class="table no-border">
                         <tbody>
-                        <tr>
-                            <td class="pull-right"><strong>Nginx 版本</strong></td>
-                            <td>{{ sysinfo.nginx }} <span id="sp_nginx_status"></span></td>
-                        </tr>
-                        <tr>
-                            <td class="pull-right"><strong>主机名</strong></td>
-                            <td>{{ sysinfo.platform.node }}</td>
-                        </tr>
-                        <tr>
-                            <td class="pull-right"><strong>操作系统</strong></td>
-                            <td>{{ sysinfo.platform.system }} {{ sysinfo.platform.release }}</td>
-                        </tr>
-                        <tr>
-                            <td class="pull-right"><strong>系统架构</strong></td>
-                            <td>{{ sysinfo.platform.processor }} </td>
-                        </tr>
-                        <tr>
-                            <td class="pull-right"><strong>网络信息</strong></td>
-                            <td>
-                                {% for nic in sysinfo.nic %}
-                                <small>{{ nic.nic }}</small> {{ nic.address }}
-                                {% endfor %}
-                            </td>
-                        </tr>
+                            <tr>
+                                <td class="pull-right"><strong>Nginx 版本</strong></td>
+                                <td>{{ sysinfo.nginx }} <span id="sp_nginx_status"></span></td>
+                            </tr>
+                            <tr>
+                                <td class="pull-right"><strong>主机名</strong></td>
+                                <td>{{ sysinfo.platform.node }}</td>
+                            </tr>
+                            <tr>
+                                <td class="pull-right"><strong>操作系统</strong></td>
+                                <td>{{ sysinfo.platform.system }} {{ sysinfo.platform.release }}</td>
+                            </tr>
+                            <tr>
+                                <td class="pull-right"><strong>系统架构</strong></td>
+                                <td>{{ sysinfo.platform.processor }} </td>
+                            </tr>
+                            <tr>
+                                <td class="pull-right"><strong>网络信息</strong></td>
+                                <td>
+                                    {% for nic in sysinfo.nic %}
+                                    <small>{{ nic.nic }}</small> {{ nic.address }} {% endfor %}
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -51,36 +48,36 @@
                 <div class="col-sm-12">
                     <table class="table no-border">
                         <tbody>
-                        <tr>
-                            <div class="progress-group">
-                                <span class="progress-text">处理器</span>
-                                <span class="progress-number"><b><span id="sp_cpu_percent">-</span></b>/100 %</span>
-                                <div class="progress active">
-                                    <div class="progress-bar progress-bar-striped" role="progressbar" id="pgs_cpu">
+                            <tr>
+                                <div class="progress-group">
+                                    <span class="progress-text">处理器</span>
+                                    <span class="progress-number"><b><span id="sp_cpu_percent">-</span></b>/100 %</span>
+                                    <div class="progress active">
+                                        <div class="progress-bar progress-bar-striped" role="progressbar" id="pgs_cpu">
+                                        </div>
                                     </div>
-                                </div> 
-                            </div>
-                        </tr>
-                        <tr>
-                            <div class="progress-group">
-                                <span class="progress-text">内存</span>
-                                <span class="progress-number"><b><span id="sp_mem_used">-</span></b>/<span id="sp_mem_total"></span> MB</span>
-                                <div class="progress active">
-                                    <div class="progress-bar progress-bar-striped" role="progressbar" id="pgs_mem">
+                                </div>
+                            </tr>
+                            <tr>
+                                <div class="progress-group">
+                                    <span class="progress-text">内存</span>
+                                    <span class="progress-number"><b><span id="sp_mem_used">-</span></b>/<span id="sp_mem_total"></span> MB</span>
+                                    <div class="progress active">
+                                        <div class="progress-bar progress-bar-striped" role="progressbar" id="pgs_mem">
+                                        </div>
                                     </div>
-                                </div> 
-                            </div>
-                        </tr>
-                        <tr>
-                            <div class="progress-group">
-                                <span class="progress-text">磁盘</span>
-                                <span class="progress-number"><b><span id="sp_disk_used">-</span></b>/<span id="sp_disk_total"></span> GB</span>
-                                <div class="progress active">
-                                    <div class="progress-bar progress-bar-striped" role="progressbar" id="pgs_disk">
+                                </div>
+                            </tr>
+                            <tr>
+                                <div class="progress-group">
+                                    <span class="progress-text">磁盘</span>
+                                    <span class="progress-number"><b><span id="sp_disk_used">-</span></b>/<span id="sp_disk_total"></span> GB</span>
+                                    <div class="progress active">
+                                        <div class="progress-bar progress-bar-striped" role="progressbar" id="pgs_disk">
+                                        </div>
                                     </div>
-                                </div> 
-                            </div>
-                        </tr>
+                                </div>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -106,162 +103,181 @@
 
 
 {% load staticfiles %}
-<script src="{% static "plugins/echarts/echarts.min.js" %}"></script>
-<script src="{% static "plugins/echarts/macarons.js" %}"></script>
+<script src="{% static " plugins/echarts/echarts.min.js " %}"></script>
+<script src="{% static " plugins/echarts/macarons.js " %}"></script>
 <script>
-$('#menu_dashboard').addClass('active')
-$('#menu_service').removeClass('active')
-$('#page_header').text('服务状态')
-$('#page_header_descript').text('负载均衡系统状态展示')
-$('#page_nav').text('服务状态')
-$('#page_name').text('服务状态')
+    $('#menu_dashboard').addClass('active')
+    $('#menu_service').removeClass('active')
+    $('#page_header').text('服务状态')
+    $('#page_header_descript').text('负载均衡系统状态展示')
+    $('#page_nav').text('服务状态')
+    $('#page_name').text('服务状态')
 
-var charts_data_total = []
-var charts_data_establish = []
-var charts_data_timewait = []
-var date = []
-var option = {
-    grid: {left:'40',right:'40',top:'50',bottom:'40'},
-    legend: {
-        data:['总连接','已连接','待释放']
-    },
-    tooltip: {
-        trigger: 'axis'
-    },
-    xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: date
-    },
-    yAxis: {
-        type: 'value'
-    },
-    series: [
-        {
-        name:'总连接',
-        type:'line',
-        smooth:true,
-        data: charts_data_total, 
-        symbolSize: 2,
-        markPoint: {
-            data: [
-                {type: 'max', name: '最大'},
-                {type: 'min', name: '最小'}
-            ]
+    var charts_data_total = []
+    var charts_data_establish = []
+    var charts_data_timewait = []
+    var date = []
+    var option = {
+        grid: {
+            left: '40',
+            right: '40',
+            top: '50',
+            bottom: '40'
         },
-        markLine: {
-            data: [
-                {type: 'average', name: '平均'}
-            ]
-        }
-    },{
-        name:'已连接',
-        type:'line',
-        smooth:true,
-        data: charts_data_establish,
-        symbolSize: 2,
-        markPoint: {
-            data: [
-                {type: 'max', name: '最大'},
-                {type: 'min', name: '最小'}
-            ]
+        legend: {
+            data: ['总连接', '已连接', '待释放']
         },
-        markLine: {
-            data: [
-                {type: 'average', name: '平均'}
-            ]
-        }
-    },{
-        name:'待释放',
-        type:'line',
-        smooth:true,
-        data: charts_data_timewait,
-        symbolSize: 2,
-        markPoint: {
-            data: [
-                {type: 'max', name: '最大'},
-                {type: 'min', name: '最小'}
-            ]
+        tooltip: {
+            trigger: 'axis'
         },
-        markLine: {
-            data: [
-                {type: 'average', name: '平均'}
-            ]
-        }
-    }
-    ]
-};
-
-
-function add_data(_init,_conn_total,_conn_establish,_conn_timewait) {
-    if (date.length==12){
-        date.shift()
-        charts_data_total.shift()
-        charts_data_establish.shift()
-        charts_data_timewait.shift()
-    }
-    var _option = {
         xAxis: {
+            type: 'category',
+            boundaryGap: false,
             data: date
         },
-        series: [
-            {name:'总连接',data: charts_data_total},
-            {name:'已建立',data: charts_data_establish},
-            {name:'待释放',data: charts_data_timewait},
-        ]
-    }
-    if (_init){
-        date.push('0')
-    }
-    else{
-        date.push(new Date().toLocaleTimeString().replace(/^\D*/,''))
-    }
-
-    charts_data_total.push(_conn_total)
-    charts_data_establish.push(_conn_establish)
-    charts_data_timewait.push(_conn_timewait)
-    connection_chart.setOption(_option)
-}
-
-function get_status_info(){
-    jQuery.ajax({
-        type: 'post',
-        url: '/dashboard/getinfo/',
-        dataType: 'json',
-        success: function(p) {
-            if (p.flag == "Success"){
-                if(p.content.nginx_status){
-                    $('#sp_nginx_status').removeClass()
-                    $('#sp_nginx_status').addClass('label label-success')
-                    $('#sp_nginx_status').text('运行中')
-                }else{
-                    $('#sp_nginx_status').removeClass()
-                    $('#sp_nginx_status').addClass('label label-danger')
-                    $('#sp_nginx_status').text('已停止')
-                }
-
-                $('#sp_cpu_percent').text(p.content.cpu_percent)
-                $('#sp_mem_used').text(p.content.mem_info.used)
-                $('#sp_mem_total').text(p.content.mem_info.total)
-                $('#sp_disk_used').text(p.content.disk_info.used)
-                $('#sp_disk_total').text(p.content.disk_info.total)
-
-                $('#pgs_cpu').css('width',p.content.cpu_percent+'%')
-                $('#pgs_mem').css('width',p.content.mem_info.used/p.content.mem_info.total*100+'%')
-                $('#pgs_disk').css('width',p.content.disk_info.used/p.content.disk_info.total*100+'%')
-
-                add_data(false,p.content.connect_info.total,p.content.connect_info.established,p.content.connect_info.time_wait)
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            name: '总连接',
+            type: 'line',
+            smooth: true,
+            data: charts_data_total,
+            symbolSize: 2,
+            markPoint: {
+                data: [{
+                    type: 'max',
+                    name: '最大'
+                }, {
+                    type: 'min',
+                    name: '最小'
+                }]
+            },
+            markLine: {
+                data: [{
+                    type: 'average',
+                    name: '平均'
+                }]
             }
-        }
-    })
-}
+        }, {
+            name: '已连接',
+            type: 'line',
+            smooth: true,
+            data: charts_data_establish,
+            symbolSize: 2,
+            markPoint: {
+                data: [{
+                    type: 'max',
+                    name: '最大'
+                }, {
+                    type: 'min',
+                    name: '最小'
+                }]
+            },
+            markLine: {
+                data: [{
+                    type: 'average',
+                    name: '平均'
+                }]
+            }
+        }, {
+            name: '待释放',
+            type: 'line',
+            smooth: true,
+            data: charts_data_timewait,
+            symbolSize: 2,
+            markPoint: {
+                data: [{
+                    type: 'max',
+                    name: '最大'
+                }, {
+                    type: 'min',
+                    name: '最小'
+                }]
+            },
+            markLine: {
+                data: [{
+                    type: 'average',
+                    name: '平均'
+                }]
+            }
+        }]
+    };
 
-var connection_chart = echarts.init($('#div_connection_count')[0],'macarons');
-connection_chart.setOption(option)
-for (var i = 1; i <= 12; i++) {
-    add_data(true,0,0,0);
-}
-get_status_info()
-window.setInterval(get_status_info, 10000);
+
+    function add_data(_init, _conn_total, _conn_establish, _conn_timewait) {
+        if (date.length == 12) {
+            date.shift()
+            charts_data_total.shift()
+            charts_data_establish.shift()
+            charts_data_timewait.shift()
+        }
+        var _option = {
+            xAxis: {
+                data: date
+            },
+            series: [{
+                name: '总连接',
+                data: charts_data_total
+            }, {
+                name: '已建立',
+                data: charts_data_establish
+            }, {
+                name: '待释放',
+                data: charts_data_timewait
+            }, ]
+        }
+        if (_init) {
+            date.push('0')
+        } else {
+            date.push(new Date().toLocaleTimeString().replace(/^\D*/, ''))
+        }
+
+        charts_data_total.push(_conn_total)
+        charts_data_establish.push(_conn_establish)
+        charts_data_timewait.push(_conn_timewait)
+        connection_chart.setOption(_option)
+    }
+
+    function get_status_info() {
+        jQuery.ajax({
+            type: 'post',
+            url: '/dashboard/getinfo/',
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    if (p.content.nginx_status) {
+                        $('#sp_nginx_status').removeClass()
+                        $('#sp_nginx_status').addClass('label label-success')
+                        $('#sp_nginx_status').text('运行中')
+                    } else {
+                        $('#sp_nginx_status').removeClass()
+                        $('#sp_nginx_status').addClass('label label-danger')
+                        $('#sp_nginx_status').text('已停止')
+                    }
+
+                    $('#sp_cpu_percent').text(p.content.cpu_percent)
+                    $('#sp_mem_used').text(p.content.mem_info.used)
+                    $('#sp_mem_total').text(p.content.mem_info.total)
+                    $('#sp_disk_used').text(p.content.disk_info.used)
+                    $('#sp_disk_total').text(p.content.disk_info.total)
+
+                    $('#pgs_cpu').css('width', p.content.cpu_percent + '%')
+                    $('#pgs_mem').css('width', p.content.mem_info.used / p.content.mem_info.total * 100 + '%')
+                    $('#pgs_disk').css('width', p.content.disk_info.used / p.content.disk_info.total * 100 + '%')
+
+                    add_data(false, p.content.connect_info.total, p.content.connect_info.established, p.content.connect_info.time_wait)
+                }
+            }
+        })
+    }
+
+    var connection_chart = echarts.init($('#div_connection_count')[0], 'macarons');
+    connection_chart.setOption(option)
+    for (var i = 1; i <= 12; i++) {
+        add_data(true, 0, 0, 0);
+    }
+    get_status_info()
+    window.setInterval(get_status_info, 10000);
 </script>
 {% endblock %}

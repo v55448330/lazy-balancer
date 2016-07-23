@@ -1,6 +1,4 @@
-{% extends "base.html" %}
-{% block content %}
-{% load custom_filter %}
+{% extends "base.html" %} {% block content %} {% load custom_filter %}
 
 <div class="row">
     <div class="col-md-12">
@@ -33,7 +31,7 @@
                                 <input type="password" class="form-control" name="verify_password" id="input_verify_password" placeholder="再次输入新密码" onblur="check_pass()">
                             </div>
                         </div>
-                    </form>
+                </form>
                 </div>
                 <div class="box-footer">
                     <button type="button" class="btn btn-primary" onclick="modify_pass()">修改密码</button>
@@ -45,60 +43,59 @@
 
 
 <script>
-//init page
-$('#menu_system_config').addClass('active')
-$('#menu_service').removeClass('active')
-$('#page_header').text('系统配置')
-$('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
-$('#page_nav').text('系统配置')
-$('#page_name').text('系统配置')
+    //init page
+    $('#menu_system_config').addClass('active')
+    $('#menu_service').removeClass('active')
+    $('#page_header').text('系统配置')
+    $('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
+    $('#page_nav').text('系统配置')
+    $('#page_name').text('系统配置')
 
-function check_pass(){
-    var _old_pass = $('#input_old_password')[0]
-    var _new_pass = $('#input_new_password')[0]
-    var _verify_pass = $('#input_verify_password')[0]
-    _return = false
-    if (_old_pass.value.length > 7 && _new_pass.value.length > 7 && _verify_pass.value.length > 7) {
-        $(_new_pass.closest("div")).removeClass()
-        $(_verify_pass.closest("div")).removeClass()
-        if (_new_pass.value == _verify_pass.value){
-            $(_new_pass.closest("div")).toggleClass('has-success')
-            $(_verify_pass.closest("div")).toggleClass('has-success')
-            _return = true
-        }else{
-            $(_new_pass.closest("div")).toggleClass('has-error')
-            $(_verify_pass.closest("div")).toggleClass('has-error')
+    function check_pass() {
+        var _old_pass = $('#input_old_password')[0]
+        var _new_pass = $('#input_new_password')[0]
+        var _verify_pass = $('#input_verify_password')[0]
+        _return = false
+        if (_old_pass.value.length > 7 && _new_pass.value.length > 7 && _verify_pass.value.length > 7) {
+            $(_new_pass.closest("div")).removeClass()
+            $(_verify_pass.closest("div")).removeClass()
+            if (_new_pass.value == _verify_pass.value) {
+                $(_new_pass.closest("div")).toggleClass('has-success')
+                $(_verify_pass.closest("div")).toggleClass('has-success')
+                _return = true
+            } else {
+                $(_new_pass.closest("div")).toggleClass('has-error')
+                $(_verify_pass.closest("div")).toggleClass('has-error')
+            }
         }
+        return _return
     }
-    return _return
-}
 
-function modify_pass(){
-    if (check_pass()){
-        if (confirm("确认要修改密码？"))  {
-            jQuery.ajax({
-                type: 'post',
-                url: '/settings/password/',
-                data: JSON.stringify($('#form_modify_pass').serializeObject()),
-                success: function(p) {
-                    if (p == "Success"){
-                        alert("修改成功！请重新登录！")
-                        top.location = '/logout/'
-                    }else if (p == "VerifyFaild"){
-                        alert('修改失败！密码验证失败！')
-                    }else{
-                        alert('修改错误！其他错误：'+p)
+    function modify_pass() {
+        if (check_pass()) {
+            if (confirm("确认要修改密码？")) {
+                jQuery.ajax({
+                    type: 'post',
+                    url: '/settings/password/',
+                    data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                    success: function(p) {
+                        if (p == "Success") {
+                            alert("修改成功！请重新登录！")
+                            top.location = '/logout/'
+                        } else if (p == "VerifyFaild") {
+                            alert('修改失败！密码验证失败！')
+                        } else {
+                            alert('修改错误！其他错误：' + p)
+                        }
+                    },
+                    error: function(e) {
+                        alert('请求失败!')
                     }
-                },
-                error: function(e) {
-                    alert('请求失败!')
-                }
-            })
+                })
+            }
+        } else {
+            alert('密码输入有误！')
         }
-    }else{
-        alert('密码输入有误！')
     }
-}
-
 </script>
 {% endblock %}
