@@ -12,7 +12,7 @@ def login_view(request):
     redirect_to = settings.LOGIN_REDIRECT_URL
 
     if request.method == "POST":
-        redirect_to = request.POST.get('next',settings.LOGIN_REDIRECT_URL)
+        redirect_to = request.POST.get('next')
         form = AuthenticationForm(request, data=request.POST)
 
         if form.is_valid():
