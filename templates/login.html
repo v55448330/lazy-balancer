@@ -40,7 +40,7 @@
         </div>
         {% endif %}
 
-        <form action="{% url 'django.contrib.auth.views.login' %}" method="post">
+        <form action="/login/" method="post">
             {% csrf_token %}
             <div class="form-group has-feedback">
                 <input name="username" type="text" class="form-control" placeholder="用户名">
