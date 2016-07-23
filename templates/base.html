@@ -8,33 +8,33 @@
     {% load staticfiles %} {% load custom_filter %}
 
     <!-- Bootstrap 3.3.6 -->
-    <link rel="stylesheet" href="{% static " bootstrap/css/bootstrap.min.css " %}">
+    <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css" %}">
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="{% static " dist/css/font-awesome.min.css " %}">
+    <link rel="stylesheet" href="{% static "dist/css/font-awesome.min.css" %}">
     <!-- Ionicons -->
-    <link rel="stylesheet" href="{% static " dist/css/ionicons.min.css " %}">
+    <link rel="stylesheet" href="{% static "dist/css/ionicons.min.css" %}">
     <!-- Theme style -->
-    <link rel="stylesheet" href="{% static " dist/css/AdminLTE.min.css " %}">
+    <link rel="stylesheet" href="{% static "dist/css/AdminLTE.min.css" %}">
     <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect.
   -->
-    <link rel="stylesheet" href="{% static " dist/css/skins/skin-blue.min.css " %}">
+    <link rel="stylesheet" href="{% static "dist/css/skins/skin-blue.min.css" %}">
 
     <!-- REQUIRED JS SCRIPTS -->
     <!-- jQuery 2.2.3 -->
-    <script src="{% static " plugins/jQuery/jquery-2.2.3.min.js " %}"></script>
+    <script src="{% static "plugins/jQuery/jquery-2.2.3.min.js" %}"></script>
     <!-- Bootstrap 3.3.6 -->
-    <script src="{% static " bootstrap/js/bootstrap.min.js " %}"></script>
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
     <!-- AdminLTE App -->
-    <script src="{% static " dist/js/app.min.js " %}"></script>
+    <script src="{% static "dist/js/app.min.js" %}"></script>
     <!-- Inputmask -->
-    <script src="{% static " plugins/input-mask/inputmask.min.js " %}"></script>
-    <script src="{% static " plugins/input-mask/jquery.inputmask.min.js " %}"></script>
-    <script src="{% static " plugins/input-mask/inputmask.extensions.min.js " %}"></script>
-    <script src="{% static " plugins/input-mask/inputmask.numeric.extensions.min.js " %}"></script>
+    <script src="{% static "plugins/input-mask/inputmask.min.js" %}"></script>
+    <script src="{% static "plugins/input-mask/jquery.inputmask.min.js" %}"></script>
+    <script src="{% static "plugins/input-mask/inputmask.extensions.min.js" %}"></script>
+    <script src="{% static "plugins/input-mask/inputmask.numeric.extensions.min.js" %}"></script>
 
 </head>
 
@@ -66,14 +66,14 @@
                             <!-- Menu Toggle Button -->
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <!-- The user image in the navbar-->
-                                <img src="{% static " dist/img/user2-160x160.jpg " %}" class="user-image" alt="User Image">
+                                <img src="{% static "dist/img/user2-160x160.jpg" %}" class="user-image" alt="User Image">
                                 <!-- hidden-xs hides the username on small devices so only the image appears. -->
                                 <span class="hidden-xs">{{ user.name }}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <!-- The user image in the menu -->
                                 <li class="user-header">
-                                    <img src="{% static " dist/img/user2-160x160.jpg " %}" class="img-circle" alt="User Image">
+                                    <img src="{% static "dist/img/user2-160x160.jpg" %}" class="img-circle" alt="User Image">
                                     <p>
                                         {{ user.name }}
                                         <small>{{ user.date | timestamp_to_date }}</small>
