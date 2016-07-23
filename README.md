@@ -38,9 +38,9 @@ python manage.py migrate
 ```
 service supervisor start
 ```
-* 创建用户
+* 登录系统（默认管理员：admin/1234.com）
 ```
-python manage.py createsuperuser
+http://[IP]:8000/
 ```
 
 ## 功能
