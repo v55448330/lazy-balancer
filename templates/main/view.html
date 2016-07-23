@@ -95,15 +95,12 @@
     $('#page_name').text('全局配置')
 
     //init form
-    { %
-        if main_config.worker_processes == 0 %
-    }
+    {% if main_config.worker_processes == 0 %}
     $('#check_worker_processes').attr('checked', 'checked')
-    $('#input_worker_processes').attr('disabled', 'disabled') { %
-        else %
-    }
-    $('#input_worker_processes').val('{{ main_config.worker_processes }}') { % endif %
-    }
+    $('#input_worker_processes').attr('disabled', 'disabled')
+    {% else %}
+    $('#input_worker_processes').val('{{ main_config.worker_processes }}')
+    {% endif %}
     $('#input_worker_connections').val('{{ main_config.worker_connections }}')
     $('#input_keepalive_timeout').val('{{ main_config.keepalive_timeout }}')
     $('#input_client_max_body_size').val('{{ main_config.client_max_body_size }}')
