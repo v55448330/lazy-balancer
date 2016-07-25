@@ -43,5 +43,22 @@ def set_public_firewall(port_list):
 def set_firewall():
     if system_settings.objects.all().count() != 0:
         internal_nic = system_settings.objects.all()[0].internal_nic
-        nics = get_sysinfo()['nic']
-        print nics
+        if internal_nic != "":
+            internal_port = [22,8000]
+            public_port = []
+
+            for proxy in proxy_config.objects.all():
+                public_port.append(proxy.listen)
+            public_port = list(set(public_port))
+
+            address = ""
+            nics = get_sysinfo()['nic']
+
+            for nic in nics:
+                if nic['nic'] == internal_nic:
+                    for i in nic['address'].split('.')[:3]:
+                        address += i + '.'
+                    address += '0/24'
+
+            set_internal_firewall(address,internal_port)
+            set_public_firewall(public_port)

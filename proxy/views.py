@@ -17,7 +17,7 @@ import os
 def view(request):
     filter = request.GET.get('filter',"")
     if filter:
-        p_config = proxy_config.objects.filter(Q(proxy_name__contains=_filter)|Q(server_name__contains=_filter))
+        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter))
     else:
         p_config = proxy_config.objects.all()
 
@@ -44,31 +44,31 @@ def view(request):
 def query_proxy(request):
     try:
         post = json.loads(request.body)
-        proxy = p_config.objects.get(config_id=_post['config_id'])
+        proxy = proxy_config.objects.get(config_id=post['config_id'])
         p = {
-            'proxy_name':_proxy.proxy_name,
-            'config_id':_proxy.config_id,
-            'listen':_proxy.listen,
-            'server_name':_proxy.server_name,
-            'access_log':_proxy.access_log,
-            'error_log':_proxy.error_log,
-            'protocols':_proxy.protocols,
-            'ssl_cert':_proxy.ssl_cert,
-            'ssl_key':_proxy.ssl_key,
-            'description':_proxy.description,
-            'balancer_type':_proxy.balancer_type,
+            'proxy_name':proxy.proxy_name,
+            'config_id':proxy.config_id,
+            'listen':proxy.listen,
+            'server_name':proxy.server_name,
+            'access_log':proxy.access_log,
+            'error_log':proxy.error_log,
+            'protocols':proxy.protocols,
+            'ssl_cert':proxy.ssl_cert,
+            'ssl_key':proxy.ssl_key,
+            'description':proxy.description,
+            'balancer_type':proxy.balancer_type,
         }
         u = []
         for ui in proxy.upstream_list.all():
             u.append({
-                'address':_ui.address,
-                'port':_ui.port,
-                'weight':_ui.weight,
-                'max_fails':_ui.max_fails,
-                'fail_timeout':_ui.fail_timeout
+                'address':ui.address,
+                'port':ui.port,
+                'weight':ui.weight,
+                'max_fails':ui.max_fails,
+                'fail_timeout':ui.fail_timeout
             })
             pass
-        content = { "flag":"Success","proxy":_p,"upstream":_u}
+        content = { "flag":"Success","proxy":p,"upstream":u}
     except Exception, e:
         content = { "flag":"Error","content":str(e) }
     return HttpResponse(json.dumps(content))
@@ -78,7 +78,7 @@ def query_proxy(request):
 def delete_proxy(request):
     try:
         post = json.loads(request.body)
-        proxy = p_config.objects.get(pk=_post['pk'])
+        proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.delete()
         reload_config()
         content = "Success"
@@ -91,7 +91,7 @@ def delete_proxy(request):
 def change_status(request):
     try:
         post = json.loads(request.body)
-        proxy = p_config.objects.get(pk=_post['pk'])
+        proxy = p_config.objects.get(pk=post['pk'])
         proxy.status = bool(int(post['status']))
         proxy.save()
         reload_config()
@@ -213,16 +213,18 @@ def save(request):
 
                     proxy['status'] = True
                     if create_flag:
-                        obj_p_config = p_config.objects.create(**_proxy)
+                        obj_p_config = p_config.objects.create(**proxy)
                     else:
-                        p_config.objects.filter(config_id=_config_id).update(**_proxy)
-                        obj_p_config = p_config.objects.get(config_id=_config_id)
+                        p_config.objects.filter(config_id=config_id).update(**proxy)
+                        obj_p_config = p_config.objects.get(config_id=config_id)
 
                     obj_p_config.upstream_list.all().delete()
                     for up in upstream_list:
-                        obj_p_config.upstream_list.add(upstream_config.objects.create(**_up))
+                        obj_p_config.upstream_list.add(upstream_config.objects.create(**up))
                         obj_p_config.save()
                         pass
+
+                    set_firewall()
                     content = "Success"
                 else:
                     content = test_ret['output']

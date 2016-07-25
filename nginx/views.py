@@ -49,8 +49,8 @@ def write_config(conf_path,conf_content):
 def run_shell(cmd):
     (status,output) = commands.getstatusoutput(cmd)
     content = {
-        'status':_status,
-        'output':_output,
+        'status':status,
+        'output':output,
     }
     return content
 
