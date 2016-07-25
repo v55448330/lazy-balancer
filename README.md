@@ -15,6 +15,7 @@ git clone https://github.com/v55448330/nginx-balancer-web.git /app/nginx_balance
 apt-get install nginx
 update-rc.d nginx disable
 service nginx stop
+echo "daemon off;" >> /etc/nginx/nginx.conf
 ```
 * 安装 supervisor
 ```
