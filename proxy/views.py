@@ -203,7 +203,7 @@ def save(request):
                     })
 
                 p_config = { 'proxy' : proxy, 'upstream' : upstream_list }
-                config_content = build_p_config(p_config)
+                config_content = build_proxy_config(p_config)
                 write_config(config_path,config_content)
 
                 test_ret = test_config()

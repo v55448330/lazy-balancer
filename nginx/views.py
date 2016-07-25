@@ -131,7 +131,7 @@ def get_statusinfo():
             'time_wait' : conn_TIME_WAIT,
             'close_wait' : conn_CLOSE_WAIT,
             'fin_wait' : conn_FIN_WAIT1 + conn_FIN_WAIT2,
-            'none' : len(conns) - conn_ESTABLISHED - conn_LISTEN -_conn_TIME_WAIT - conn_CLOSE_WAIT - conn_FIN_WAIT1 - conn_FIN_WAIT2
+            'none' : len(conns) - conn_ESTABLISHED - conn_LISTEN - conn_TIME_WAIT - conn_CLOSE_WAIT - conn_FIN_WAIT1 - conn_FIN_WAIT2
         },
         'nginx_status' : nginx_status
     }

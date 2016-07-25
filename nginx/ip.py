@@ -40,7 +40,7 @@ def set_internal_firewall(network,port_list):
     rule.add_match(match)
     chain.insert_rule(rule)
 
-    chain.set_policy("DROP")
+    #chain.set_policy("DROP")
 
 def set_public_firewall(port_list):
     chain = iptc.Chain(iptc.Table(iptc.Table.FILTER), "INPUT")
