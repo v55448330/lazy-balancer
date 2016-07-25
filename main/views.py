@@ -11,16 +11,16 @@ import os
 
 @login_required(login_url="/login/")
 def view(request):
-    main_config = main_config.objects.all()
-    if len(main_config) != 0:
-        main_config = main_config[0]
+    m_config = main_config.objects.all()
+    if len(m_config) != 0:
+        m_config = m_config[0]
 
     user = {
         'name':request.user,
         'date':time.time()
     }
 
-    return render_to_response('main/view.html',{ 'main_config' : main_config, 'user' : user })
+    return render_to_response('main/view.html',{ 'main_config' : m_config, 'user' : user })
     pass
 
 @login_required(login_url="/login/")
@@ -52,7 +52,7 @@ def save(request):
             if not error_log:
                 error_log = "/var/log/nginx/error.log"
 
-            main_config = {
+            m_config = {
                 'config_id' : config_id,
                 'worker_processes' : int(worker_processes),
                 'worker_connections' : int(worker_connections),
@@ -62,15 +62,15 @@ def save(request):
                 'error_log' : error_log,
                 'update_time' : time.time()
             }
-            print main_config
-            config_content = build_main_config(main_config)
-            write_config(config_path,_config_content)
+            print m_config
+            config_content = build_main_config(m_config)
+            write_config(config_path,config_content)
 
             test_ret = test_config()
             if test_ret['status'] == 0:
-                write_config(config_path,_config_content)
+                write_config(config_path,config_content)
                 main_config.objects.all().delete()
-                main_config.objects.create(**main_config)
+                main_config.objects.create(**m_config)
                 content = "Success"
             else:
                 content = test_ret['output']

@@ -91,7 +91,7 @@ def delete_proxy(request):
 def change_status(request):
     try:
         post = json.loads(request.body)
-        proxy = p_config.objects.get(pk=post['pk'])
+        proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.status = bool(int(post['status']))
         proxy.save()
         reload_config()
@@ -213,10 +213,10 @@ def save(request):
 
                     proxy['status'] = True
                     if create_flag:
-                        obj_p_config = p_config.objects.create(**proxy)
+                        obj_p_config = proxy_config.objects.create(**proxy)
                     else:
-                        p_config.objects.filter(config_id=config_id).update(**proxy)
-                        obj_p_config = p_config.objects.get(config_id=config_id)
+                        proxy_config.objects.filter(config_id=config_id).update(**proxy)
+                        obj_p_config = proxy_config.objects.get(config_id=config_id)
 
                     obj_p_config.upstream_list.all().delete()
                     for up in upstream_list:
