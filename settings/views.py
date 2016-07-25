@@ -35,8 +35,8 @@ def modify_pass(request):
         verify_pass = post['verify_password']
         if old_pass and new_pass and verify_pass:
             user = User.objects.get(username=request.user)
-            if user.check_password(_old_pass) and new_pass == verify_pass:
-                user.set_password(_verify_pass)
+            if user.check_password(old_pass) and new_pass == verify_pass:
+                user.set_password(verify_pass)
                 user.save()
                 content = "Success"
             else:
