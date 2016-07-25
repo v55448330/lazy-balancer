@@ -3,35 +3,60 @@ from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from .models import system_settings
 from nginx.views import *
 import json
 import time
- 
-@login_required(login_url="/login/") 
+
+@login_required(login_url="/login/")
 def view(request):
-    _user = {
+
+    user = {
         'name':request.user,
         'date':time.time()
     }
-    return render_to_response('settings/view.html',{ 'user' : _user })
+    nic = {
+        'nics':get_sysinfo()['nic'],
+        'internal_nic':''
+    }
 
-@login_required(login_url="/login/") 
+    if system_settings.objects.all().count() != 0:
+        settings = system_settings.objects.all()[0]
+        nic['internal_nic'] = settings.internal_nic
+
+    return render_to_response('settings/view.html',{ 'user' : user , 'nic' : nic })
+
+@login_required(login_url="/login/")
 def modify_pass(request):
     try:
-        _post = json.loads(request.body)
-        _old_pass = _post['old_password']
-        _new_pass = _post['new_password']
-        _verify_pass = _post['verify_password']
-        if _old_pass and _new_pass and _verify_pass:
-            _user = User.objects.get(username=request.user)
-            if _user.check_password(_old_pass) and _new_pass == _verify_pass:
-                _user.set_password(_verify_pass)
-                _user.save()
-                _content = "Success"
+        post = json.loads(request.body)
+        old_pass = post['old_password']
+        new_pass = post['new_password']
+        verify_pass = post['verify_password']
+        if old_pass and new_pass and verify_pass:
+            user = User.objects.get(username=request.user)
+            if user.check_password(_old_pass) and new_pass == verify_pass:
+                user.set_password(_verify_pass)
+                user.save()
+                content = "Success"
             else:
-                _content = "VerifyFaild"
+                content = "VerifyFaild"
     except Exception,e:
-        _content = str(e)
+        content = str(e)
 
-    return HttpResponse(_content)
+    return HttpResponse(content)
 
+@login_required(login_url="/login/")
+def select_nic(request):
+    try:
+        content = "test"
+        post = json.loads(request.body)
+        internal_nic = post['select_nic']
+        if system_settings.objects.all().count() != 0:
+            system_settings.objects.all().update(internal_nic=internal_nic)
+        else:
+            system_settings.objects.create(internal_nic=internal_nic)
+        content = "Success"
+    except Exception,e:
+        content = str(e)
+    return HttpResponse(content)

@@ -4,7 +4,7 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h4 class="box-title">管理员密码 <small>修改您的管理员密码</small></h4>
+                <h4 class="box-title">管理员密码<small> 修改您的管理员密码</small></h4>
             </div>
             <div class="box-body">
                 <form class="form-horizontal" id="form_modify_pass">
@@ -12,7 +12,7 @@
                         <label class="col-sm-1 control-label">原密码</label>
                         <div class="col-sm-4">
                             <div id="div_old_password">
-                                <input type="password" class="form-control" name="old_password" id="input_old_password" placeholder="请输入当前密码">
+                                <input type="password" class="form-control" name="old_password" id="input_old_password" placeholder="请输入当前密码" onblur="check_pass()">
                             </div>
                         </div>
                     </div>
@@ -31,11 +31,42 @@
                                 <input type="password" class="form-control" name="verify_password" id="input_verify_password" placeholder="再次输入新密码" onblur="check_pass()">
                             </div>
                         </div>
+                    </div>
                 </form>
-                </div>
-                <div class="box-footer">
-                    <button type="button" class="btn btn-primary" onclick="modify_pass()">修改密码</button>
-                </div>
+            </div>
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" onclick="modify_pass()">修改密码</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h4 class="box-title">网络选择<small> 用于创建防火墙规则</small></h4>
+            </div>
+            <div class="box-body">
+                <form class="form-horizontal" id="form_select_nic">
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">内网卡</label>
+                        <div class="col-sm-4">
+                            <div id="div_select_nic">
+                                <select class="form-control" name="select_nic" id="select_nic">
+                                    {% for n in nic.nics %} {% if n.nic == nic.internal_nic %}
+                                    <option value="{{ n.nic }}" selected>{{ n.nic }} - {{ n.address }}</option>
+                                    {% else %}
+                                    <option value="{{ n.nic }}">{{ n.nic }} - {{ n.address }}</option>
+                                    {% endif %} {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" onclick="select_nic()">保存</button>
             </div>
         </div>
     </div>
@@ -43,59 +74,85 @@
 
 
 <script>
-    //init page
-    $('#menu_system_config').addClass('active')
-    $('#menu_service').removeClass('active')
-    $('#page_header').text('系统配置')
-    $('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
-    $('#page_nav').text('系统配置')
-    $('#page_name').text('系统配置')
+//init page
+$('#menu_system_config').addClass('active')
+$('#menu_service').removeClass('active')
+$('#page_header').text('系统配置')
+$('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
+$('#page_nav').text('系统配置')
+$('#page_name').text('系统配置')
 
-    function check_pass() {
-        var _old_pass = $('#input_old_password')[0]
-        var _new_pass = $('#input_new_password')[0]
-        var _verify_pass = $('#input_verify_password')[0]
-        _return = false
-        if (_old_pass.value.length > 7 && _new_pass.value.length > 7 && _verify_pass.value.length > 7) {
-            $(_new_pass.closest("div")).removeClass()
-            $(_verify_pass.closest("div")).removeClass()
-            if (_new_pass.value == _verify_pass.value) {
-                $(_new_pass.closest("div")).toggleClass('has-success')
-                $(_verify_pass.closest("div")).toggleClass('has-success')
-                _return = true
-            } else {
-                $(_new_pass.closest("div")).toggleClass('has-error')
-                $(_verify_pass.closest("div")).toggleClass('has-error')
-            }
-        }
-        return _return
-    }
-
-    function modify_pass() {
-        if (check_pass()) {
-            if (confirm("确认要修改密码？")) {
-                jQuery.ajax({
-                    type: 'post',
-                    url: '/settings/password/',
-                    data: JSON.stringify($('#form_modify_pass').serializeObject()),
-                    success: function(p) {
-                        if (p == "Success") {
-                            alert("修改成功！请重新登录！")
-                            top.location = '/logout/'
-                        } else if (p == "VerifyFaild") {
-                            alert('修改失败！密码验证失败！')
-                        } else {
-                            alert('修改错误！其他错误：' + p)
-                        }
-                    },
-                    error: function(e) {
-                        alert('请求失败!')
-                    }
-                })
-            }
+function check_pass() {
+    var _old_pass = $('#input_old_password')[0]
+    var _new_pass = $('#input_new_password')[0]
+    var _verify_pass = $('#input_verify_password')[0]
+    _return = false
+    $(_new_pass.closest("div")).removeClass()
+    $(_verify_pass.closest("div")).removeClass()
+    if (_old_pass.value.length > 7 && _new_pass.value.length > 7 && _verify_pass.value.length > 7) {
+        if (_new_pass.value == _verify_pass.value) {
+            $(_new_pass.closest("div")).toggleClass('has-success')
+            $(_verify_pass.closest("div")).toggleClass('has-success')
+            _return = true
         } else {
-            alert('密码输入有误！')
+            $(_new_pass.closest("div")).toggleClass('has-error')
+            $(_verify_pass.closest("div")).toggleClass('has-error')
         }
+    } else {
+        $(_new_pass.closest("div")).toggleClass('has-error')
+        $(_verify_pass.closest("div")).toggleClass('has-error')
     }
+    return _return
+}
+
+function select_nic() {
+    if (confirm("确认选择的是您的内网网卡？选择错误将有可能导致平台访问中断！")) {
+        jQuery.ajax({
+            type: 'post',
+            url: '/settings/nic/',
+            data: JSON.stringify($('#form_select_nic').serializeObject()),
+            success: function(p) {
+                if (p == "Success") {
+                    alert("修改成功！")
+                    top.location = '/settings/'
+                } else if (p == "VerifyFaild") {
+                    alert('修改失败！')
+                } else {
+                    alert('修改错误！其他错误：' + p)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+function modify_pass() {
+    if (check_pass()) {
+        if (confirm("确认要修改密码？")) {
+            jQuery.ajax({
+                type: 'post',
+                url: '/settings/password/',
+                data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                success: function(p) {
+                    if (p == "Success") {
+                        alert("修改成功！请重新登录！")
+                        top.location = '/logout/'
+                    } else if (p == "VerifyFaild") {
+                        alert('修改失败！密码验证失败！')
+                    } else {
+                        alert('修改错误！其他错误：' + p)
+                    }
+                },
+                error: function(e) {
+                    alert('请求失败!')
+                }
+            })
+        }
+    } else {
+        alert('密码输入有误！')
+    }
+}
 </script>
 {% endblock %}

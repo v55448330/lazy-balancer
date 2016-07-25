@@ -2,14 +2,14 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from main.models import main_config 
+from main.models import main_config
 from nginx.views import *
 import json
 import uuid
 import time
 import os
- 
-@login_required(login_url="/login/") 
+
+@login_required(login_url="/login/")
 def view(request):
     _main_config = main_config.objects.all()
     if len(_main_config) != 0:
@@ -23,9 +23,9 @@ def view(request):
     return render_to_response('main/view.html',{ 'main_config' : _main_config, 'user' : _user })
     pass
 
-@login_required(login_url="/login/") 
+@login_required(login_url="/login/")
 def save(request):
-    content = "" 
+    content = ""
     try:
         _post = json.loads(request.body)
 
@@ -45,7 +45,7 @@ def save(request):
         if worker_processes and worker_connections and keepalive_timeout and client_max_body_size:
             _config_id = str(uuid.uuid1())
             _config_path= "/etc/nginx/nginx.conf"
-            
+
             if not access_log:
                 access_log = "/var/log/nginx/access.log"
 
@@ -71,7 +71,7 @@ def save(request):
                 write_config(_config_path,_config_content)
                 main_config.objects.all().delete()
                 main_config.objects.create(**_main_config)
-                content = "Success" 
+                content = "Success"
             else:
                 content = _test_ret['output']
 

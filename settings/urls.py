@@ -20,4 +20,5 @@ from . import views
 urlpatterns = [
     url(r'^$', views.view),
     url(r'^password/$', views.modify_pass),
+    url(r'^nic/$', views.select_nic),
 ]

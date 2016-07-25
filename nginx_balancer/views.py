@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout,login
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
+from nginx.ip import *
 
 def login_view(request):
     redirect_to = settings.LOGIN_REDIRECT_URL
@@ -36,10 +37,8 @@ def login_view(request):
     }
 
     return render_to_response('login.html',context)
- 
+
 def logout_view(request):
     Session.objects.filter(expire_date__lte=timezone.now()).delete()
     logout(request)
     return HttpResponseRedirect('/login/')
-
-
