@@ -3,6 +3,7 @@ from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from nginx.ip import set_firewall
 from .models import system_settings
 from nginx.views import *
 import json
@@ -56,6 +57,7 @@ def select_nic(request):
             system_settings.objects.all().update(internal_nic=internal_nic)
         else:
             system_settings.objects.create(internal_nic=internal_nic)
+        set_firewall()
         content = "Success"
     except Exception,e:
         content = str(e)
