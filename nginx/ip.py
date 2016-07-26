@@ -23,17 +23,10 @@ def set_internal_firewall(network,port_list):
         rule.src = network
         match = iptc.Match(rule, "tcp")
         match.dport = str(port)
-        match.state = "NEW"
         rule.add_match(match)
         chain.insert_rule(rule)
 
     rule = iptc.Rule()
-    rule.target = iptc.Target(rule, "ACCEPT")
-    rule.in_interface = "lo"
-    chain.insert_rule(rule)
-
-    rule = iptc.Rule()
-    rule.protocol = "all"
     rule.target = iptc.Target(rule, "ACCEPT")
     match = iptc.Match(rule, "state")
     match.state = "RELATED,ESTABLISHED"
