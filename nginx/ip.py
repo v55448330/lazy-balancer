@@ -68,9 +68,9 @@ def set_firewall():
 
             for nic in nics:
                 if nic['nic'] == internal_nic:
-                    for i in nic['address'].split('.')[:3]:
+                    for i in nic['address'].split('.')[:2]:
                         address += i + '.'
-                    address += '0/24'
+                    address += '0.0/16'
 
             set_internal_firewall(address,internal_port)
             set_public_firewall(public_port)
