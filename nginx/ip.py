@@ -33,6 +33,11 @@ def set_internal_firewall(network,port_list):
     rule.add_match(match)
     chain.insert_rule(rule)
 
+    rule = iptc.Rule()
+    rule.target = iptc.Target(rule, "ACCEPT")
+    rule.in_interface = "lo"
+    chain.insert_rule(rule)
+
     chain.set_policy("DROP")
 
 def set_public_firewall(port_list):
