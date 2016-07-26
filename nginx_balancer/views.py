@@ -19,8 +19,6 @@ def login_view(request):
         if form.is_valid():
             login(request, form.get_user())
             return HttpResponseRedirect(redirect_to)
-        else:
-            return HttpResponseRedirect('/login/?next=' + redirect_to)
 
     else:
         set_firewall()
