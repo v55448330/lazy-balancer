@@ -82,10 +82,10 @@ def save(request):
 
             reload_config()
         else:
-            content['error'] = "Error"
+            content['flag'] = "Error"
             content['content'] = "ArgsError"
     except Exception, e:
-        content['error'] = "Error"
+        content['flag'] = "Error"
         content['content'] = str(e)
 
     return HttpResponse(json.dumps(content))

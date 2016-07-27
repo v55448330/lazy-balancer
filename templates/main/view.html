@@ -127,7 +127,7 @@
                 type: 'post',
                 url: '/main/save/',
                 data: JSON.stringify($('#form_main_config').serializeObject()),
-                dateType: 'json',
+                dataType: 'json',
                 success: function(p) {
                     if (p.flag == "Success") {
                         alert("保存成功!")
