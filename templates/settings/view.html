@@ -111,14 +111,18 @@ function select_nic() {
             type: 'post',
             url: '/settings/nic/',
             data: JSON.stringify($('#form_select_nic').serializeObject()),
+            dataType: 'json',
             success: function(p) {
-                if (p == "Success") {
+                if (p.flag == "Success") {
                     alert("修改成功！")
                     top.location = '/settings/'
-                } else if (p == "VerifyFaild") {
+                } else if (p.flag == "Error" && p.content == "VerifyFaild") {
                     alert('修改失败！')
+                } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                 } else {
-                    alert('修改错误！其他错误：' + p)
+                    alert('修改错误！其他错误：' + p.content)
                 }
             },
             error: function(e) {
@@ -135,14 +139,18 @@ function modify_pass() {
                 type: 'post',
                 url: '/settings/password/',
                 data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                dataType: 'json',
                 success: function(p) {
-                    if (p == "Success") {
+                    if (p.flag == "Success") {
                         alert("修改成功！请重新登录！")
                         top.location = '/logout/'
-                    } else if (p == "VerifyFaild") {
+                    } else if (p.flag == "Error" && p.content == "VerifyFaild") {
                         alert('修改失败！密码验证失败！')
+                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                     } else {
-                        alert('修改错误！其他错误：' + p)
+                        alert('修改错误！其他错误：' + p.content)
                     }
                 },
                 error: function(e) {

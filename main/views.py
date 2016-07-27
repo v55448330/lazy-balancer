@@ -2,6 +2,7 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from nginx_balancer.views import is_auth
 from main.models import main_config
 from nginx.views import *
 import json
@@ -23,9 +24,12 @@ def view(request):
     return render_to_response('main/view.html',{ 'main_config' : m_config, 'user' : user })
     pass
 
-@login_required(login_url="/login/")
+@is_auth
 def save(request):
-    content = ""
+    content = {
+        'flag':"",
+        'content':""
+    }
     try:
         post = json.loads(request.body)
 
@@ -71,16 +75,19 @@ def save(request):
                 write_config(config_path,config_content)
                 main_config.objects.all().delete()
                 main_config.objects.create(**m_config)
-                content = "Success"
+                content['flag'] = "Success"
             else:
-                content = test_ret['output']
+                content['error'] = "Error"
+                content['content'] = test_ret['output']
 
             reload_config()
         else:
-            content = "ArgsError"
+            content['error'] = "Error"
+            content['content'] = "ArgsError"
     except Exception, e:
-        content = str(e)
+        content['error'] = "Error"
+        content['content'] = str(e)
 
-    return HttpResponse(content)
+    return HttpResponse(json.dumps(content))
     pass
 #

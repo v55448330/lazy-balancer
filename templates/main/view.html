@@ -127,14 +127,18 @@
                 type: 'post',
                 url: '/main/save/',
                 data: JSON.stringify($('#form_main_config').serializeObject()),
+                dateType: 'json'
                 success: function(p) {
-                    if (p == "Success") {
+                    if (p.flag == "Success") {
                         alert("保存成功!")
                         top.location = '/main/'
-                    } else if (p == "ArgsError") {
+                    } else if (p.flag == "Error" && p.content == "ArgsError") {
                         alert('保存失败！配置项填写错误！')
+                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                     } else {
-                        alert('保存错误！其他错误：' + p)
+                        alert('保存错误！其他错误：' + p.content)
                     }
                 },
                 error: function(e) {

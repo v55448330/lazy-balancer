@@ -326,44 +326,42 @@
                 dataType: "json",
                 success: function(p) {
                     if (p.flag == "Success") {
-                        console.log(p)
                         $('#edit_balancer_title').text('编辑负载均衡器')
                         $('#edit_balancer_mtitle').text(_config_id)
                         $('#input_proxy_config_id').val(_config_id)
                         $('#div_upstream_list').empty()
 
-                        $('#input_proxy_proxy_name').val(p.proxy.proxy_name)
-                        $('#input_proxy_listen').val(p.proxy.listen)
-                        $('#input_proxy_server_name').val(p.proxy.server_name)
-                        $('#input_proxy_access_log').val(p.proxy.access_log)
-                        $('#input_proxy_error_log').val(p.proxy.error_log)
-                        $('#input_proxy_description').text(p.proxy.description)
-                        if (p.proxy.balancer_type == "ip_hash") {
+                        $('#input_proxy_proxy_name').val(p.content.proxy.proxy_name)
+                        $('#input_proxy_listen').val(p.content.proxy.listen)
+                        $('#input_proxy_server_name').val(p.content.proxy.server_name)
+                        $('#input_proxy_access_log').val(p.content.proxy.access_log)
+                        $('#input_proxy_error_log').val(p.content.proxy.error_log)
+                        $('#input_proxy_description').text(p.content.proxy.description)
+                        if (p.content.proxy.balancer_type == "ip_hash") {
                             $('#check_proxy_ip_hash').prop('checked', true)
                         } else {
                             $('#check_proxy_ip_hash').prop('checked', false)
                         }
-
-                        for (var f in p.upstream) {
-                            edit_upstream(1, p.upstream[f])
+                        for (var f in p.content.upstream) {
+                            edit_upstream(1, p.content.upstream[f])
                         }
-
-                        if (p.proxy.protocols == true) {
+                        if (p.content.proxy.protocols == true) {
                             $('#check_ssl_status').prop('checked', true)
-                            $('#txt_ssl_cert_body').text(p.proxy.ssl_cert)
-                            $('#txt_ssl_key_body').text(p.proxy.ssl_key)
+                            $('#txt_ssl_cert_body').text(p.content.proxy.ssl_cert)
+                            $('#txt_ssl_key_body').text(p.content.proxy.ssl_key)
                         } else {
                             $('#check_ssl_status').prop('checked', false)
                         }
-                        if (p.proxy.listen == 443) {
+                        if (p.content.proxy.listen == 443) {
                             $('#check_ssl_port').prop('checked', false)
                         } else {
                             $('#check_ssl_port').prop('checked', true)
                         }
                         check_balancer_ssl($('#check_ssl_status'))
-
                         $('#edit_balancer').modal('show')
-
+                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                     } else {
                         alert('查询失败！' + p.content)
                     }
@@ -385,12 +383,16 @@
                 type: 'post',
                 url: '/proxy/delete/',
                 data: JSON.stringify(_post),
+                dataType: 'json',
                 success: function(p) {
-                    if (p == "Success") {
+                    if (p.flag == "Success") {
                         alert("删除成功!")
                         top.location = '/proxy/'
+                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                     } else {
-                        alert('删除错误！' + p)
+                        alert('删除错误！' + p.content)
                     }
                 },
                 error: function(e) {
@@ -410,12 +412,16 @@
                 type: 'post',
                 url: '/proxy/status/',
                 data: JSON.stringify(_post),
+                dataType: 'json',
                 success: function(p) {
-                    if (p == "Success") {
+                    if (p.flag == "Success") {
                         alert("变更成功!")
                         top.location = '/proxy/'
+                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                     } else {
-                        alert('变更错误！' + p)
+                        alert('变更错误！' + p.content)
                     }
                 },
                 error: function(e) {
@@ -447,16 +453,20 @@
                 type: 'post',
                 url: '/proxy/save/',
                 data: JSON.stringify(_post),
+                dataType: 'json',
                 success: function(p) {
-                    if (p == "Success") {
+                    if (p.flag == "Success") {
                         alert("保存成功!")
                         top.location = '/proxy/'
-                    } else if (p == "ArgsError") {
+                    } else if (p.flag == "Error" && p.content == "ArgsError") {
                         alert('保存失败！配置项填写错误！')
-                    } else if (p == "NicError") {
+                    } else if (p.flag == "Error" && p.content == "NicError") {
                         alert('保存失败！内网网卡选择错误！')
+                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
                     } else {
-                        alert('保存错误！其他错误：' + p)
+                        alert('保存错误！其他错误：' + p.content)
                     }
                 },
                 error: function(e) {

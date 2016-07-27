@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import HttpResponse
 from django.db.models import Q
+from nginx_balancer.views import is_auth
 from proxy.models import proxy_config,upstream_config
 from settings.models import system_settings
 from nginx.views import *
@@ -40,7 +41,7 @@ def view(request):
     return render_to_response('proxy/view.html',{ 'proxy' : contents, 'filter' : filter, 'user' : user })
     pass
 
-@login_required(login_url="/login/")
+@is_auth
 def query_proxy(request):
     try:
         post = json.loads(request.body)
@@ -68,26 +69,26 @@ def query_proxy(request):
                 'fail_timeout':ui.fail_timeout
             })
             pass
-        content = { "flag":"Success","proxy":p,"upstream":u}
+        content = { "flag":"Success","content":{"proxy":p,"upstream":u}}
     except Exception, e:
         content = { "flag":"Error","content":str(e) }
     return HttpResponse(json.dumps(content))
     pass
 
-@login_required(login_url="/login/")
+@is_auth
 def delete_proxy(request):
     try:
         post = json.loads(request.body)
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.delete()
         reload_config()
-        content = "Success"
+        content = { "flag":"Success" }
     except Exception, e:
-        content = str(e)
-    return HttpResponse(content)
+        content = { "flag":"Error","content":str(e) }
+    return HttpResponse(json.dumps(content))
     pass
 
-@login_required(login_url="/login/")
+@is_auth
 def change_status(request):
     try:
         post = json.loads(request.body)
@@ -95,16 +96,15 @@ def change_status(request):
         proxy.status = bool(int(post['status']))
         proxy.save()
         reload_config()
-        content = "Success"
+        content = { "flag":"Success" }
     except Exception, e:
-        content = str(e)
+        content = { "flag":"Error","content":str(e) }
 
-    return HttpResponse(content)
+    return HttpResponse(json.dumps(content))
     pass
 
 @login_required(login_url="/login/")
 def save(request):
-    content = ""
     try:
         post = json.loads(request.body)
         config_id = post['base_config']['proxy_config_id']
@@ -223,22 +223,20 @@ def save(request):
                         obj_p_config.upstream_list.add(upstream_config.objects.create(**up))
                         obj_p_config.save()
                         pass
-                        
-                    reload_config()
-                    set_firewall()
-                    content = "Success"
-                else:
-                    content = test_ret['output']
 
-            #    reload_config()
+                    set_firewall()
+                    content = {"flag":"Success"}
+                else:
+                    content = {"flag":"Error","content":test_ret['output']}
+
+                reload_config()
             else:
-                content = "ArgsError"
+                content = {"flag":"Error","content":"ArgsError"}
         else:
-            content = "NicError"
+            content = {"flag":"Error","content":"NicError"}
 
     except Exception, e:
-        content = str(e)
+        content = {"flag":"Error","content":str(e)}
 
-    return HttpResponse(content)
+    return HttpResponse(json.dumps(content))
     pass
-#

@@ -3,6 +3,7 @@ from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from nginx_balancer.views import is_auth
 from nginx.ip import set_firewall
 from .models import system_settings
 from nginx.views import *
@@ -27,7 +28,7 @@ def view(request):
 
     return render_to_response('settings/view.html',{ 'user' : user , 'nic' : nic })
 
-@login_required(login_url="/login/")
+@is_auth
 def modify_pass(request):
     try:
         post = json.loads(request.body)
@@ -39,15 +40,15 @@ def modify_pass(request):
             if user.check_password(old_pass) and new_pass == verify_pass:
                 user.set_password(verify_pass)
                 user.save()
-                content = "Success"
+                content = { "flag":"Success" }
             else:
-                content = "VerifyFaild"
+                content = { "flag":"Error","content":"VerifyFaild" }
     except Exception,e:
-        content = str(e)
+        content = { "flag":"Error","content":str(e) }
 
-    return HttpResponse(content)
+    return HttpResponse(json.dumps(content))
 
-@login_required(login_url="/login/")
+@is_auth
 def select_nic(request):
     try:
         content = "test"
@@ -58,7 +59,7 @@ def select_nic(request):
         else:
             system_settings.objects.create(internal_nic=internal_nic)
         set_firewall()
-        content = "Success"
+        content = { "flag":"Success" }
     except Exception,e:
-        content = str(e)
-    return HttpResponse(content)
+        content = { "flag":"Error","content":str(e) }
+    return HttpResponse(json.dumps(content))

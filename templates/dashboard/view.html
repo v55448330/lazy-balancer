@@ -267,6 +267,9 @@
                     $('#pgs_disk').css('width', p.content.disk_info.used / p.content.disk_info.total * 100 + '%')
 
                     add_data(false, p.content.connect_info.total, p.content.connect_info.established, p.content.connect_info.time_wait)
+                }else if (p.flag == "Error" && p.content == "AuthFailed"){
+                  alert('认证失败！请重新登录！')
+                  top.location = '/login/'
                 }
             }
         })
