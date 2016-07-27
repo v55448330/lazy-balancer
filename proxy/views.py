@@ -223,7 +223,8 @@ def save(request):
                         obj_p_config.upstream_list.add(upstream_config.objects.create(**up))
                         obj_p_config.save()
                         pass
-
+                        
+                    reload_config()
                     set_firewall()
                     content = "Success"
                 else:
