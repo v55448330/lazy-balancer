@@ -103,7 +103,7 @@ def change_status(request):
     return HttpResponse(json.dumps(content))
     pass
 
-@login_required(login_url="/login/")
+@is_auth
 def save(request):
     try:
         post = json.loads(request.body)
