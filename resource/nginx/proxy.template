@@ -2,8 +2,8 @@ upstream {{ proxy.config_id | lower }} {
     {%- if proxy.balancer_type == "ip_hash" %}
     ip_hash;
     {%- endif %}
-    {%- for _server in upstream %}
-    server {{ _server.address }}:{{ _server.port }} weight={{ _server.weight }} max_fails={{ _server.max_fails }} fail_timeout={{ _server.fail_timeout }}s;
+    {%- for server in upstream %}
+    server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ server.max_fails }} fail_timeout={{ server.fail_timeout }}s;
     {%- endfor %}
 }
 

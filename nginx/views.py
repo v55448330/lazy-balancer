@@ -41,6 +41,11 @@ def build_proxy_config(config):
 
     return template.render(config)
 
+def build_default_config(config):
+    template = load_template('default.template')
+
+    return template.render(config)
+
 def write_config(conf_path,conf_content):
     f = open(conf_path, 'w')
     f.write(conf_content)
@@ -59,11 +64,13 @@ def test_config():
 
 def reload_config():
     config_nginx_path = "/etc/nginx/nginx.conf"
+    config_default_path = "/etc/nginx/conf.d/default.conf"
     os.remove(config_nginx_path)
     clean_dir("/etc/nginx/conf.d")
     m_config = main_config.objects.all()[0].__dict__
     write_config(config_nginx_path,build_main_config(m_config))
 
+    proxy_port_list = []
     proxy_config_list = proxy_config.objects.filter(status=True)
     for p in proxy_config_list:
         u_list = []
@@ -76,7 +83,10 @@ def reload_config():
             write_config(p.ssl_cert_path,p.ssl_cert)
             write_config(p.ssl_key_path,p.ssl_key)
         pass
+        proxy_prot_list.append(p.listen)
         write_config(config_proxy_path,build_proxy_config(p_config))
+
+    write_config(config_default_path,build_default_config({'listen_list':proxy_port_list})
 
     return run_shell('nginx -s reload')
 
