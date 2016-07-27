@@ -86,7 +86,7 @@ def reload_config():
         proxy_prot_list.append(p.listen)
         write_config(config_proxy_path,build_proxy_config(p_config))
 
-    write_config(config_default_path,build_default_config({'listen_list':proxy_port_list})
+    write_config(config_default_path,build_default_config({'listen_list':proxy_port_list}))
 
     return run_shell('nginx -s reload')
 
