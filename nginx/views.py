@@ -83,7 +83,7 @@ def reload_config():
             write_config(p.ssl_cert_path,p.ssl_cert)
             write_config(p.ssl_key_path,p.ssl_key)
         pass
-        proxy_prot_list.append(p.listen)
+        proxy_port_list.append(p.listen)
         write_config(config_proxy_path,build_proxy_config(p_config))
 
     write_config(config_default_path,build_default_config({'listen_list':proxy_port_list}))
