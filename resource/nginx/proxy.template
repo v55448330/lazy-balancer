@@ -13,11 +13,21 @@ server {
     server_name {{ proxy.server_name }};
 
     {%- if proxy.error_log %}
-    error_log {{ proxy.error_log }}; 
+    error_log {{ proxy.error_log }};
     {%- endif %}
     {%- if proxy.access_log %}
     access_log {{ proxy.access_log }};
     {%- endif %}
+
+    location ~* .*\.(js|css)?$
+    {
+        access_log off;
+    }
+
+    location ~* .*\.(png|jpg|gif|jpeg|bmp|ico)?$
+    {
+        access_log off;
+    }
 
     root /usr/share/nginx/html;
 
@@ -36,18 +46,28 @@ server {
     server_name {{ proxy.server_name }};
 
     {%- if proxy.error_log %}
-    error_log {{ proxy.error_log }}; 
+    error_log {{ proxy.error_log }};
     {%- endif %}
     {%- if proxy.access_log %}
     access_log {{ proxy.access_log }};
     {%- endif %}
+
+    location ~* .*\.(js|css)?$
+    {
+        access_log off;
+    }
+
+    location ~* .*\.(png|jpg|gif|jpeg|bmp|ico)?$
+    {
+        access_log off;
+    }
 
     root /usr/share/nginx/html;
 
     ssl on;
     ssl_certificate {{ proxy.ssl_cert_path }};
     ssl_certificate_key {{ proxy.ssl_key_path }};
-    
+
     # Diffie-Hellman parameter for DHE ciphersuites, recommended 2048 bits
     # ssl_dhparam ;
 
@@ -67,4 +87,3 @@ server {
     }
 }
 {%- endif %}
-
