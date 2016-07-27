@@ -1,6 +1,6 @@
 {%- for listen in listen_list %}
 server {
-  listen {{ listen }} default;
+  listen {{ listen }};
   return 444;
 }
 {%- endfor %}
