@@ -19,16 +19,6 @@ server {
     access_log {{ proxy.access_log }};
     {%- endif %}
 
-    location ~* .*\.(js|css)?$
-    {
-        access_log off;
-    }
-
-    location ~* .*\.(png|jpg|gif|jpeg|bmp|ico)?$
-    {
-        access_log off;
-    }
-
     root /usr/share/nginx/html;
 
     location / {
@@ -51,16 +41,6 @@ server {
     {%- if proxy.access_log %}
     access_log {{ proxy.access_log }};
     {%- endif %}
-
-    location ~* .*\.(js|css)?$
-    {
-        access_log off;
-    }
-
-    location ~* .*\.(png|jpg|gif|jpeg|bmp|ico)?$
-    {
-        access_log off;
-    }
 
     root /usr/share/nginx/html;
 
