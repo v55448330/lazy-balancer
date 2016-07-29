@@ -84,6 +84,6 @@ Vagrant.configure(2) do |config|
 
     python manage.py makemigrations
     python manage.py migrate
-    sudo service supervisor start 
+    sudo service supervisor restart 
   SHELL
 end

@@ -1,8 +1,0 @@
-version: '2'
-services:
-    lazy_balancer:
-        build: .
-        ports:
-            - "80:80"
-            - "443:443"
-            - "8000:8000"
