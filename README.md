@@ -1,4 +1,4 @@
-# nginx-balancer-web
+# Lazy-Balancer
 
 
 项目起源于好哥们（Win平台）需要一个 7 层负载均衡器，无奈商业负载均衡器成本高昂，操作复杂。又没有特别喜欢（好看，好用）的开源产品，作为一名大 Ops 怎么能没有办法？正好最近在看 Django 框架，尝试自己给 Nginx 画皮，项目诞生！非专业开发，代码凑合看吧。
@@ -8,7 +8,7 @@
 * 克隆代码
 ```
 mkdir -p /app  
-git clone https://github.com/v55448330/nginx-balancer-web.git /app/nginx_balancer  
+git clone https://github.com/v55448330/lazy-balancer.git /app/nginx_balancer  
 ```
 * 安装 nginx
 ```
