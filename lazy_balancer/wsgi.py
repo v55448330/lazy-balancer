@@ -1,5 +1,5 @@
 """
-WSGI config for nginx_balancer project.
+WSGI config for lazy_balancer project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "nginx_balancer.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lazy_balancer.settings")
 
 application = get_wsgi_application()

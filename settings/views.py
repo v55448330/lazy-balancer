@@ -3,7 +3,7 @@ from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from nginx_balancer.views import is_auth
+from lazy_balancer.views import is_auth
 from nginx.ip import set_firewall
 from .models import system_settings
 from nginx.views import *

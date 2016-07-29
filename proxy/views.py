@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import HttpResponse
 from django.db.models import Q
-from nginx_balancer.views import is_auth
+from lazy_balancer.views import is_auth
 from proxy.models import proxy_config,upstream_config
 from settings.models import system_settings
 from nginx.views import *

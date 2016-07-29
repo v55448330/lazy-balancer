@@ -1,6 +1,6 @@
 version: '2'
 services:
-    nginx_balancer:
+    lazy_balancer:
         build: .
         ports:
             - "80:80"

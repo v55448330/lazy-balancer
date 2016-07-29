@@ -8,7 +8,7 @@
 * 克隆代码
 ```
 mkdir -p /app  
-git clone https://github.com/v55448330/lazy-balancer.git /app/nginx_balancer  
+git clone https://github.com/v55448330/lazy-balancer.git /app/lazy_balancer  
 ```
 * 安装 nginx
 ```

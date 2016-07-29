@@ -4,8 +4,8 @@ MAINTAINER Zhang XiaoBao <crazy.zhang@outlook.com>
 RUN apt-get update && apt-get install -y nginx supervisor python-dev python-pip
 RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
-ADD . /app/nginx_balancer
-WORKDIR /app/nginx_balancer
+ADD . /app/lazy_balancer
+WORKDIR /app/lazy_balancer
 
 RUN pip install pip --upgrade
 RUN pip install -r requirements.txt --upgrade
