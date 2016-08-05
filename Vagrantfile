@@ -48,7 +48,7 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
     # vb.gui = true
-  
+
     # Customize the amount of memory on the VM:
     vb.memory = "2048"
     vb.cpus = "1"
@@ -68,15 +68,20 @@ Vagrant.configure(2) do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    cd /app/lazy_balancer
     sudo apt-get update
+    sudo apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev
     sudo apt-get install -y nginx supervisor python-dev python-pip iptables
+    sudo apt-get -y purge nginx* nginx-*
+    sudo apt-get -y autoremove
 
-    sudo update-rc.d nginx disable
-    sudo update-rc.d supervisor enable 
-    sudo service nginx stop
-
+    cd /app/lazy_balancer/resource/nginx/tengine
+    ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid
+    make && sudo make install
+    sudo mkdir -p /etc/nginx/conf.d
     echo "daemon off;" | sudo tee -a /etc/nginx/nginx.conf
+
+    cd /app/lazy_balancer
+    sudo update-rc.d supervisor enable
     sudo cp -rf service/* /etc/supervisor/
 
     sudo pip install pip --upgrade
@@ -84,6 +89,6 @@ Vagrant.configure(2) do |config|
 
     python manage.py makemigrations
     python manage.py migrate
-    sudo service supervisor restart 
+    sudo service supervisor restart
   SHELL
 end

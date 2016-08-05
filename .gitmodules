@@ -1,0 +1,3 @@
+[submodule "resource/nginx/tengine"]
+	path = resource/nginx/tengine
+	url = git://github.com/alibaba/tengine.git

@@ -1,5 +1,35 @@
 {% extends "base.html" %} {% block content %} {% load custom_filter %}
 <!-- Modal -->
+<div class="modal fade" id="proxy_status" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="proxy_status_title">节点 HTTP 服务状态</h4><small id="proxy_status_mtitle"></small>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped" style="margin-bottom:0px">
+                    <thead>
+                        <tr>
+                            <td class="col-sm-2">序号</td>
+                            <td class="col-sm-3">节点</td>
+                            <td class="col-sm-2">成功计数</td>
+                            <td class="col-sm-2">失败计数</td>
+                            <td class="col-sm-3">状态</td>
+                        </tr>
+                    </thead>
+                    <tbody id="div_proxy_status_list">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="modal fade" id="edit_balancer" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -49,11 +79,21 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">* ip_hash</label>
+                                    <label class="col-sm-2 control-label">* IP_HASH</label>
                                     <div class="col-sm-9">
                                         <div class="checkbox">
                                             <label>
                                                 <input type="checkbox" name="proxy_ip_hash" id="check_proxy_ip_hash"> 启用根据源地址引导流量
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* HTTP 检测</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="proxy_http_check" id="check_proxy_http_check" onchange="check_form(this)"> 启用节点 HTTP 状态检测
                                             </label>
                                         </div>
                                     </div>
@@ -183,6 +223,7 @@
                             <th>协议</th>
                             <th>端口</th>
                             <th>状态</th>
+                            <th>检测方式</th>
                             <th>更新时间</th>
                             <th>操作</th>
                         </tr>
@@ -207,6 +248,14 @@
                             <td>
                                 <button type="button" class="btn btn-danger btn-xs" onclick="change_status('{{ server.pk }}',1)">禁用</button>
                             </td>
+                            {% endif %} {% if server.check_type == "tcp" %}
+                            <td>
+                                <button type="button" class="btn btn-warning btn-xs" disabled>TCP</button>
+                            </td>
+                            {% else %}
+                            <td>
+                                <button type="button" class="btn btn-primary btn-xs" onclick="proxy_status('{{ server.pk }}')">HTTP</button>
+                            </td>
                             {% endif %}
                             <td>{{ server.update_time | timestamp_to_date }}</td>
                             <td>
@@ -224,8 +273,7 @@
                     <li><a href="?page={{ proxy.previous_page_number }}&filter={{ filter }}" class="prev">{{ previous_link_decorator|safe }}上一页</a></li>
                     {% else %}
                     <li class="paginate_button previous disabled"><span class="disabled prev">{{ previous_link_decorator|safe }}上一页</span></li>
-                    {% endif %}
-                    {% if proxy.has_next %}
+                    {% endif %} {% if proxy.has_next %}
                     <li><a href="?page={{ proxy.next_page_number }}&filter={{ filter }}" class="next">下一页{{ next_link_decorator|safe }}</a></li>
                     {% else %}
                     <li class="paginate_button next disabled"><span class="disabled next">下一页{{ next_link_decorator|safe }}</span></li>
@@ -239,242 +287,298 @@
     </div>
 </div>
 <script>
-    $('#menu_proxy_config').addClass('active')
-    $('#page_header').text('负载均衡配置')
-    $('#page_header_descript').text('用于管理 Nginx 虚拟主机相关配置')
-    $('#page_nav').text('服务管理')
-    $('#page_name').text('负载均衡配置')
+$('#menu_proxy_config').addClass('active')
+$('#page_header').text('负载均衡配置')
+$('#page_header_descript').text('用于管理 Nginx 虚拟主机相关配置')
+$('#page_nav').text('服务管理')
+$('#page_name').text('负载均衡配置')
 
-    function check_form(_input) {
-        var _input_div = $(_input.closest("div"))
-        _input_div.removeClass('has-error')
-        _input_div.removeClass('has-success')
-        if (($(_input).val() == "") || ($(_input).attr('name') == "proxy_listen" && !$(_input).val().indexOf("8000"))) {
-            _input_div.addClass('has-error')
-        } else {
-            _input_div.addClass('has-success')
+function check_form(input) {
+    if ($(input).attr('name') == 'proxy_http_check') {
+        if ($(input).prop('checked') == true) {
+            alert('您选择了使用 HTTP 方式检测后端节点，这种方式将视所有状态码为非 2XX 以及 3XX 的节点为不可用，有可能造成访问异常以及效率下降，若有以上问题请修改配置！')
         }
+        return
     }
-
-    function check_balancer_ssl(_self) {
-        if ($(_self)[0].checked == true) {
-            $('#txt_ssl_cert_body').removeAttr('disabled')
-            $('#txt_ssl_key_body').removeAttr('disabled')
-            $('#check_ssl_port').removeAttr('disabled')
-            $('#div_ssl_cert_body').removeClass('has-success')
-            $('#div_ssl_key_body').removeClass('has-success')
-        } else {
-            $('#txt_ssl_cert_body').text('')
-            $('#txt_ssl_key_body').text('')
-            $('#check_ssl_port').prop('checked', false)
-            $('#check_ssl_port').attr('disabled', 'disabled')
-            $('#txt_ssl_cert_body').attr('disabled', 'disabled')
-            $('#txt_ssl_key_body').attr('disabled', 'disabled')
-        }
+    var input_div = $(input.closest("div"))
+    input_div.removeClass('has-error')
+    input_div.removeClass('has-success')
+    if (($(input).val() == "") || ($(input).attr('name') == "proxy_listen" && !$(input).val().indexOf("8000"))) {
+        input_div.addClass('has-error')
+    } else {
+        input_div.addClass('has-success')
     }
+}
 
-    function edit_upstream(_add, _upstream) {
-        if (_add == 1) {
-            if (_upstream == null) {
-                _upstream = {
-                    address: null,
-                    port: null,
-                    weight: null,
-                    max_fails: null,
-                    fail_timeout: null
-                }
+function check_balancer_ssl(self) {
+    if ($(self)[0].checked == true) {
+        $('#txt_ssl_cert_body').removeAttr('disabled')
+        $('#txt_ssl_key_body').removeAttr('disabled')
+        $('#check_ssl_port').removeAttr('disabled')
+        $('#div_ssl_cert_body').removeClass('has-success')
+        $('#div_ssl_key_body').removeClass('has-success')
+    } else {
+        $('#txt_ssl_cert_body').text('')
+        $('#txt_ssl_key_body').text('')
+        $('#check_ssl_port').prop('checked', false)
+        $('#check_ssl_port').attr('disabled', 'disabled')
+        $('#txt_ssl_cert_body').attr('disabled', 'disabled')
+        $('#txt_ssl_key_body').attr('disabled', 'disabled')
+    }
+}
+
+function edit_upstream(add, upstream) {
+    if (add == 1) {
+        if (upstream == null) {
+            upstream = {
+                address: null,
+                port: null,
+                weight: null,
+                max_fails: null,
+                fail_timeout: null
             }
-
-            _tb = '<form class="form-horizontal"><table class="table table-bordered" style="margin-bottom:0px"><tr>'
-            _tb += '<td class="col-sm-3"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_address" placeholder="IP地址" data-inputmask="\'alias\': \'ip\'" data-mask value="' + _upstream.address + '"></div></td>'
-            _tb += '<td class="col-sm-2"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_port" placeholder="服务端口" data-inputmask="\'mask\':\'[9]{1,5}\'" data-mask value="' + _upstream.port + '"></div></td>'
-            _tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_weight" placeholder="*权重(1-100)" data-inputmask="\'mask\':\'[9]{1,3}\'" data-mask value="' + _upstream.weight + '"></td>'
-            _tb += '<td  class="col-sm-2"><input type="text" class="form-control" name="upstream_max_fails" placeholder="*重试次数(1-99)"data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="' + _upstream.max_fails + '"></td>'
-            _tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_fail_timeout" placeholder="*超时时间(秒)" data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="' + _upstream.fail_timeout + '"></td>'
-            _tb += '<td><a href="#" onclick="edit_upstream(0,this)"><h5><i class="fa fa-remove"></i></h5></a></td>'
-            _tb += '</tr></table></form>'
-            $('#div_upstream_list').append(_tb)
-            $("[data-mask]").inputmask()
-        } else {
-            $(_upstream).parents('form')[0].remove()
         }
+
+        tb = '<form class="form-horizontal"><table class="table table-bordered" style="margin-bottom:0px"><tr>'
+        tb += '<td class="col-sm-3"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_address" placeholder="IP地址" data-inputmask="\'alias\': \'ip\'" data-mask value="' + upstream.address + '"></div></td>'
+        tb += '<td class="col-sm-2"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_port" placeholder="服务端口" data-inputmask="\'mask\':\'[9]{1,5}\'" data-mask value="' + upstream.port + '"></div></td>'
+        tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_weight" placeholder="*权重(1-100)" data-inputmask="\'mask\':\'[9]{1,3}\'" data-mask value="' + upstream.weight + '"></td>'
+        tb += '<td  class="col-sm-2"><input type="text" class="form-control" name="upstream_max_fails" placeholder="*重试次数(1-99)"data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="' + upstream.max_fails + '"></td>'
+        tb += '<td class="col-sm-2"><input type="text" class="form-control" name="upstream_fail_timeout" placeholder="*超时时间(秒)" data-inputmask="\'mask\':\'[9]{1,2}\'" data-mask value="' + upstream.fail_timeout + '"></td>'
+        tb += '<td><a href="#" onclick="edit_upstream(0,this)"><h5><i class="fa fa-remove"></i></h5></a></td>'
+        tb += '</tr></table></form>'
+        $('#div_upstream_list').append(tb)
+        $("[data-mask]").inputmask()
+    } else {
+        $(upstream).parents('form')[0].remove()
     }
+}
 
 
-    function edit_balancer(_create, _config_id) {
-        $('#a_default_conf').trigger('click')
-        if (_create == 1) {
-            $('#edit_balancer_title').text('创建负载均衡器')
-            $('#input_proxy_config_id').val('0')
-            $('#input_proxy_proxy_name').val('')
-            $('#input_proxy_listen').val('')
-            $('#input_proxy_server_name').val('')
-            $('#input_proxy_access_log').val('')
-            $('#input_proxy_error_log').val('')
-            $('#check_proxy_ip_hash').attr('checked', false)
-            $('#div_upstream_list').empty()
-            $("[data-mask]").inputmask()
-            $('#edit_balancer').modal('show')
-        } else {
-            var _post = {
-                config_id: _config_id
-            }
-            jQuery.ajax({
-                type: 'post',
-                url: '/proxy/query/',
-                data: JSON.stringify(_post),
-                dataType: "json",
-                success: function(p) {
-                    if (p.flag == "Success") {
-                        $('#edit_balancer_title').text('编辑负载均衡器')
-                        $('#edit_balancer_mtitle').text(_config_id)
-                        $('#input_proxy_config_id').val(_config_id)
-                        $('#div_upstream_list').empty()
+function edit_balancer(create, config_id) {
+    $('#a_default_conf').trigger('click')
+    if (create == 1) {
+        $('#edit_balancer_title').text('创建负载均衡器')
+        $('#edit_balancer_mtitle').text('')
+        $('#input_proxy_config_id').val('0')
+        $('#input_proxy_proxy_name').val('')
+        $('#input_proxy_listen').val('')
+        $('#input_proxy_server_name').val('')
+        $('#input_proxy_access_log').val('')
+        $('#input_proxy_error_log').val('')
+        $('#check_proxy_ip_hash').attr('checked', false)
+        $('#check_proxy_http_check').attr('checked', false)
+        $('#div_upstream_list').empty()
+        $("[data-mask]").inputmask()
+        $('#edit_balancer').modal('show')
+    } else {
+        var post = {
+            config_id: config_id
+        }
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/query/',
+            data: JSON.stringify(post),
+            dataType: "json",
+            success: function(p) {
+                if (p.flag == "Success") {
+                    $('#edit_balancer_title').text('编辑负载均衡器')
+                    $('#edit_balancer_mtitle').text(config_id)
+                    $('#input_proxy_config_id').val(config_id)
+                    $('#div_upstream_list').empty()
 
-                        $('#input_proxy_proxy_name').val(p.content.proxy.proxy_name)
-                        $('#input_proxy_listen').val(p.content.proxy.listen)
-                        $('#input_proxy_server_name').val(p.content.proxy.server_name)
-                        $('#input_proxy_access_log').val(p.content.proxy.access_log)
-                        $('#input_proxy_error_log').val(p.content.proxy.error_log)
-                        $('#input_proxy_description').text(p.content.proxy.description)
-                        if (p.content.proxy.balancer_type == "ip_hash") {
-                            $('#check_proxy_ip_hash').prop('checked', true)
-                        } else {
-                            $('#check_proxy_ip_hash').prop('checked', false)
-                        }
-                        for (var f in p.content.upstream) {
-                            edit_upstream(1, p.content.upstream[f])
-                        }
-                        if (p.content.proxy.protocols == true) {
-                            $('#check_ssl_status').prop('checked', true)
-                            $('#txt_ssl_cert_body').text(p.content.proxy.ssl_cert)
-                            $('#txt_ssl_key_body').text(p.content.proxy.ssl_key)
-                        } else {
-                            $('#check_ssl_status').prop('checked', false)
-                        }
-                        if (p.content.proxy.listen == 443) {
-                            $('#check_ssl_port').prop('checked', false)
-                        } else {
-                            $('#check_ssl_port').prop('checked', true)
-                        }
-                        check_balancer_ssl($('#check_ssl_status'))
-                        $('#edit_balancer').modal('show')
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
+                    $('#input_proxy_proxy_name').val(p.context.proxy.proxy_name)
+                    $('#input_proxy_listen').val(p.context.proxy.listen)
+                    $('#input_proxy_server_name').val(p.context.proxy.server_name)
+                    $('#input_proxy_access_log').val(p.context.proxy.access_log)
+                    $('#input_proxy_error_log').val(p.context.proxy.error_log)
+                    $('#input_proxy_description').text(p.context.proxy.description)
+                    if (p.context.proxy.balancer_type == "ip_hash") {
+                        $('#check_proxy_ip_hash').prop('checked', true)
                     } else {
-                        alert('查询失败！' + p.content)
+                        $('#check_proxy_ip_hash').prop('checked', false)
                     }
-                },
-                error: function(e) {
-                    alert('请求失败!')
-                }
-            })
-
-        }
-    }
-
-    function delete_proxy(_pk, _name) {
-        if (confirm("确认删除负载均衡[" + _name + "]？")) {
-            var _post = {
-                pk: _pk
-            }
-            jQuery.ajax({
-                type: 'post',
-                url: '/proxy/delete/',
-                data: JSON.stringify(_post),
-                dataType: 'json',
-                success: function(p) {
-                    if (p.flag == "Success") {
-                        alert("删除成功!")
-                        top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
+                    if (p.context.proxy.check_type == "http") {
+                        $('#check_proxy_http_check').prop('checked', true)
                     } else {
-                        alert('删除错误！' + p.content)
+                        $('#check_proxy_http_check').prop('checked', false)
                     }
-                },
-                error: function(e) {
-                    alert('请求失败!')
-                }
-            })
-        }
-    }
-
-    function change_status(_pk, _status) {
-        if (confirm("确认要变更状态？")) {
-            var _post = {
-                pk: _pk,
-                status: _status
-            }
-            jQuery.ajax({
-                type: 'post',
-                url: '/proxy/status/',
-                data: JSON.stringify(_post),
-                dataType: 'json',
-                success: function(p) {
-                    if (p.flag == "Success") {
-                        alert("变更成功!")
-                        top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
+                    for (var f in p.context.upstream) {
+                        edit_upstream(1, p.context.upstream[f])
+                    }
+                    if (p.context.proxy.protocols == true) {
+                        $('#check_ssl_status').prop('checked', true)
+                        $('#txt_ssl_cert_body').text(p.context.proxy.ssl_cert)
+                        $('#txt_ssl_key_body').text(p.context.proxy.ssl_key)
                     } else {
-                        alert('变更错误！' + p.content)
+                        $('#check_ssl_status').prop('checked', false)
                     }
-                },
-                error: function(e) {
-                    alert('请求失败!')
-                }
-            })
-        }
-    }
-
-    function proxy_filter() {
-        window.location = '/proxy/?filter=' + $('#input_proxy_filter').val()
-    }
-
-    function save_balancer() {
-        if (confirm("确认要保存这样的配置？")) {
-            var _base_config = $('#form_base_config').serializeObject()
-            var _ssl_config = $('#form_ssl_config').serializeObject()
-            var _upstream_list = []
-            $('#div_upstream_list form').each(function() {
-                _upstream_list.push($(this).serializeObject())
-            })
-            var _post = {
-                'base_config': _base_config,
-                'ssl_config': _ssl_config,
-                'upstream_list': _upstream_list
-            }
-
-            jQuery.ajax({
-                type: 'post',
-                url: '/proxy/save/',
-                data: JSON.stringify(_post),
-                dataType: 'json',
-                success: function(p) {
-                    if (p.flag == "Success") {
-                        alert("保存成功!")
-                        top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.content == "ArgsError") {
-                        alert('保存失败！配置项填写错误！')
-                    } else if (p.flag == "Error" && p.content == "NicError") {
-                        alert('保存失败！内网网卡选择错误！')
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
+                    if (p.context.proxy.listen == 443) {
+                        $('#check_ssl_port').prop('checked', false)
                     } else {
-                        alert('保存错误！其他错误：' + p.content)
+                        $('#check_ssl_port').prop('checked', true)
                     }
-                },
-                error: function(e) {
-                    alert('请求失败!')
+                    check_balancer_ssl($('#check_ssl_status'))
+                    $('#edit_balancer').modal('show')
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('查询失败！' + p.context)
                 }
-            })
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+function delete_proxy(pk, name) {
+    if (confirm("确认删除负载均衡[" + name + "]？")) {
+        var post = {
+            pk: pk
+        }
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/delete/',
+            data: JSON.stringify(post),
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    alert("删除成功!")
+                    top.location = '/proxy/'
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('删除错误！' + p.context)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+function proxy_status(pk) {
+    var post = {
+        pk: pk
+    }
+    jQuery.ajax({
+        type: 'post',
+        url: '/proxy/checkhttp/',
+        data: JSON.stringify(post),
+        dataType: "json",
+        success: function(p) {
+            if (p.flag == "Success") {
+                $('#proxy_status_mtitle').text(p.config_id)
+                $('#div_proxy_status_list').empty()
+
+                for (var f in p.status.servers.server) {
+                    var server = p.status.servers.server[f]
+                    tb = '<tr>'
+                    tb += '<td>' + server.index + '</td>'
+                    tb += '<td>' + server.name + '</td>'
+                    tb += '<td>' + server.rise + '</td>'
+                    tb += '<td>' + server.fall + '</td>'
+                    if (server.status == "up"){
+                      tb += '<td><span class="label label-success">正常</span></td>'
+                    }else{
+                      tb += '<td><span class="label label-warning">异常</span></td>'
+                    }
+                    tb += '</tr>'
+                    $('#div_proxy_status_list').append(tb)
+                }
+
+                $('#proxy_status').modal('show')
+            } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                alert('认证失败！请重新登录！')
+                top.location = '/login/'
+            } else {
+                alert('查询失败！' + p.context)
+            }
+        },
+        error: function(e) {
+            alert('请求失败!')
+        }
+    })
+}
+
+function change_status(pk, status) {
+    if (confirm("确认要变更状态？")) {
+        var post = {
+            pk: pk,
+            status: status
+        }
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/status/',
+            data: JSON.stringify(post),
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    alert("变更成功!")
+                    top.location = '/proxy/'
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('变更错误！' + p.context)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    }
+}
+
+function proxy_filter() {
+    window.location = '/proxy/?filter=' + $('#input_proxy_filter').val()
+}
+
+function save_balancer() {
+    if (confirm("确认要保存这样的配置？")) {
+        var base_config = $('#form_base_config').serializeObject()
+        var ssl_config = $('#form_ssl_config').serializeObject()
+        var upstream_list = []
+        $('#div_upstream_list form').each(function() {
+            upstream_list.push($(this).serializeObject())
+        })
+        var post = {
+            'base_config': base_config,
+            'ssl_config': ssl_config,
+            'upstream_list': upstream_list
         }
 
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/save/',
+            data: JSON.stringify(post),
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    alert("保存成功!")
+                    top.location = '/proxy/'
+                } else if (p.flag == "Error" && p.context == "ArgsError") {
+                    alert('保存失败！配置项填写错误！')
+                } else if (p.flag == "Error" && p.context == "NicError") {
+                    alert('保存失败！内网网卡选择错误！')
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('保存错误！其他错误：' + p.context)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
     }
+
+}
 </script>
 {% endblock %}

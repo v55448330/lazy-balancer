@@ -27,18 +27,31 @@ def view(request):
     page = request.GET.get('page')
 
     try:
-        contents = paginator.page(page)
+        contexts = paginator.page(page)
     except PageNotAnInteger:
-        contents = paginator.page(1)
+        contexts = paginator.page(1)
     except EmptyPage:
-        contents = paginator.page(paginator.num_pages)
+        contexts = paginator.page(paginator.num_pages)
 
     user = {
         'name':request.user,
         'date':time.time()
     }
 
-    return render_to_response('proxy/view.html',{ 'proxy' : contents, 'filter' : filter, 'user' : user })
+    return render_to_response('proxy/view.html',{ 'proxy' : contexts, 'filter' : filter, 'user' : user })
+    pass
+
+@is_auth
+def check_http_status(request):
+    try:
+        post = json.loads(request.body)
+        proxy = proxy_config.objects.get(pk=post['pk'])
+        status = get_proxy_http_status(proxy.protocols,proxy.listen,proxy.host,proxy.config_id)
+
+        context = { "flag":"Success","config_id":proxy.config_id,"status":status}
+    except Exception, e:
+        context = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(context))
     pass
 
 @is_auth
@@ -57,6 +70,7 @@ def query_proxy(request):
             'ssl_cert':proxy.ssl_cert,
             'ssl_key':proxy.ssl_key,
             'description':proxy.description,
+            'check_type':proxy.check_type,
             'balancer_type':proxy.balancer_type,
         }
         u = []
@@ -69,10 +83,10 @@ def query_proxy(request):
                 'fail_timeout':ui.fail_timeout
             })
             pass
-        content = { "flag":"Success","content":{"proxy":p,"upstream":u}}
+        context = { "flag":"Success","context":{"proxy":p,"upstream":u}}
     except Exception, e:
-        content = { "flag":"Error","content":str(e) }
-    return HttpResponse(json.dumps(content))
+        context = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(context))
     pass
 
 @is_auth
@@ -82,10 +96,10 @@ def delete_proxy(request):
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.delete()
         reload_config()
-        content = { "flag":"Success" }
+        context = { "flag":"Success" }
     except Exception, e:
-        content = { "flag":"Error","content":str(e) }
-    return HttpResponse(json.dumps(content))
+        context = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(context))
     pass
 
 @is_auth
@@ -96,11 +110,11 @@ def change_status(request):
         proxy.status = bool(int(post['status']))
         proxy.save()
         reload_config()
-        content = { "flag":"Success" }
+        context = { "flag":"Success" }
     except Exception, e:
-        content = { "flag":"Error","content":str(e) }
+        context = { "flag":"Error","context":str(e) }
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(context))
     pass
 
 @is_auth
@@ -140,18 +154,25 @@ def save(request):
                 if post['base_config'].has_key('proxy_ip_hash'):
                     balancer_type = "ip_hash"
 
+                if post['base_config'].has_key('proxy_http_check'):
+                    check_type = "http"
+                else:
+                    check_type = "tcp"
+
                 proxy = {
                     'config_id' : config_id,
                     'proxy_name' : proxy_name,
                     'status' : False,
                     'listen' : int(listen),
                     'server_name' : server_name,
+                    'host' : server_name.split(' ')[0],
                     'access_log' : access_log,
                     'error_log' : error_log,
                     'balancer_type' : balancer_type,
                     'update_time' : time.time(),
                     'description' : description,
                     'protocols' : False,
+                    'check_type' : check_type,
                     'ssl_cert' : "",
                     'ssl_cert_path' : "",
                     'ssl_key' : "",
@@ -203,8 +224,8 @@ def save(request):
                     })
 
                 p_config = { 'proxy' : proxy, 'upstream' : upstream_list }
-                config_content = build_proxy_config(p_config)
-                write_config(config_path,config_content)
+                config_context = build_proxy_config(p_config)
+                write_config(config_path,config_context)
 
                 test_ret = test_config()
                 if test_ret['status'] == 0:
@@ -225,18 +246,18 @@ def save(request):
                         pass
 
                     set_firewall()
-                    content = {"flag":"Success"}
+                    context = {"flag":"Success"}
                 else:
-                    content = {"flag":"Error","content":test_ret['output']}
+                    context = {"flag":"Error","context":test_ret['output']}
 
                 reload_config()
             else:
-                content = {"flag":"Error","content":"ArgsError"}
+                context = {"flag":"Error","context":"ArgsError"}
         else:
-            content = {"flag":"Error","content":"NicError"}
+            context = {"flag":"Error","context":"NicError"}
 
     except Exception, e:
-        content = {"flag":"Error","content":str(e)}
+        context = {"flag":"Error","context":str(e)}
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(context))
     pass

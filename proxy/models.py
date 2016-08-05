@@ -26,7 +26,7 @@ class proxy_config(models.Model):
     ssl_key_path = models.CharField(max_length=128,null=True)
     description = models.TextField(null=True)
     balancer_type = models.CharField(max_length=64,null=True)
+    host = models.CharField(max_length=64,null=True)
+    check_type = models.CharField(max_length=64,null=True)
     update_time = models.FloatField(null=False)
     upstream_list = models.ManyToManyField(upstream_config)
-
-

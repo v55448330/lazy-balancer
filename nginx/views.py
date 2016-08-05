@@ -9,6 +9,8 @@ import platform
 import json
 import os
 import psutil
+import pycurl
+import StringIO
 
 def clean_dir(dir_path):
     filelist=[]
@@ -166,3 +168,20 @@ def get_sysinfo():
         'nginx' : run_shell('nginx -v')['output'].split(': ')[1]
     }
     return sysinfo
+
+def get_proxy_http_status(ssl,listen,host,config_id):
+    if ssl == True:
+        protocols = "https"
+    else:
+        protocols = "http"
+    url = "%s://%s:%s/status_%s?format=json" % (protocols,host,listen,config_id)
+    s = StringIO.StringIO()
+    c = pycurl.Curl()
+    c.setopt(c.URL, url)
+    c.setopt(c.WRITEFUNCTION, s.write)
+    c.setopt(pycurl.CONNECTTIMEOUT, 10)
+    c.setopt(c.SSL_VERIFYPEER, 0)
+    c.perform()
+    c.close
+    ret = json.loads(s.getvalue())
+    return ret

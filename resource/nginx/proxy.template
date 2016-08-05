@@ -2,9 +2,19 @@ upstream {{ proxy.config_id | lower }} {
     {%- if proxy.balancer_type == "ip_hash" %}
     ip_hash;
     {%- endif %}
-    {%- for server in upstream %}
-    server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ server.max_fails }} fail_timeout={{ server.fail_timeout }}s;
-    {%- endfor %}
+    {%- if proxy.check_type == "tcp" %}
+      {%- for server in upstream %}
+      server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ server.max_fails }} fail_timeout={{ server.fail_timeout }}s;
+      {%- endfor %}
+    {%- else %}
+      {%- for server in upstream %}
+      server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
+      {%- endfor %}
+      check interval=3000 rise=2 fall=5 timeout=1000 type=http;
+      check_http_expect_alive http_2xx http_3xx;
+      check_keepalive_requests 100;
+      check_http_send "HEAD / HTTP/1.1\r\nConnection: keep-alive\r\nHOST {{ proxy.host }}\r\n\r\n";
+    {%- endif %}
 }
 
 {%- if not proxy.protocols %}
@@ -28,6 +38,13 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_buffering off;
+    }
+
+    location /status_{{ proxy.config_id | lower }} {
+        check_status;
+        #access_log off;
+        #allow 127.0.0.1;
+        #deny all;
     }
 }
 {%- else %}
@@ -64,6 +81,13 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_buffering off;
+    }
+
+    location /status_{{ proxy.config_id | lower }} {
+        check_status;
+        #access_log off;
+        #allow 127.0.0.1;
+        #deny all;
     }
 }
 {%- endif %}
