@@ -17,11 +17,12 @@ from django.conf.urls import url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 from django.conf import settings
-from .views import logout_view,login_view
+from .views import logout_view,login_view,create_superuser
 
 urlpatterns = [
     url(r'^login/$', login_view),
     url(r'^logout/$', logout_view),
+    url(r'^superuser/$', create_superuser),
     url(r'^dashboard/', include('dashboard.urls')),
     url(r'^main/', include('main.urls')),
     url(r'^proxy/', include('proxy.urls')),

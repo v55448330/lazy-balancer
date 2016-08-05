@@ -49,6 +49,19 @@ def modify_pass(request):
     return HttpResponse(json.dumps(content))
 
 @is_auth
+def admin_reset(request):
+    try:
+        post = json.loads(request.body)
+        reset = post['reset']
+        if reset == 1:
+            User.objects.all().delete()
+            content = { "flag":"Success" }
+    except Exception,e:
+        content = { "flag":"Error","content":str(e) }
+
+    return HttpResponse(json.dumps(content))
+
+@is_auth
 def select_nic(request):
     try:
         content = "test"

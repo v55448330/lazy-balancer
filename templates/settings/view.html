@@ -35,7 +35,8 @@
                 </form>
             </div>
             <div class="box-footer">
-                <button type="button" class="btn btn-primary" onclick="modify_pass()">修改密码</button>
+                <button type="button" class="btn" onclick="modify_pass(1)">重置管理员</button>
+                <button type="button" class="btn btn-primary" onclick="modify_pass(0)">修改密码</button>
             </div>
         </div>
     </div>
@@ -119,8 +120,8 @@ function select_nic() {
                 } else if (p.flag == "Error" && p.content == "VerifyFaild") {
                     alert('修改失败！')
                 } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
                 } else {
                     alert('修改错误！其他错误：' + p.content)
                 }
@@ -132,25 +133,20 @@ function select_nic() {
     }
 }
 
-function modify_pass() {
-    if (check_pass()) {
-        if (confirm("确认要修改密码？")) {
+function modify_pass(reset_admin) {
+    if (reset_admin == 1) {
+        if (confirm("确认要重置管理员？")) {
             jQuery.ajax({
                 type: 'post',
-                url: '/settings/password/',
-                data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                url: '/settings/admin/',
+                data: '{"reset":1}',
                 dataType: 'json',
                 success: function(p) {
                     if (p.flag == "Success") {
-                        alert("修改成功！请重新登录！")
+                        alert("重置成功！请重新创建管理员账号！")
                         top.location = '/logout/'
-                    } else if (p.flag == "Error" && p.content == "VerifyFaild") {
-                        alert('修改失败！密码验证失败！')
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
                     } else {
-                        alert('修改错误！其他错误：' + p.content)
+                        alert('重置失败！其他错误：' + p.content)
                     }
                 },
                 error: function(e) {
@@ -159,7 +155,34 @@ function modify_pass() {
             })
         }
     } else {
-        alert('密码输入有误！')
+        if (check_pass()) {
+            if (confirm("确认要修改密码？")) {
+                jQuery.ajax({
+                    type: 'post',
+                    url: '/settings/password/',
+                    data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                    dataType: 'json',
+                    success: function(p) {
+                        if (p.flag == "Success") {
+                            alert("修改成功！请重新登录！")
+                            top.location = '/logout/'
+                        } else if (p.flag == "Error" && p.content == "VerifyFaild") {
+                            alert('修改失败！密码验证失败！')
+                        } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                            alert('认证失败！请重新登录！')
+                            top.location = '/login/'
+                        } else {
+                            alert('修改错误！其他错误：' + p.content)
+                        }
+                    },
+                    error: function(e) {
+                        alert('请求失败!')
+                    }
+                })
+            }
+        } else {
+            alert('密码输入有误！')
+        }
     }
 }
 </script>

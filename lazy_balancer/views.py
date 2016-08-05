@@ -27,7 +27,8 @@ def login_view(request):
             redirect_to = request.GET['next']
 
         if not bool(User.objects.all().count()):
-            User.objects.create_superuser('admin','admin@123.com','1234.com')
+            return HttpResponseRedirect('/superuser/')
+            #User.objects.create_superuser('admin','admin@123.com','1234.com')
 
         form = AuthenticationForm(request)
 
@@ -38,6 +39,24 @@ def login_view(request):
 
     return render_to_response('login.html',context)
 
+def create_superuser(request):
+    redirect_to = settings.LOGIN_REDIRECT_URL
+
+    if bool(User.objects.all().count()):
+        return HttpResponseRedirect(redirect_to)
+
+    if request.method == "POST":
+        try:
+            post = json.loads(request.body)
+            User.objects.create_superuser(post['username'],'admin@123.com',post['password'])
+            context = {'flag':"Success",}
+        except Exception,e:
+            content = { "flag":"Error","content":str(e) }
+
+        return HttpResponse(json.dumps(context))
+
+    return render_to_response('superuser.html')
+
 def logout_view(request):
     Session.objects.filter(expire_date__lte=timezone.now()).delete()
     logout(request)
@@ -46,11 +65,11 @@ def logout_view(request):
 def is_auth(view):
     def decorator(request, *args, **kwargs):
         if not request.user.is_authenticated():
-            content = {
+            context = {
                 'flag':"Error",
-                'content':"AuthFailed"
+                'context':"AuthFailed"
             }
-            return HttpResponse(json.dumps(content))
+            return HttpResponse(json.dumps(context))
         else:
             return view(request, *args, **kwargs)
     return decorator
