@@ -43,8 +43,8 @@ server {
     location /status_{{ proxy.config_id | lower }} {
         check_status;
         #access_log off;
-        #allow 127.0.0.1;
-        #deny all;
+        allow 127.0.0.1;
+        deny all;
     }
 }
 {%- else %}
