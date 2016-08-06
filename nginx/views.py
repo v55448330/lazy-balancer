@@ -174,7 +174,7 @@ def get_proxy_http_status(ssl,listen,host,config_id):
         protocols = "https"
     else:
         protocols = "http"
-    url = "%s://127.0.0.1:%s/status_%s?format=json" % (protocols,host,listen,config_id)
+    url = "%s://127.0.0.1:%s/status_%s?format=json" % (protocols,listen,config_id)
     header = []
     header['Host: '] = host
     s = StringIO.StringIO()
