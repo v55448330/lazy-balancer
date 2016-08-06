@@ -37,6 +37,7 @@ apt-get -y autoremove
 ```
 * 安装 tengine
 ```
+git submodule update --init --recursive
 cd resource/nginx/tengine
 apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev
 ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid
