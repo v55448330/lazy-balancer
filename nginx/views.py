@@ -175,13 +175,15 @@ def get_proxy_http_status(ssl,listen,host,config_id):
     else:
         protocols = "http"
     url = "%s://127.0.0.1:%s/status_%s?format=json" % (protocols,host,listen,config_id)
+    header = []
+    header['Host: '] = host
     s = StringIO.StringIO()
     c = pycurl.Curl()
     c.setopt(c.URL, url)
     c.setopt(c.WRITEFUNCTION, s.write)
     c.setopt(pycurl.CONNECTTIMEOUT, 10)
     c.setopt(c.SSL_VERIFYPEER, 0)
-    c.setopt(c.HTTPHEADER, ["Host: %s" % host])
+    c.setopt(c.HTTPHEADER, header)
     c.perform()
     c.close
     ret = json.loads(s.getvalue())
