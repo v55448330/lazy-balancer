@@ -478,18 +478,20 @@ function proxy_status(pk) {
 
                 for (var f in p.status.servers.server) {
                     var server = p.status.servers.server[f]
-                    tb = '<tr>'
-                    tb += '<td>' + server.index + '</td>'
-                    tb += '<td>' + server.name + '</td>'
-                    tb += '<td>' + server.rise + '</td>'
-                    tb += '<td>' + server.fall + '</td>'
-                    if (server.status == "up"){
-                      tb += '<td><span class="label label-success">正常</span></td>'
-                    }else{
-                      tb += '<td><span class="label label-warning">异常</span></td>'
+                    if (server.upstream == p.config_id){
+                        tb = '<tr>'
+                        tb += '<td>' + server.index + '</td>'
+                        tb += '<td>' + server.name + '</td>'
+                        tb += '<td>' + server.rise + '</td>'
+                        tb += '<td>' + server.fall + '</td>'
+                        if (server.status == "up"){
+                          tb += '<td><span class="label label-success">正常</span></td>'
+                        }else{
+                          tb += '<td><span class="label label-warning">异常</span></td>'
+                        }
+                        tb += '</tr>'
+                        $('#div_proxy_status_list').append(tb)
                     }
-                    tb += '</tr>'
-                    $('#div_proxy_status_list').append(tb)
                 }
 
                 $('#proxy_status').modal('show')
