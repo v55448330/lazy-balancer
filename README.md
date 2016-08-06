@@ -57,7 +57,7 @@ cp -rf service/* /etc/supervisor/
 ```
 * 安装依赖
 ```
-apt-get install -y python-dev python-pip iptables
+apt-get install -y python-dev python-pip iptables libcurl4-openssl-dev
 pip install -r requirements.txt  
 ```
 * 初始化数据库
