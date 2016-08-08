@@ -80,9 +80,9 @@
                 <h4 class="box-title">配置备份<small> 通过文件备份和还原负载均衡配置</small></h4>
             </div>
             <div class="box-body">
-              <button type="button" class="btn btn-primary" onclick="config_backup(1)">备份</button>
-              <button type="button" class="btn btn-primary" onclick="import_config.click()">还原</button>
-              <input type="file" style="display:none" name="import_config" id="import_config" onchange="config_backup(0)" />
+                <button type="button" class="btn btn-primary" onclick="config_backup(1)">备份</button>
+                <button type="button" class="btn btn-primary" onclick="import_config.click()">还原</button>
+                <input type="file" style="display:none" name="import_config" id="import_config" onchange="config_backup(0)" />
             </div>
         </div>
     </div>
@@ -149,63 +149,64 @@ function select_nic() {
 }
 
 function config_backup(type) {
-    if (type==1){
-      if (confirm("此操作会将负载均衡器<全局配置>和<负载均衡配置>备份为文件以供还原，是否继续？")) {
-          jQuery.ajax({
-              type: 'post',
-              url: '/settings/config/export/',
-              dataType: 'json',
-              success: function(p) {
-                  if (p.flag == "Success") {
-                      var blob = new Blob([JSON.stringify(p.content)], {type: "text/plain;charset=utf-8"});
-                      saveAs(blob, "LazyBalancer.bak");
-                      alert("备份成功！")
-                      top.location = '/settings/'
-                  } else if (p.flag == "Error" && p.content == "AuthFailed") {
-                      alert('认证失败！请重新登录！')
-                      top.location = '/login/'
-                  } else {
-                      alert('修改错误！其他错误：' + p.content)
-                  }
-              },
-              error: function(e) {
-                  alert('请求失败!')
-              }
-          })
-      }
-    }else{
-      if (confirm("此操作会将负载均衡器<全局配置>和<负载均衡配置>通过您提供的配置文件覆盖，是否继续？")) {
-          var reader = new FileReader()
-            reader.readAsText($('#import_config')[0].files[0])
-            reader.onload = function(e){
-              $.ajax({
+    if (type == 1) {
+        if (confirm("此操作会将负载均衡器<全局配置>和<负载均衡配置>备份为文件以供还原，是否继续？")) {
+            jQuery.ajax({
                 type: 'post',
-                url: '/settings/config/import/',
-                data: this.result,
+                url: '/settings/config/export/',
                 dataType: 'json',
                 success: function(p) {
-                  console.log(p)
                     if (p.flag == "Success") {
-                        alert("还原完成！")
+                        var blob = new Blob([JSON.stringify(p.content)], {
+                            type: "text/plain;charset=utf-8"
+                        });
+                        saveAs(blob, "LazyBalancer.bak");
+                        alert("备份成功！")
                         top.location = '/settings/'
                     } else if (p.flag == "Error" && p.content == "AuthFailed") {
                         alert('认证失败！请重新登录！')
                         top.location = '/login/'
                     } else {
-                        $('#import_config').val('')
-                        alert('还原失败！错误：' + p.content)
+                        alert('修改错误！其他错误：' + p.content)
                     }
                 },
                 error: function(e) {
-                    $('#import_config').val('')
                     alert('请求失败!')
                 }
             })
         }
-      }
-      else{
-        $('#import_config').val('')
-      }
+    } else {
+        if (confirm("此操作会将负载均衡器<全局配置>和<负载均衡配置>通过您提供的配置文件覆盖，是否继续？")) {
+            var reader = new FileReader()
+            reader.readAsText($('#import_config')[0].files[0])
+            reader.onload = function(e) {
+                $.ajax({
+                    type: 'post',
+                    url: '/settings/config/import/',
+                    data: this.result,
+                    dataType: 'json',
+                    success: function(p) {
+                        console.log(p)
+                        if (p.flag == "Success") {
+                            alert("还原完成！")
+                            top.location = '/settings/'
+                        } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                            alert('认证失败！请重新登录！')
+                            top.location = '/login/'
+                        } else {
+                            $('#import_config').val('')
+                            alert('还原失败！错误：' + p.content)
+                        }
+                    },
+                    error: function(e) {
+                        $('#import_config').val('')
+                        alert('请求失败!')
+                    }
+                })
+            }
+        } else {
+            $('#import_config').val('')
+        }
     }
 }
 
