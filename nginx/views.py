@@ -129,7 +129,7 @@ def get_statusinfo():
         'cpu_percent' : psutil.cpu_percent(),
         'mem_info' : {
             'available' : phymem.available/1024/1024,
-            'used' : phymem.used/1024/1024,
+            'used' : (phymem.used-phymem.cached)/1024/1024,
             'total' : phymem.total/1024/1024
         },
         'disk_info' : {
