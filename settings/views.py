@@ -2,7 +2,10 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core import serializers
 from django.http import HttpResponse
+from proxy.models import *
+from main.models import *
 from lazy_balancer.views import is_auth
 from nginx.ip import set_firewall
 from .models import system_settings
@@ -64,7 +67,6 @@ def admin_reset(request):
 @is_auth
 def select_nic(request):
     try:
-        content = "test"
         post = json.loads(request.body)
         internal_nic = post['select_nic']
         if system_settings.objects.all().count() != 0:
@@ -75,4 +77,49 @@ def select_nic(request):
         content = { "flag":"Success" }
     except Exception,e:
         content = { "flag":"Error","content":str(e) }
+    return HttpResponse(json.dumps(content))
+
+@is_auth
+def config_backup(request,action):
+    main_config_qc = main_config.objects.all()
+    upstream_config_qc = upstream_config.objects.all()
+    proxy_config_qc = proxy_config.objects.all()
+    if action == "export":
+        try:
+            m_config = serializers.serialize('json', main_config_qc)
+            u_config = serializers.serialize('json', upstream_config_qc)
+            p_config = serializers.serialize('json', proxy_config_qc)
+
+            config = {
+                "main_config" : m_config,
+                "upstream_config" : u_config,
+                "proxy_config" : p_config,
+            }
+            content = { "flag":"Success", "content": config }
+        except Exception,e:
+            content = { "flag":"Error","content":str(e) }
+
+    elif action == "import":
+        try:
+            post = json.loads(request.body)
+
+            m_config = post['main_config']
+            u_config = post['upstream_config']
+            p_config = post['proxy_config']
+
+            main_config_qc.delete()
+            upstream_config_qc.delete()
+            proxy_config_qc.delete()
+
+            for obj in serializers.deserialize("json", m_config):
+                obj.save()
+            for obj in serializers.deserialize("json", u_config):
+                obj.save()
+            for obj in serializers.deserialize("json", p_config):
+                obj.save()
+
+            content = { "flag":"Success" }
+        except Exception,e:
+            content = { "flag":"Error","content":str(e) }
+
     return HttpResponse(json.dumps(content))

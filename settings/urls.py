@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^password/$', views.modify_pass),
     url(r'^admin/$', views.admin_reset),
     url(r'^nic/$', views.select_nic),
+    url(r'^config/(?P<action>.*)/$', views.config_backup),
 ]
