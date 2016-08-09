@@ -29,6 +29,35 @@
     </div>
 </div>
 
+<div class="modal fade" id="proxy_logs" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="proxy_logs_title">节点日志</h4><small id="proxy_logs_mtitle"></small>
+            </div>
+            <div class="modal-body">
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#tab_access_log" data-toggle="tab" id="a_access_log">访问日志</a></li>
+                        <li><a href="#tab_error_log" data-toggle="tab">错误日志</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab_access_log">
+                            <textarea id="tail_access" class="form-control" rows="20" readonly="readonly"></textarea>
+                        </div>
+                        <div class="tab-pane" id="tab_error_log">
+                            <textarea id="tail_error" class="form-control" rows="20" readonly="readonly"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="edit_balancer" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -259,7 +288,8 @@
                             {% endif %}
                             <td>{{ server.update_time | timestamp_to_date }}</td>
                             <td>
-                                <button type="button" class="btn btn-default btn-xs" onclick="delete_proxy('{{ server.pk }}','{{ server.proxy_name }}')">删除</button>
+                                <button type="button" class="btn btn-primary btn-xs" onclick="get_proxy_logs('{{ server.pk }}')">日志</button>
+                                <button type="button" class="btn btn-danger btn-xs" onclick="delete_proxy('{{ server.pk }}','{{ server.proxy_name }}')">删除</button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -478,16 +508,16 @@ function proxy_status(pk) {
 
                 for (var f in p.status.servers.server) {
                     var server = p.status.servers.server[f]
-                    if (server.upstream == p.config_id){
+                    if (server.upstream == p.config_id) {
                         tb = '<tr>'
                         tb += '<td>' + server.index + '</td>'
                         tb += '<td>' + server.name + '</td>'
                         tb += '<td>' + server.rise + '</td>'
                         tb += '<td>' + server.fall + '</td>'
-                        if (server.status == "up"){
-                          tb += '<td><span class="label label-success">正常</span></td>'
-                        }else{
-                          tb += '<td><span class="label label-warning">异常</span></td>'
+                        if (server.status == "up") {
+                            tb += '<td><span class="label label-success">正常</span></td>'
+                        } else {
+                            tb += '<td><span class="label label-warning">异常</span></td>'
                         }
                         tb += '</tr>'
                         $('#div_proxy_status_list').append(tb)
@@ -506,6 +536,82 @@ function proxy_status(pk) {
             alert('请求失败!')
         }
     })
+}
+
+var t
+$(function() {
+    $('#proxy_logs').on('hide.bs.modal', function() {
+        $("#tail_access").empty()
+        $("#tail_error").empty()
+        clearTimeout(t)
+    })
+});
+
+var tailswitch = false;
+
+function tailScroll(tail) {
+    var height = tail.get(0).scrollHeight;
+    tail.animate({
+        scrollTop: height
+    }, 500);
+    if (tail.val().split("\n").length > 500) {
+        tail.empty()
+    }
+}
+
+function get_proxy_logs(pk, position) {
+    if (position == null) {
+        $('#a_access_log').trigger('click')
+        $("#tail_access").empty()
+        $("#tail_error").empty()
+
+        position = {
+            "access": 0,
+            "error": 0
+        }
+        get_proxy_logs(pk, position)
+
+        $('#proxy_logs').modal('show')
+    } else {
+        tailswitch = true
+        post = {
+            "curr_position": position,
+            "pk": pk
+        }
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/logs/',
+            data: JSON.stringify(post),
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    if (p.log_body.access != "") {
+                        $('#tail_access').append(p.log_body.access)
+                        tailScroll($("#tail_access"))
+                    }
+                    if (p.log_body.error != "") {
+                        $('#tail_error').append(p.log_body.error)
+                        tailScroll($("#tail_error"))
+                    }
+
+                    t = setTimeout(function() {
+                        get_proxy_logs(pk, p.curr_position);
+                    }, 2000)
+
+                } else if (p.flag == "Error") {
+                    $("#tail_access").empty()
+                    $("#tail_error").empty()
+                    clearTimeout(t)
+                    alert('查询失败！错误：' + p.context)
+                }
+
+                if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                }
+            },
+        })
+    }
 }
 
 function change_status(pk, status) {
@@ -540,6 +646,7 @@ function change_status(pk, status) {
 function proxy_filter() {
     window.location = '/proxy/?filter=' + $('#input_proxy_filter').val()
 }
+
 
 function save_balancer() {
     if (confirm("确认要保存这样的配置？")) {

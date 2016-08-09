@@ -118,6 +118,54 @@ def change_status(request):
     pass
 
 @is_auth
+def proxy_logs(request):
+    try:
+        post = json.loads(request.body)
+
+        curr_position = {"access":0,"error":0}
+        curr_position['access'] = int(post['curr_position']['access'])
+        curr_position['error'] = int(post['curr_position']['error'])
+
+        proxy = proxy_config.objects.get(pk=post['pk'])
+
+        log_body = {"access":"","error":""}
+
+        with open(proxy.access_log) as file_:
+            file_.seek(0,2)
+
+            if curr_position['access'] != 0:
+                file_.seek(curr_position['access'])
+                line = file_.readline()
+
+                while line:
+                    log_body['access'] += line
+                    curr_position['access'] = file_.tell()
+                    line = file_.readline()
+
+            curr_position['access'] = file_.tell()
+
+        with open(proxy.error_log) as file_:
+            file_.seek(0,2)
+
+            if curr_position['error'] != 0:
+                file_.seek(curr_position['error'])
+                line = file_.readline()
+
+                while line:
+                    log_body['error'] += line
+                    curr_position['error'] = file_.tell()
+                    line = file_.readline()
+
+            curr_position['error'] = file_.tell()
+
+        context = { "flag":"Success" , "log_body":log_body , "curr_position":curr_position }
+    except Exception, e:
+        context = { "flag":"Error","context":str(e) }
+
+    return HttpResponse(json.dumps(context))
+    pass
+
+@is_auth
 def save(request):
     try:
         post = json.loads(request.body)

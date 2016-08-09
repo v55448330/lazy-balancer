@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^checkhttp/$', views.check_http_status),
     url(r'^delete/$', views.delete_proxy),
     url(r'^query/$', views.query_proxy),
+    url(r'^logs/$', views.proxy_logs),
     #url(r'^/(?P<action>.*)$', views.action),
 ]

@@ -15,6 +15,7 @@
 * 修复因主机头导致后端服务器探测失败
 * 新增自定义管理员用户
 * 新增配置通过文件备份和还原
+* 新增实时查看访问日志和错误日志
 * 更新 Vagrantfile
 * 修复其他 Bug
 
@@ -89,3 +90,4 @@ http://[IP]:8000/
 ![image](readme_img/7.png)
 ![image](readme_img/8.png)
 ![image](readme_img/9.png)
+![image](readme_img/10.png)
