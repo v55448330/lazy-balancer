@@ -8,6 +8,7 @@ from proxy.models import *
 from main.models import *
 from lazy_balancer.views import is_auth
 from nginx.ip import set_firewall
+from nginx.views import reload_config
 from .models import system_settings
 from nginx.views import *
 import json
@@ -117,6 +118,8 @@ def config_backup(request,action):
                 obj.save()
             for obj in serializers.deserialize("json", p_config):
                 obj.save()
+
+            reload_config()
 
             content = { "flag":"Success" }
         except Exception,e:
