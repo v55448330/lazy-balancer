@@ -40,7 +40,7 @@ server {
         proxy_buffering off;
     }
 
-    set $limit 0;
+    #set $limit 1;
     req_status server;
 }
 {%- else %}
@@ -79,7 +79,7 @@ server {
         proxy_buffering off;
     }
 
-    set $limit 0;
+    #set $limit 1;
     req_status server;
 }
 {%- endif %}

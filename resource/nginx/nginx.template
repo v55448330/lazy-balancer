@@ -49,7 +49,7 @@ http {
     ##
 
     req_status_zone server "$host,$server_addr:$server_port" 10M;
-    req_status_zone_add_indicator server $limit;
+    #req_status_zone_add_indicator server $limit;
 
     server {
         listen 80 default;
@@ -65,7 +65,7 @@ http {
         }
         location /req_status {
             req_status_show;
-            req_status_show_field req_total $limit;
+            #req_status_show_field req_total $limit;
             allow 127.0.0.1;
             deny all;
         }
