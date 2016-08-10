@@ -169,14 +169,8 @@ def get_sysinfo():
     }
     return sysinfo
 
-def get_proxy_http_status(ssl,listen,host,config_id):
-    if ssl == True:
-        protocols = "https"
-    else:
-        protocols = "http"
-    url = "%s://127.0.0.1:%s/status_%s?format=json" % (protocols,listen,config_id)
-    header = []
-    header.append("Host: " + host)
+def post_request(url,header=[]):
+    #header.append("Host: " + host)
     s = StringIO.StringIO()
     c = pycurl.Curl()
     c.setopt(c.URL, url)
@@ -187,5 +181,9 @@ def get_proxy_http_status(ssl,listen,host,config_id):
     c.setopt(c.HTTPHEADER, header)
     c.perform()
     c.close
-    ret = json.loads(s.getvalue())
+    return s.getvalue()
+
+def get_proxy_http_status():
+    url = "http://127.0.0.1/up_status?format=json"
+    ret = json.loads(post_request(url))
     return ret

@@ -46,7 +46,7 @@ def check_http_status(request):
     try:
         post = json.loads(request.body)
         proxy = proxy_config.objects.get(pk=post['pk'])
-        status = get_proxy_http_status(proxy.protocols,proxy.listen,proxy.host,proxy.config_id)
+        status = get_proxy_http_status()
 
         context = { "flag":"Success","config_id":proxy.config_id,"status":status}
     except Exception, e:

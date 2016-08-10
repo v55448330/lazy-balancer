@@ -1,6 +1,8 @@
 {%- for listen in listen_list %}
+{%- if listen != 80 %}
 server {
   listen {{ listen }} default;
   return 444;
 }
+{%- endif %}
 {%- endfor %}

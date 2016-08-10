@@ -40,12 +40,8 @@ server {
         proxy_buffering off;
     }
 
-    location /status_{{ proxy.config_id | lower }} {
-        check_status;
-        #access_log off;
-        allow 127.0.0.1;
-        deny all;
-    }
+    set $limit 0;
+    req_status server;
 }
 {%- else %}
 server {
@@ -83,11 +79,7 @@ server {
         proxy_buffering off;
     }
 
-    location /status_{{ proxy.config_id | lower }} {
-        check_status;
-        #access_log off;
-        #allow 127.0.0.1;
-        #deny all;
-    }
+    set $limit 0;
+    req_status server;
 }
 {%- endif %}

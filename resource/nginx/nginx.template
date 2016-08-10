@@ -45,9 +45,36 @@ http {
     gzip_disable "msie6";
 
     ##
+    # Status Settings
+    ##
+
+    req_status_zone server "$host,$server_addr:$server_port" 10M;
+    req_status_zone_add_indicator server $limit;
+
+    server {
+        listen 80 default;
+
+        location / {
+            return 444;
+        }
+
+        location /up_status {
+            check_status;
+            allow 127.0.0.1;
+            deny all;
+        }
+        location /req_status {
+            req_status_show;
+            req_status_show_field req_total $limit;
+            allow 127.0.0.1;
+            deny all;
+        }
+    }
+
+    ##
     # Virtual Host Configs
     ##
 
     include /etc/nginx/conf.d/*.conf;
-    include /etc/nginx/sites-enabled/*.conf;
+
 }
