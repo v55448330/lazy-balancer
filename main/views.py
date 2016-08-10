@@ -20,15 +20,16 @@ def view(request):
         'name':request.user,
         'date':time.time()
     }
+    print m_config
 
     return render_to_response('main/view.html',{ 'main_config' : m_config, 'user' : user })
     pass
 
 @is_auth
 def save(request):
-    content = {
+    context = {
         'flag':"",
-        'content':""
+        'context':""
     }
     try:
         post = json.loads(request.body)
@@ -67,27 +68,27 @@ def save(request):
                 'update_time' : time.time()
             }
             print m_config
-            config_content = build_main_config(m_config)
-            write_config(config_path,config_content)
+            config_context = build_main_config(m_config)
+            write_config(config_path,config_context)
 
             test_ret = test_config()
             if test_ret['status'] == 0:
-                write_config(config_path,config_content)
+                write_config(config_path,config_context)
                 main_config.objects.all().delete()
                 main_config.objects.create(**m_config)
-                content['flag'] = "Success"
+                context['flag'] = "Success"
             else:
-                content['error'] = "Error"
-                content['content'] = test_ret['output']
+                context['error'] = "Error"
+                context['context'] = test_ret['output']
 
             reload_config()
         else:
-            content['flag'] = "Error"
-            content['content'] = "ArgsError"
+            context['flag'] = "Error"
+            context['context'] = "ArgsError"
     except Exception, e:
-        content['flag'] = "Error"
-        content['content'] = str(e)
+        context['flag'] = "Error"
+        context['context'] = str(e)
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(context))
     pass
 #

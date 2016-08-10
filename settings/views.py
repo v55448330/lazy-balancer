@@ -22,7 +22,7 @@ def view(request):
         'date':time.time()
     }
     nic = {
-        'nics':get_sysinfo()['nic'],
+        'nics':get_sys_info()['nic'],
         'internal_nic':''
     }
 

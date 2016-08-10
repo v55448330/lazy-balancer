@@ -64,7 +64,7 @@ def set_firewall():
             public_port = list(set(public_port))
 
             address = ""
-            nics = get_sysinfo()['nic']
+            nics = get_sys_info()['nic']
 
             for nic in nics:
                 if nic['nic'] == internal_nic:

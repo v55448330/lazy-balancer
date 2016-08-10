@@ -51,7 +51,7 @@ def create_superuser(request):
             User.objects.create_superuser(post['username'],'admin@123.com',post['password'])
             context = {'flag':"Success",}
         except Exception,e:
-            content = { "flag":"Error","content":str(e) }
+            context = { "flag":"Error","context":str(e) }
 
         return HttpResponse(json.dumps(context))
 

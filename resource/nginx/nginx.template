@@ -2,11 +2,18 @@
 # Config ID : {{ config_id }}
 ##
 user www-data;
+{%- if worker_processes == 0 %}
+worker_processes auto;
+{%- else %}
 worker_processes {{ worker_processes }};
+{%- endif %}
 pid /run/nginx.pid;
 daemon off;
 
 events {
+    use epoll;
+    multi_accept off;
+    # reuse_port on;
     worker_connections {{ worker_connections }};
     # multi_accept on;
 }
@@ -20,6 +27,8 @@ http {
     sendfile on;
     tcp_nopush on;
     tcp_nodelay on;
+    server_tokens off;
+
     keepalive_timeout {{ keepalive_timeout }};
     types_hash_max_size 2048;
     client_max_body_size {{ client_max_body_size }}m;
@@ -48,7 +57,7 @@ http {
     # Status Settings
     ##
 
-    req_status_zone server "$host,$server_addr:$server_port" 10M;
+    req_status_zone server "$host,$server_addr:$server_port" 32M;
     #req_status_zone_add_indicator server $limit;
 
     server {

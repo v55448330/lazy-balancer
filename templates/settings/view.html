@@ -132,13 +132,13 @@ function select_nic() {
                 if (p.flag == "Success") {
                     alert("修改成功！")
                     top.location = '/settings/'
-                } else if (p.flag == "Error" && p.content == "VerifyFaild") {
+                } else if (p.flag == "Error" && p.context == "VerifyFaild") {
                     alert('修改失败！')
-                } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
                     alert('认证失败！请重新登录！')
                     top.location = '/login/'
                 } else {
-                    alert('修改错误！其他错误：' + p.content)
+                    alert('修改错误！其他错误：' + p.context)
                 }
             },
             error: function(e) {
@@ -157,17 +157,17 @@ function config_backup(type) {
                 dataType: 'json',
                 success: function(p) {
                     if (p.flag == "Success") {
-                        var blob = new Blob([JSON.stringify(p.content)], {
+                        var blob = new Blob([JSON.stringify(p.context)], {
                             type: "text/plain;charset=utf-8"
                         });
                         saveAs(blob, "LazyBalancer.bak");
                         alert("备份成功！")
                         top.location = '/settings/'
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
                         alert('认证失败！请重新登录！')
                         top.location = '/login/'
                     } else {
-                        alert('修改错误！其他错误：' + p.content)
+                        alert('修改错误！其他错误：' + p.context)
                     }
                 },
                 error: function(e) {
@@ -190,12 +190,12 @@ function config_backup(type) {
                         if (p.flag == "Success") {
                             alert("还原完成！")
                             top.location = '/settings/'
-                        } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
                             alert('认证失败！请重新登录！')
                             top.location = '/login/'
                         } else {
                             $('#import_config').val('')
-                            alert('还原失败！错误：' + p.content)
+                            alert('还原失败！错误：' + p.context)
                         }
                     },
                     error: function(e) {
@@ -223,7 +223,7 @@ function modify_pass(reset_admin) {
                         alert("重置成功！请重新创建管理员账号！")
                         top.location = '/logout/'
                     } else {
-                        alert('重置失败！其他错误：' + p.content)
+                        alert('重置失败！其他错误：' + p.context)
                     }
                 },
                 error: function(e) {
@@ -243,13 +243,13 @@ function modify_pass(reset_admin) {
                         if (p.flag == "Success") {
                             alert("修改成功！请重新登录！")
                             top.location = '/logout/'
-                        } else if (p.flag == "Error" && p.content == "VerifyFaild") {
+                        } else if (p.flag == "Error" && p.context == "VerifyFaild") {
                             alert('修改失败！密码验证失败！')
-                        } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
                             alert('认证失败！请重新登录！')
                             top.location = '/login/'
                         } else {
-                            alert('修改错误！其他错误：' + p.content)
+                            alert('修改错误！其他错误：' + p.context)
                         }
                     },
                     error: function(e) {

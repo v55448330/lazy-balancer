@@ -1,6 +1,5 @@
 from jinja2 import Environment, FileSystemLoader
 from subprocess import check_output, CalledProcessError
-from multiprocessing import cpu_count
 from django.conf import settings
 from proxy.models import proxy_config,upstream_config
 from main.models import main_config
@@ -33,9 +32,6 @@ def load_template(template):
 def build_main_config(config):
     template = load_template('nginx.template')
 
-    if config['worker_processes'] == 0:
-        config['worker_processes'] = cpu_count()
-
     return template.render(config)
 
 def build_proxy_config(config):
@@ -48,18 +44,18 @@ def build_default_config(config):
 
     return template.render(config)
 
-def write_config(conf_path,conf_content):
+def write_config(conf_path,conf_context):
     f = open(conf_path, 'w')
-    f.write(conf_content)
+    f.write(conf_context)
     f.close()
 
 def run_shell(cmd):
     (status,output) = commands.getstatusoutput(cmd)
-    content = {
+    context = {
         'status':status,
         'output':output,
     }
-    return content
+    return context
 
 def test_config():
     return run_shell('nginx -t')
@@ -92,7 +88,7 @@ def reload_config():
 
     return run_shell('nginx -s reload')
 
-def get_statusinfo():
+def get_sys_status():
     phymem = psutil.virtual_memory()
     disk = psutil.disk_usage('/')
     conns = psutil.net_connections()
@@ -151,7 +147,7 @@ def get_statusinfo():
     return statusinfo
 
 
-def get_sysinfo():
+def get_sys_info():
     disk_info = psutil.disk_usage('/')
     nic_info = []
     for nic,addrs in psutil.net_if_addrs().items():
@@ -186,4 +182,14 @@ def post_request(url,header=[]):
 def get_proxy_http_status():
     url = "http://127.0.0.1/up_status?format=json"
     ret = json.loads(post_request(url))
+    return ret
+
+def get_req_status():
+    url = "http://127.0.0.1/req_status"
+    req_status = post_request(url)
+    ret = []
+    for req in req_status.split('\n'):
+        r = req.split(',')
+        if r[0] != "":
+            ret.append(r)
     return ret

@@ -97,6 +97,7 @@
     //input filter
     $("[data-mask]").inputmask();
 
+
     function check_auto_process() {
         if ($('#check_worker_processes')[0].checked == true) {
             $('#input_worker_processes').val('')
@@ -108,6 +109,12 @@
             $('#div_worker_processes').removeClass('has-success')
             $('#div_worker_processes').addClass('has-error')
         }
+    }
+
+    if ($('#input_worker_processes').val() == "0"){
+        $('#check_worker_processes').prop('checked','checked')
+        $('#input_worker_processes').val('')
+        $('#input_worker_processes').attr('disabled', 'disabled')
     }
 
     function check_form(_input) {
@@ -132,13 +139,13 @@
                     if (p.flag == "Success") {
                         alert("保存成功!")
                         top.location = '/main/'
-                    } else if (p.flag == "Error" && p.content == "ArgsError") {
+                    } else if (p.flag == "Error" && p.context == "ArgsError") {
                         alert('保存失败！配置项填写错误！')
-                    } else if (p.flag == "Error" && p.content == "AuthFailed") {
+                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
                         alert('认证失败！请重新登录！')
                         top.location = '/login/'
                     } else {
-                        alert('保存错误！其他错误：' + p.content)
+                        alert('保存错误！其他错误：' + p.context)
                     }
                 },
                 error: function(e) {
