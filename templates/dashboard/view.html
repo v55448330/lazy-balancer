@@ -300,13 +300,18 @@ function get_status_info() {
                 add_data(false, p.context.sysstatus.connect_info.total, p.context.sysstatus.connect_info.established, p.context.sysstatus.connect_info.time_wait)
 
                 $('#tb_request_count_body').empty()
-                for (var f in p.context.reqstatus) {
-                    var req = p.context.reqstatus[f]
-                    var req_td = "<tr>"
-                    req_td += "<td>" + req.req_url + "</td><td><small>in</small> " + req.bytes_in + " / <small>out</small> " + req.bytes_out + "</td>"
-                    req_td += "<td>" + req.conn_total + "</td><td>" + req.req_total + "</td><td>" + req.http_2xx + "</td>"
-                    req_td += "<td>" + req.http_3xx + "</td><td>" + req.http_4xx + "</td><td>" + req.http_5xx + "</td></tr>"
+                if (p.context.reqstatus.length == 0) {
+                    var req_td = "<tr><td>无数据</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>"
                     $('#tb_request_count_body').append(req_td)
+                } else {
+                    for (var f in p.context.reqstatus) {
+                        var req = p.context.reqstatus[f]
+                        var req_td = "<tr>"
+                        req_td += "<td>" + req.req_url + "</td><td><small>in</small> " + req.bytes_in + " / <small>out</small> " + req.bytes_out + "</td>"
+                        req_td += "<td>" + req.conn_total + "</td><td>" + req.req_total + "</td><td>" + req.http_2xx + "</td>"
+                        req_td += "<td>" + req.http_3xx + "</td><td>" + req.http_4xx + "</td><td>" + req.http_5xx + "</td></tr>"
+                        $('#tb_request_count_body').append(req_td)
+                    }
                 }
 
             } else if (p.flag == "Error" && p.context == "AuthFailed") {

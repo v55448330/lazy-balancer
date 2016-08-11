@@ -596,7 +596,7 @@ function get_proxy_logs(pk, position) {
 
                     t = setTimeout(function() {
                         get_proxy_logs(pk, p.curr_position);
-                    }, 2000)
+                    }, 3000)
 
                 } else if (p.flag == "Error") {
                     $("#tail_access").empty()

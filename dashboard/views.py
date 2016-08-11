@@ -33,7 +33,6 @@ def get_status_info(request):
             'http_5xx' : r[9]
         }
         r_stat.append(rs)
-    print r_stat
     context = {
         'flag':"Success",
         'context':{

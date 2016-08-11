@@ -5,11 +5,9 @@ from proxy.models import proxy_config,upstream_config
 from main.models import main_config
 import commands
 import platform
-import json
 import os
 import psutil
-import pycurl
-import StringIO
+import requests
 
 def clean_dir(dir_path):
     filelist=[]
@@ -18,7 +16,6 @@ def clean_dir(dir_path):
         filepath = os.path.join(dir_path,f)
         if os.path.isfile(filepath):
             os.remove(filepath)
-    print dir_path+" removed!"
     return True
 
 def load_template(template):
@@ -165,28 +162,18 @@ def get_sys_info():
     }
     return sysinfo
 
-def post_request(url,header=[]):
-    #header.append("Host: " + host)
-    s = StringIO.StringIO()
-    c = pycurl.Curl()
-    c.setopt(c.URL, url)
-    c.setopt(c.WRITEFUNCTION, s.write)
-    c.setopt(c.CONNECTTIMEOUT, 10)
-    c.setopt(c.TIMEOUT, 10)
-    c.setopt(c.SSL_VERIFYPEER, 0)
-    c.setopt(c.HTTPHEADER, header)
-    c.perform()
-    c.close
-    return s.getvalue()
+def post_request(url,headers={}):
+    resp = requests.get(url,timeout=1,headers=headers)
+    return resp
 
 def get_proxy_http_status():
     url = "http://127.0.0.1/up_status?format=json"
-    ret = json.loads(post_request(url))
+    ret = post_request(url,'json').json
     return ret
 
 def get_req_status():
     url = "http://127.0.0.1/req_status"
-    req_status = post_request(url)
+    req_status = post_request(url).text
     ret = []
     for req in req_status.split('\n'):
         r = req.split(',')
