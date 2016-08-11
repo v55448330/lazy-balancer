@@ -5,7 +5,12 @@
 
 > * 项目基于 [Django](https://www.djangoproject.com/) + [AdminLTE](https://www.almsaeedstudio.com/) 构建，在 Ubuntu 14.04 上测试通过；为了保证良好的兼容性，请使用 Chrome 浏览器。
 > * 因为增加了 iptables 自动控制，所以暂时不支持 docker 方式部署；需要本地测试的同学请使用 vagrant 方式
-> * 因为使用了 [nginx_upstream_check_module](http://tengine.taobao.org/document/http_upstream_check.html) 模块，以及为了后续扩展方便，建议大家直接使用 [Tengine](http://tengine.taobao.org/) 替代 Nginx 服务
+> * 为了后续扩展方便，请大家使用 [Tengine](http://tengine.taobao.org/) 替代 Nginx 服务
+
+## 项目地址
+- GITHUB - https://github.com/v55448330/lazy-balancer
+- 码云 - http://git.oschina.net/v55448330/lazy-balancer
+- OSCHINA - http://www.oschina.net/p/nginx-balancer
 
 ## 更新
 * 将 Nginx 更换为 Tengine 以提供更灵活的功能支持以及性能提升
@@ -28,6 +33,8 @@
 * 自动维护防火墙规则（白名单）
 * 支持 TCP 被动后端节点宕机检测
 * 支持 HTTP 主动后端节点宕机检测
+* 日志实时查询
+* 请求统计
 
 ## 运行
 * 克隆代码
