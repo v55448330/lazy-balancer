@@ -554,10 +554,12 @@ function proxy_status(pk, getdata) {
                     alert('认证失败！请重新登录！')
                     top.location = '/login/'
                 } else {
+                    clearTimeout(t)
                     alert('查询失败！' + p.context)
                 }
             },
             error: function(e) {
+                clearTimeout(t)
                 alert('请求失败!')
             }
         })
