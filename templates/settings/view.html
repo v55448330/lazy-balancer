@@ -122,7 +122,7 @@ function check_pass() {
 }
 
 function select_nic() {
-    if (confirm("确认选择的是您的内网网卡？选择错误将有可能导致平台访问中断！")) {
+    if (confirm("确认选择的是您的内网网卡？选择错误将有可能导致平台访问中断！选择网卡后系统将自动维护防火墙策略，22，8000 端口将会只对内网开放！外网将只开放负载均衡器的监听端口！")) {
         jQuery.ajax({
             type: 'post',
             url: '/settings/nic/',

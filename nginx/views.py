@@ -149,7 +149,8 @@ def get_sys_info():
     nic_info = []
     for nic,addrs in psutil.net_if_addrs().items():
         if ":" not in addrs[0].address:
-            nic_info.append({'nic':nic,'address':addrs[0].address})
+            if nic != "lo":
+                nic_info.append({'nic':nic,'address':addrs[0].address})
     sysinfo = {
         'nic' : nic_info,
         'platform' : {
@@ -168,7 +169,7 @@ def post_request(url,headers={}):
 
 def get_proxy_http_status():
     url = "http://127.0.0.1/up_status?format=json"
-    ret = post_request(url,'json').json
+    ret = post_request(url).json()
     return ret
 
 def get_req_status():

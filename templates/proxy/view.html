@@ -264,9 +264,13 @@
                                 <button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.proxy_name }}</button>
                             </td>
                             {% if server.protocols %}
-                            <td><span class="label label-warning">HTTPS</span></td>
+                            <td>
+                                <button class="btn btn-warning btn-xs" disabled>HTTPS</button>
+                            </td>
                             {% else %}
-                            <td><span class="label label-primary">HTTP</span></td>
+                            <td>
+                                <button class="btn btn-primary btn-xs" disabled>HTTP</button>
+                            </td>
                             {% endif %}
                             <td>{{ server.listen }}</td>
                             {% if server.status %}
@@ -283,7 +287,7 @@
                             </td>
                             {% else %}
                             <td>
-                                <button type="button" class="btn btn-primary btn-xs" onclick="proxy_status('{{ server.pk }}')">HTTP</button>
+                                <button type="button" class="btn btn-primary btn-xs" onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
                             </td>
                             {% endif %}
                             <td>{{ server.update_time | timestamp_to_date }}</td>
@@ -492,52 +496,6 @@ function delete_proxy(pk, name) {
     }
 }
 
-function proxy_status(pk) {
-    var post = {
-        pk: pk
-    }
-    jQuery.ajax({
-        type: 'post',
-        url: '/proxy/checkhttp/',
-        data: JSON.stringify(post),
-        dataType: "json",
-        success: function(p) {
-            if (p.flag == "Success") {
-                $('#proxy_status_mtitle').text(p.config_id)
-                $('#div_proxy_status_list').empty()
-
-                for (var f in p.status.servers.server) {
-                    var server = p.status.servers.server[f]
-                    if (server.upstream == p.config_id) {
-                        tb = '<tr>'
-                        tb += '<td>' + server.index + '</td>'
-                        tb += '<td>' + server.name + '</td>'
-                        tb += '<td>' + server.rise + '</td>'
-                        tb += '<td>' + server.fall + '</td>'
-                        if (server.status == "up") {
-                            tb += '<td><span class="label label-success">正常</span></td>'
-                        } else {
-                            tb += '<td><span class="label label-warning">异常</span></td>'
-                        }
-                        tb += '</tr>'
-                        $('#div_proxy_status_list').append(tb)
-                    }
-                }
-
-                $('#proxy_status').modal('show')
-            } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                alert('认证失败！请重新登录！')
-                top.location = '/login/'
-            } else {
-                alert('查询失败！' + p.context)
-            }
-        },
-        error: function(e) {
-            alert('请求失败!')
-        }
-    })
-}
-
 var t
 $(function() {
     $('#proxy_logs').on('hide.bs.modal', function() {
@@ -547,7 +505,68 @@ $(function() {
     })
 });
 
-var tailswitch = false;
+$(function() {
+    $('#proxy_status').on('hide.bs.modal', function() {
+        $("#tail_access").empty()
+        $("#tail_error").empty()
+        clearTimeout(t)
+    })
+});
+
+function proxy_status(pk, getdata) {
+    if (getdata == 1) {
+        var post = {
+            pk: pk
+        }
+        jQuery.ajax({
+            type: 'post',
+            url: '/proxy/checkhttp/',
+            data: JSON.stringify(post),
+            dataType: "json",
+            success: function(p) {
+                if (p.flag == "Success") {
+                    $('#proxy_status_mtitle').text(p.config_id)
+                    $('#div_proxy_status_list').empty()
+
+                    for (var f in p.status.servers.server) {
+                        var server = p.status.servers.server[f]
+                        if (server.upstream == p.config_id) {
+                            tb = '<tr>'
+                            tb += '<td>' + server.index + '</td>'
+                            tb += '<td>' + server.name + '</td>'
+                            tb += '<td>' + server.rise + '</td>'
+                            tb += '<td>' + server.fall + '</td>'
+                            if (server.status == "up") {
+                                tb += '<td><span class="label label-success">正常</span></td>'
+                            } else {
+                                tb += '<td><span class="label label-warning">异常</span></td>'
+                            }
+                            tb += '</tr>'
+                            $('#div_proxy_status_list').append(tb)
+                        }
+                    }
+                    t = setTimeout(function() {
+                        proxy_status(pk, 1);
+                    }, 3000)
+
+
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('查询失败！' + p.context)
+                }
+            },
+            error: function(e) {
+                alert('请求失败!')
+            }
+        })
+    } else {
+        proxy_status(pk, 1)
+        $('#proxy_status').modal('show')
+    }
+}
+
 
 function tailScroll(tail) {
     var height = tail.get(0).scrollHeight;
@@ -573,7 +592,6 @@ function get_proxy_logs(pk, position) {
 
         $('#proxy_logs').modal('show')
     } else {
-        tailswitch = true
         post = {
             "curr_position": position,
             "pk": pk
