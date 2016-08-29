@@ -46,9 +46,9 @@ def modify_pass(request):
                 user.save()
                 content = { "flag":"Success" }
             else:
-                content = { "flag":"Error","content":"VerifyFaild" }
+                content = { "flag":"Error","context":"VerifyFaild" }
     except Exception,e:
-        content = { "flag":"Error","content":str(e) }
+        content = { "flag":"Error","context":str(e) }
 
     return HttpResponse(json.dumps(content))
 
@@ -61,7 +61,7 @@ def admin_reset(request):
             User.objects.all().delete()
             content = { "flag":"Success" }
     except Exception,e:
-        content = { "flag":"Error","content":str(e) }
+        content = { "flag":"Error","context":str(e) }
 
     return HttpResponse(json.dumps(content))
 
@@ -77,7 +77,7 @@ def select_nic(request):
         set_firewall()
         content = { "flag":"Success" }
     except Exception,e:
-        content = { "flag":"Error","content":str(e) }
+        content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
 
 @is_auth
@@ -96,9 +96,9 @@ def config_backup(request,action):
                 "upstream_config" : u_config,
                 "proxy_config" : p_config,
             }
-            content = { "flag":"Success", "content": config }
+            content = { "flag":"Success", "context": config }
         except Exception,e:
-            content = { "flag":"Error","content":str(e) }
+            content = { "flag":"Error","context":str(e) }
 
     elif action == "import":
         try:
@@ -123,6 +123,6 @@ def config_backup(request,action):
 
             content = { "flag":"Success" }
         except Exception,e:
-            content = { "flag":"Error","content":str(e) }
+            content = { "flag":"Error","context":str(e) }
 
     return HttpResponse(json.dumps(content))
