@@ -64,21 +64,6 @@ def admin_reset(request):
     return HttpResponse(json.dumps(content))
 
 @is_auth
-def select_nic(request):
-    try:
-        post = json.loads(request.body)
-        internal_nic = post['select_nic']
-        if system_settings.objects.all().count() != 0:
-            system_settings.objects.all().update(internal_nic=internal_nic)
-        else:
-            system_settings.objects.create(internal_nic=internal_nic)
-        set_firewall()
-        content = { "flag":"Success" }
-    except Exception,e:
-        content = { "flag":"Error","context":str(e) }
-    return HttpResponse(json.dumps(content))
-
-@is_auth
 def config_backup(request,action):
     main_config_qc = main_config.objects.all()
     upstream_config_qc = upstream_config.objects.all()

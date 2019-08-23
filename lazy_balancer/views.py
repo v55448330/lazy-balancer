@@ -21,7 +21,6 @@ def login_view(request):
             return HttpResponseRedirect(redirect_to)
 
     else:
-        set_firewall()
         if request.GET.has_key('next'):
             redirect_to = request.GET['next']
 
