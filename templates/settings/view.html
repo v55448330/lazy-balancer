@@ -46,37 +46,6 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h4 class="box-title">网络选择<small> 用于创建防火墙规则</small></h4>
-            </div>
-            <div class="box-body">
-                <form class="form-horizontal" id="form_select_nic">
-                    <div class="form-group">
-                        <label class="col-sm-1 control-label">内网卡</label>
-                        <div class="col-sm-4">
-                            <div id="div_select_nic">
-                                <select class="form-control" name="select_nic" id="select_nic">
-                                    {% for n in nic.nics %} {% if n.nic == nic.internal_nic %}
-                                    <option value="{{ n.nic }}" selected>{{ n.nic }} - {{ n.address }}</option>
-                                    {% else %}
-                                    <option value="{{ n.nic }}">{{ n.nic }} - {{ n.address }}</option>
-                                    {% endif %} {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="box-footer">
-                <button type="button" class="btn btn-primary" onclick="select_nic()">保存</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-primary">
-            <div class="box-header with-border">
                 <h4 class="box-title">配置备份<small> 通过文件备份和还原负载均衡配置</small></h4>
             </div>
             <div class="box-body">
@@ -119,33 +88,6 @@ function check_pass() {
         $(_verify_pass.closest("div")).toggleClass('has-error')
     }
     return _return
-}
-
-function select_nic() {
-    if (confirm("确认选择的是您的内网网卡？选择错误将有可能导致平台访问中断！选择网卡后系统将自动维护防火墙策略，22，8000 端口将会只对内网开放！外网将只开放负载均衡器的监听端口！")) {
-        jQuery.ajax({
-            type: 'post',
-            url: '/settings/nic/',
-            data: JSON.stringify($('#form_select_nic').serializeObject()),
-            dataType: 'json',
-            success: function(p) {
-                if (p.flag == "Success") {
-                    alert("修改成功！")
-                    top.location = '/settings/'
-                } else if (p.flag == "Error" && p.context == "VerifyFaild") {
-                    alert('修改失败！')
-                } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                    alert('认证失败！请重新登录！')
-                    top.location = '/login/'
-                } else {
-                    alert('修改错误！其他错误：' + p.context)
-                }
-            },
-            error: function(e) {
-                alert('请求失败!')
-            }
-        })
-    }
 }
 
 function config_backup(type) {

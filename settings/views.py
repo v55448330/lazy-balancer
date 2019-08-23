@@ -7,7 +7,6 @@ from django.http import HttpResponse
 from proxy.models import *
 from main.models import *
 from lazy_balancer.views import is_auth
-from nginx.ip import set_firewall
 from nginx.views import reload_config
 from .models import system_settings
 from nginx.views import *
@@ -28,9 +27,8 @@ def view(request):
 
     if system_settings.objects.all().count() != 0:
         settings = system_settings.objects.all()[0]
-        nic['internal_nic'] = settings.internal_nic
 
-    return render_to_response('settings/view.html',{ 'user' : user , 'nic' : nic })
+    return render_to_response('settings/view.html',{ 'user' : user })
 
 @is_auth
 def modify_pass(request):
