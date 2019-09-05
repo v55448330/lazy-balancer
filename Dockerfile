@@ -1,7 +1,7 @@
 FROM alpine:3.10
 
 ENV TENGINE_VERSION 2.3.2
-ENV LAZYBALANCER_VERSION v0.8.0beta
+ENV LAZYBALANCER_VERSION v0.8.1beta
 
 RUN set -x \
     && addgroup -g 101 -S www-data \
