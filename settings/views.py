@@ -30,6 +30,7 @@ def view(request):
     _sync_status = sync_status.objects.all()
     if len(_system_settings) == 0:
         system_settings.objects.create(config_sync_type=0)
+        _system_settings = system_settings.objects.all()
     
     return render_to_response('settings/view.html',{ 'user': user, 'settings': _system_settings[0], 'sync_status': _sync_status })
 
