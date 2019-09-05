@@ -34,6 +34,8 @@ RUN set -x \
             --prefix=/etc/nginx --sbin-path=/usr/sbin \
             --error-log-path=/var/log/nginx/error.log \
             --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid \
+            --ngx_http_lua_module \
+            --with-http_reqstat_module \
             --with-http_stub_status_module \
     && make && make install \
     && mkdir -p /etc/nginx/conf.d \
@@ -51,6 +53,6 @@ WORKDIR /app/lazy_balancer
 
 EXPOSE 8000
 
-CMD [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
+CMD [ "supervisord", "-c", "/etc/supervisor/supervisord_docker.conf" ]
 
 
