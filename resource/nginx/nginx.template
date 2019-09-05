@@ -40,11 +40,11 @@ http {
     # Logging Settings
     ##
 
-    #access_log /dev/stdout;
-    #error_log /dev/stdout;
+    access_log /dev/stdout;
+    error_log /dev/stdout;
 
-    access_log {{ access_log }};
-    error_log {{ error_log }};
+    #access_log {{ access_log }};
+    #error_log {{ error_log }};
 
     ##
     # Gzip Settings
