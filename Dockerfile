@@ -10,7 +10,7 @@ RUN set -x \
     && apkArch="$(cat /etc/apk/arch)" \
     && tempDir="$(mktemp -d)" \
     && chown nobody:nobody ${tempDir} \
-    && apk add --no-cache python2 py2-pip supervisor pcre luajit \
+    && apk add --no-cache python2 py2-pip supervisor pcre libxml2 libxslt libgd libgcc \
     && apk add --no-cache --virtual .build-deps \
                 gcc \
                 libc-dev \
@@ -30,7 +30,7 @@ RUN set -x \
                 python-dev \
     && curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz \
     && tar zxf luajit.tar.gz -C ${tempDir} \
-    && cd ${tempDir}/LuaJIT-${LUAJIT_VERSION} \
+    && cd ${tempDir}/luajit2-${LUAJIT_VERSION#v} \
     && make && make install \
     && export LUAJIT_INC=/usr/local/include/luajit-2.1 \
     && export LUAJIT_LIB=/usr/local/lib \
@@ -77,14 +77,14 @@ RUN set -x \
             --add-module=./modules/ngx_http_reqstat_module \
             --with-http_geoip_module=dynamic \
     && make && make install \
-    && mkdir -p /etc/nginx/conf.d \
-    && echo "daemon off;" | sudo tee -a /etc/nginx/nginx.conf \
-    && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && mkdir -p /app/lazy_balancer \
     && curl -fsSL https://github.com/v55448330/lazy-balancer/archive/${LAZYBALANCER_VERSION}.tar.gz -o lazybalancer.tar.gz \
     && tar zxf lazybalancer.tar.gz --strip-components=1 -C /app/lazy_balancer \
+    && mkdir -p /app/lazy_balancer/db \
     && chown -R www-data:www-data /app \
-    && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ \
+    && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ && rm -rf /etc/supervisor/conf.d/supervisor_balancer.conf \
+    && mkdir -p /etc/nginx/conf.d \
+    && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && pip install -r requirements.txt \
     && apk del .build-deps \
     && rm -rf ${tempDir}
