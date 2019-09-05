@@ -12,7 +12,8 @@
                         <label class="col-sm-1 control-label">原密码</label>
                         <div class="col-sm-4">
                             <div id="div_old_password">
-                                <input type="password" class="form-control" name="old_password" id="input_old_password" placeholder="请输入当前密码" onblur="check_pass()">
+                                <input type="password" class="form-control" name="old_password" id="input_old_password"
+                                    placeholder="请输入当前密码" onblur="check_pass()">
                             </div>
                         </div>
                     </div>
@@ -20,7 +21,8 @@
                         <label class="col-sm-1 control-label">新密码</label>
                         <div class="col-sm-4">
                             <div id="div_new_password">
-                                <input type="password" class="form-control" name="new_password" id="input_new_password" placeholder="请输入新密码" onblur="check_pass()">
+                                <input type="password" class="form-control" name="new_password" id="input_new_password"
+                                    placeholder="请输入新密码" onblur="check_pass()">
                             </div>
                         </div>
                     </div>
@@ -28,7 +30,8 @@
                         <label class="col-sm-1 control-label">新密码</label>
                         <div class="col-sm-4">
                             <div id="div_verify_password">
-                                <input type="password" class="form-control" name="verify_password" id="input_verify_password" placeholder="再次输入新密码" onblur="check_pass()">
+                                <input type="password" class="form-control" name="verify_password"
+                                    id="input_verify_password" placeholder="再次输入新密码" onblur="check_pass()">
                             </div>
                         </div>
                     </div>
@@ -46,163 +49,316 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h4 class="box-title">配置管理<small> 通过文件备份和还原负载均衡配置</small></h4>
+                <h4 class="box-title">配置管理<small> 通过文件或同步的方式备份和还原负载均衡配置</small></h4>
             </div>
             <div class="box-body">
+                <form class="form-horizontal" id="form_config_sync">
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">同步配置</label>
+                        <div class="col-sm-11">
+                            <div class="radio">
+                                <label class="col-sm-2">
+                                    <input type="radio" name="config_sync_type" id="radio_sync_disable" value="0"
+                                        onclick="display_sync_form(0)"> 禁用
+                                </label>
+                                <label class="col-sm-2">
+                                    <input type="radio" name="config_sync_type" id="radio_sync_master" value="1"
+                                        onclick="display_sync_form(1)"> 主节点
+                                </label>
+                                <label class="col-sm-2">
+                                    <input type="radio" name="config_sync_type" id="radio_sync_slave" value="2"
+                                        onclick="display_sync_form(2)"> 从节点
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="form_config_sync_master">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Access Key</label>
+                            <div class="col-sm-4">
+                                <input type="input" class="form-control" name="config_sync_access_key"
+                                    id="input_config_sync_access_key" readonly>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <button class="btn btn-primary" href="#" onclick="update_sync_key()">
+                                    更新</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="form_config_sync_slave">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">主节点URL</label>
+                            <div class="col-sm-4">
+                                <div>
+                                    <input type="input" class="form-control" name="config_sync_master_api"
+                                        id="input_config_sync_master_api" placeholder="http(s)://<host>:<port>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">同步选项</label>
+                            <div class="col-sm-8">
+                                <div class="checkbox">
+                                    <label class="col-sm-8">
+                                        <input type="checkbox" name="config_sync_scope" id="check_sync_scope">
+                                        仅同步负载均衡配置
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="form_config_sync_status">
+                    <div class="form-group">
+                            <label class="col-sm-1 control-label">同步状态</label>
+                            <div class="col-sm-5">
+                                    <table id="tb_request_count" class="table table-bordered table-hover dataTable" role="grid">
+                                            <thead>
+                                                <tr role="row">
+                                                    <th class="sorting" rowspan="1" colspan="1">节点地址</th>
+                                                    <th class="sorting" rowspan="1" colspan="1">更新时间</th>
+                                                    <th class="sorting" rowspan="1" colspan="1">同步状态</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody> 
+                                                {% for s in sync_status %}
+                                                    <td>{{ s.address }}</td>
+                                                    <td>{{ s.update_time | date:'Y-m-d H:i:s' }}</td>
+                                                    {% if s.status == 1 %}
+                                                    <td><button class="btn btn-warning btn-xs">正在同步</button></td>
+                                                    {% elif s.status == 2 %}
+                                                    <td><button class="btn btn-success btn-xs">同步完成</button></td>
+                                                    {% elif s.status == 3 %}
+                                                    <td><button class="btn btn-denger btn-xs">同步失败</button></td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="box-footer">
+                <button type="button" class="btn btn-primary" onclick="save_config_sync()">保存同步配置</button>
                 <button type="button" class="btn btn-primary" onclick="config_backup(1)">备份</button>
                 <button type="button" class="btn btn-primary" onclick="import_config.click()">还原</button>
-                <input type="file" style="display:none" name="import_config" id="import_config" onchange="config_backup(0)" />
+                <input type="file" style="display:none" name="import_config" id="import_config"
+                    onchange="config_backup(0)" />
             </div>
         </div>
     </div>
-</div>
 
 
-<script>
-//init page
-$('#menu_system_config').addClass('active')
-$('#menu_service').removeClass('active')
-$('#page_header').text('系统配置')
-$('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
-$('#page_nav').text('系统配置')
-$('#page_name').text('系统配置')
+    <script>
+        //init page
+        $('#menu_system_config').addClass('active')
+        $('#menu_service').removeClass('active')
+        $('#page_header').text('系统配置')
+        $('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
+        $('#page_nav').text('系统配置')
+        $('#page_name').text('系统配置')
 
-function check_pass() {
-    var _old_pass = $('#input_old_password')[0]
-    var _new_pass = $('#input_new_password')[0]
-    var _verify_pass = $('#input_verify_password')[0]
-    _return = false
-    $(_new_pass.closest("div")).removeClass()
-    $(_verify_pass.closest("div")).removeClass()
-    if (_old_pass.value.length > 7 && _new_pass.value.length > 7 && _verify_pass.value.length > 7) {
-        if (_new_pass.value == _verify_pass.value) {
-            $(_new_pass.closest("div")).toggleClass('has-success')
-            $(_verify_pass.closest("div")).toggleClass('has-success')
-            _return = true
-        } else {
-            $(_new_pass.closest("div")).toggleClass('has-error')
-            $(_verify_pass.closest("div")).toggleClass('has-error')
-        }
-    } else {
-        $(_new_pass.closest("div")).toggleClass('has-error')
-        $(_verify_pass.closest("div")).toggleClass('has-error')
-    }
-    return _return
-}
-
-function config_backup(type) {
-    if (type == 1) {
-        if (confirm("此操作会将负载均衡器<全局配置>和<负载均衡配置>备份为文件以供还原，是否继续？")) {
-            jQuery.ajax({
-                type: 'post',
-                url: '/settings/config/export/',
-                dataType: 'json',
-                success: function(p) {
-                    if (p.flag == "Success") {
-                        var blob = new Blob([JSON.stringify(p.context)], {
-                            type: "text/plain;charset=utf-8"
-                        });
-                        saveAs(blob, "LazyBalancer.bak");
-                        alert("备份成功！")
-                        top.location = '/settings/'
-                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else {
-                        alert('修改错误！其他错误：' + p.context)
-                    }
-                },
-                error: function(e) {
-                    alert('请求失败!')
-                }
-            })
-        }
-    } else {
-        if (confirm("此操作会将负载均衡器<全局配置>和<负载均衡配置>通过您提供的配置文件覆盖，是否继续？")) {
-            var reader = new FileReader()
-            reader.readAsText($('#import_config')[0].files[0])
-            reader.onload = function(e) {
-                $.ajax({
-                    type: 'post',
-                    url: '/settings/config/import/',
-                    data: this.result,
-                    dataType: 'json',
-                    success: function(p) {
-                        console.log(p)
-                        if (p.flag == "Success") {
-                            alert("还原完成！")
-                            top.location = '/settings/'
-                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
-                        } else {
-                            $('#import_config').val('')
-                            alert('还原失败！错误：' + p.context)
-                        }
-                    },
-                    error: function(e) {
-                        $('#import_config').val('')
-                        alert('请求失败!')
-                    }
-                })
-            }
-        } else {
-            $('#import_config').val('')
-        }
-    }
-}
-
-function modify_pass(reset_admin) {
-    if (reset_admin == 1) {
-        if (confirm("确认要重置管理员？")) {
-            jQuery.ajax({
-                type: 'post',
-                url: '/settings/admin/',
-                data: '{"reset":1}',
-                dataType: 'json',
-                success: function(p) {
-                    if (p.flag == "Success") {
-                        alert("重置成功！请重新创建管理员账号！")
-                        top.location = '/logout/'
-                    } else {
-                        alert('重置失败！其他错误：' + p.context)
-                    }
-                },
-                error: function(e) {
-                    alert('请求失败!')
-                }
-            })
-        }
-    } else {
-        if (check_pass()) {
-            if (confirm("确认要修改密码？")) {
+        function save_config_sync() {
+            if (confirm("确认要保存这样的配置？")) {
+                var data = $('#form_config_sync').serializeObject()
                 jQuery.ajax({
                     type: 'post',
-                    url: '/settings/password/',
-                    data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                    url: '/settings/config/sync_save_config/',
+                    data: JSON.stringify(data),
                     dataType: 'json',
                     success: function(p) {
                         if (p.flag == "Success") {
-                            alert("修改成功！请重新登录！")
-                            top.location = '/logout/'
-                        } else if (p.flag == "Error" && p.context == "VerifyFaild") {
-                            alert('修改失败！密码验证失败！')
-                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
+                            alert("保存成功!")
+                            top.location = '/settings/'
                         } else {
-                            alert('修改错误！其他错误：' + p.context)
+                            alert("保存失败!请检查参数！")
                         }
-                    },
-                    error: function(e) {
-                        alert('请求失败!')
                     }
                 })
             }
-        } else {
-            alert('密码输入有误！')
         }
-    }
-}
-</script>
-{% endblock %}
+
+        function update_sync_key() {
+            if (confirm("更新同步 AccessKey 将打开主机同步模式？是否继续？")) {
+                jQuery.ajax({
+                    type: 'post',
+                    url: '/settings/config/sync_update_token/',
+                    dataType: 'json',
+                    success: function(p) {
+                        if (p.flag == "Success") {
+                            alert("更新成功!")
+                            top.location = '/settings/'
+                        }
+                    }
+                })
+            }
+        }
+
+        function check_pass() {
+            var _old_pass = $('#input_old_password')[0]
+            var _new_pass = $('#input_new_password')[0]
+            var _verify_pass = $('#input_verify_password')[0]
+            _return = false
+            $(_new_pass.closest("div")).removeClass()
+            $(_verify_pass.closest("div")).removeClass()
+            if (_new_pass.value.length > 7 && _verify_pass.value.length > 7) {
+                if (_new_pass.value == _verify_pass.value) {
+                    $(_new_pass.closest("div")).toggleClass('has-success')
+                    $(_verify_pass.closest("div")).toggleClass('has-success')
+                    _return = true
+                } else {
+                    $(_new_pass.closest("div")).toggleClass('has-error')
+                    $(_verify_pass.closest("div")).toggleClass('has-error')
+                }
+            } else {
+                $(_new_pass.closest("div")).toggleClass('has-error')
+                $(_verify_pass.closest("div")).toggleClass('has-error')
+            }
+            return _return
+        }
+
+        function display_sync_form(sync_type) {
+            $('#form_config_sync_master').hide()
+            $('#form_config_sync_slave').hide()
+            $('#form_config_sync_status').hide()
+            if (sync_type == 1) {
+                $('#form_config_sync_master').show()
+                $('#form_config_sync_status').show()
+            } else if (sync_type == 2) {
+                $('#form_config_sync_slave').show()
+                $('#form_config_sync_status').show()
+            }
+        }
+
+        function config_backup(type) {
+            if (type == 1) {
+                if (confirm("此操作会将负载均衡器<全局配置>/<负载均衡配置>/<系统配置>备份为文件以供还原，其中管理员密码不会被备份，是否继续？")) {
+                    jQuery.ajax({
+                        type: 'post',
+                        url: '/settings/config/export/',
+                        dataType: 'json',
+                        success: function (p) {
+                            if (p.flag == "Success") {
+                                var blob = new Blob([JSON.stringify(p.context)], {
+                                    type: "text/plain;charset=utf-8"
+                                });
+                                saveAs(blob, "LazyBalancer.bak");
+                                alert("备份成功！")
+                                top.location = '/settings/'
+                            } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                                alert('认证失败！请重新登录！')
+                                top.location = '/login/'
+                            } else {
+                                alert('修改错误！其他错误：' + p.context)
+                            }
+                        },
+                        error: function (e) {
+                            alert('请求失败!')
+                        }
+                    })
+                }
+            } else {
+                if (confirm("此操作会将负载均衡器所有配置通过您提供的配置文件覆盖，是否继续？")) {
+                    var reader = new FileReader()
+                    reader.readAsText($('#import_config')[0].files[0])
+                    reader.onload = function (e) {
+                        $.ajax({
+                            type: 'post',
+                            url: '/settings/config/import/',
+                            data: this.result,
+                            dataType: 'json',
+                            success: function (p) {
+                                console.log(p)
+                                if (p.flag == "Success") {
+                                    alert("还原完成！")
+                                    top.location = '/settings/'
+                                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                                    alert('认证失败！请重新登录！')
+                                    top.location = '/login/'
+                                } else {
+                                    $('#import_config').val('')
+                                    alert('还原失败！错误：' + p.context)
+                                }
+                            },
+                            error: function (e) {
+                                $('#import_config').val('')
+                                alert('请求失败!')
+                            }
+                        })
+                    }
+                } else {
+                    $('#import_config').val('')
+                }
+            }
+        }
+
+        function modify_pass(reset_admin) {
+            if (reset_admin == 1) {
+                if (confirm("确认要重置管理员？")) {
+                    jQuery.ajax({
+                        type: 'post',
+                        url: '/settings/admin/reset/',
+                        dataType: 'json',
+                        success: function (p) {
+                            if (p.flag == "Success") {
+                                alert("重置成功！请重新创建管理员账号！")
+                                top.location = '/logout/'
+                            } else {
+                                alert('重置失败！其他错误：' + p.context)
+                            }
+                        },
+                        error: function (e) {
+                            alert('请求失败!')
+                        }
+                    })
+                }
+            } else {
+                if (check_pass()) {
+                    if (confirm("确认要修改密码？")) {
+                        jQuery.ajax({
+                            type: 'post',
+                            url: '/settings/admin/modify/',
+                            data: JSON.stringify($('#form_modify_pass').serializeObject()),
+                            dataType: 'json',
+                            success: function (p) {
+                                if (p.flag == "Success") {
+                                    alert("修改成功！请重新登录！")
+                                    top.location = '/logout/'
+                                } else if (p.flag == "Error" && p.context == "VerifyFaild") {
+                                    alert('修改失败！密码验证失败！')
+                                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                                    alert('认证失败！请重新登录！')
+                                    top.location = '/login/'
+                                } else {
+                                    alert('修改错误！其他错误：' + p.context)
+                                }
+                            },
+                            error: function (e) {
+                                alert('请求失败!')
+                            }
+                        })
+                    }
+                } else {
+                    alert('密码输入有误！')
+                }
+            }
+        }
+
+        {% if settings.config_sync_type == 1 %}
+        $('#input_config_sync_access_key').val("{{ settings.config_sync_access_key }}")
+        $('#radio_sync_master').click() 
+        {% elif settings.config_sync_type == 2 %}
+        $('#input_config_sync_master_api').val("{{ settings.config_sync_master_url }}")
+            {% if settings.config_sync_scope == 1 %}
+            $('#check_sync_scope').prop("checked",true);
+            {% endif %}
+        $('#radio_sync_slave').click() 
+        {% else %}
+        $('#radio_sync_disable').click() 
+        {% endif %}
+
+
+    </script>
+    {% endblock %}

@@ -693,8 +693,6 @@ function save_balancer() {
                     top.location = '/proxy/'
                 } else if (p.flag == "Error" && p.context == "ArgsError") {
                     alert('保存失败！配置项填写错误！')
-                } else if (p.flag == "Error" && p.context == "NicError") {
-                    alert('保存失败！内网网卡选择错误！')
                 } else if (p.flag == "Error" && p.context == "AuthFailed") {
                     alert('认证失败！请重新登录！')
                     top.location = '/login/'

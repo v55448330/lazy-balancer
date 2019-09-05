@@ -19,7 +19,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.view),
-    url(r'^password/$', views.modify_pass),
-    url(r'^admin/$', views.admin_reset),
-    url(r'^config/(?P<action>.*)/$', views.config_backup),
+    url(r'^admin/(?P<action>.*)/$', views.admin_password),
+    url(r'^sync/(?P<action>.*)/$', views.sync_config),
+    url(r'^config/(?P<action>.*)/$', views.config),
 ]

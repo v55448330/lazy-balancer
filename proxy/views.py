@@ -47,10 +47,10 @@ def check_http_status(request):
         proxy = proxy_config.objects.get(pk=post['pk'])
         status = get_proxy_http_status()
 
-        context = { "flag":"Success","config_id":proxy.config_id,"status":status}
+        content = { "flag":"Success","config_id":proxy.config_id,"status":status}
     except Exception, e:
-        context = { "flag":"Error","context":str(e) }
-    return HttpResponse(json.dumps(context))
+        content = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(content))
     pass
 
 @is_auth
@@ -82,10 +82,10 @@ def query_proxy(request):
                 'fail_timeout':ui.fail_timeout
             })
             pass
-        context = { "flag":"Success","context":{"proxy":p,"upstream":u}}
+        content = { "flag":"Success","context":{"proxy":p,"upstream":u}}
     except Exception, e:
-        context = { "flag":"Error","context":str(e) }
-    return HttpResponse(json.dumps(context))
+        content = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(content))
     pass
 
 @is_auth
@@ -95,10 +95,10 @@ def delete_proxy(request):
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.delete()
         reload_config()
-        context = { "flag":"Success" }
+        content = { "flag":"Success" }
     except Exception, e:
-        context = { "flag":"Error","context":str(e) }
-    return HttpResponse(json.dumps(context))
+        content = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(content))
     pass
 
 @is_auth
@@ -109,11 +109,11 @@ def change_status(request):
         proxy.status = bool(int(post['status']))
         proxy.save()
         reload_config()
-        context = { "flag":"Success" }
+        content = { "flag":"Success" }
     except Exception, e:
-        context = { "flag":"Error","context":str(e) }
+        content = { "flag":"Error","context":str(e) }
 
-    return HttpResponse(json.dumps(context))
+    return HttpResponse(json.dumps(content))
     pass
 
 @is_auth
@@ -157,11 +157,11 @@ def proxy_logs(request):
 
             curr_position['error'] = file_.tell()
 
-        context = { "flag":"Success" , "log_body":log_body , "curr_position":curr_position }
+        content = { "flag":"Success" , "log_body":log_body , "curr_position":curr_position }
     except Exception, e:
-        context = { "flag":"Error","context":str(e) }
+        content = { "flag":"Error","context":str(e) }
 
-    return HttpResponse(json.dumps(context))
+    return HttpResponse(json.dumps(content))
     pass
 
 @is_auth
@@ -286,16 +286,16 @@ def save(request):
                     obj_p_config.save()
                     pass
 
-                context = {"flag":"Success"}
+                content = {"flag":"Success"}
             else:
-                context = {"flag":"Error","context":test_ret['output']}
+                content = {"flag":"Error","context":test_ret['output']}
 
             reload_config()
         else:
-            context = {"flag":"Error","context":"ArgsError"}
+            content = {"flag":"Error","context":"ArgsError"}
 
     except Exception, e:
-        context = {"flag":"Error","context":str(e)}
+        content = {"flag":"Error","context":str(e)}
 
-    return HttpResponse(json.dumps(context))
+    return HttpResponse(json.dumps(content))
     pass
