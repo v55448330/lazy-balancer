@@ -9,7 +9,7 @@ RUN set -x \
     && apkArch="$(cat /etc/apk/arch)" \
     && tempDir="$(mktemp -d)" \
     && chown nobody:nobody ${tempDir} \
-    && apk add --no-cache python2 py2-pip supervisor \
+    && apk add --no-cache python2 py2-pip supervisor pcre \
     && apk add --no-cache --virtual .build-deps \
                 gcc \
                 libc-dev \
@@ -29,23 +29,27 @@ RUN set -x \
                 python-dev \
     && curl -fsSL https://github.com/alibaba/tengine/archive/${TENGINE_VERSION}.tar.gz -o tengine.tar.gz \
     && tar zxf tengine.tar.gz -C ${tempDir} \
-    && cd ${tempDir}/tengine$-{TENGINE_VERSION} \
+    && cd ${tempDir}/tengine-${TENGINE_VERSION} \
     && ./configure --user=www-data --group=www-data \
             --prefix=/etc/nginx --sbin-path=/usr/sbin \
             --error-log-path=/var/log/nginx/error.log \
             --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid \
+            --with-http_stub_status_module \
     && make && make install \
     && mkdir -p /etc/nginx/conf.d \
     && echo "daemon off;" | sudo tee -a /etc/nginx/nginx.conf \
-    && mkdir -p /app \
-    && curl -fsSL https://github.com/v55448330/lazy-balancer/archive/${LAZYBALANCER_VERSION}}.tar.gz -o lazybalancer.tar.gz \
+    && mkdir -p /app/lazy_balancer \
+    && curl -fsSL https://github.com/v55448330/lazy-balancer/archive/${LAZYBALANCER_VERSION}.tar.gz -o lazybalancer.tar.gz \
     && tar zxf lazybalancer.tar.gz --strip-components=1 -C /app/lazy_balancer \
     && chown -R www-data:www-data /app \
     && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ \
-    && python manage.py makemigrations \
-    && python manage.py migrate \
+    && pip install -r requirements.txt \
     && apk del .build-deps \
     && rm -rf ${tempDir}
+
+WORKDIR /app/lazy_balancer 
+
+EXPOSE 8000
 
 CMD [ "supervisord", "-c", "/etc/supervisor/supervisord.conf" ]
 
