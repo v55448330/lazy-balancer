@@ -12,6 +12,7 @@ RUN set -x \
     && chown nobody:nobody ${tempDir} \
     && apk add --no-cache python2 py2-pip supervisor pcre libxml2 libxslt libgd libgcc \
     && apk add --no-cache --virtual .build-deps \
+                tzdata \
                 gcc \
                 libc-dev \
                 make \
@@ -28,6 +29,7 @@ RUN set -x \
                 alpine-sdk \
                 findutils \
                 python-dev \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz \
     && tar zxf luajit.tar.gz -C ${tempDir} \
     && cd ${tempDir}/luajit2-${LUAJIT_VERSION#v} \

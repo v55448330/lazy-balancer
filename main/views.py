@@ -52,10 +52,10 @@ def save(request):
             config_path= "/etc/nginx/nginx.conf"
 
             if not access_log:
-                access_log = "/var/log/nginx/access.log"
+                access_log = "/dev/stdout"
 
             if not error_log:
-                error_log = "/var/log/nginx/error.log"
+                error_log = "/dev/stderr"
 
             m_config = {
                 'config_id' : config_id,

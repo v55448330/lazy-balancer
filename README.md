@@ -47,6 +47,7 @@ docker run -d --restart=always --name=lazy_balancer \
     -p 8000:8000 -p 80:80 -p 443:443 \
     -v <nginx_config_dir>:</etc/nginx> \
     -v <db_dir>:/app/lazy_balancer/db \
+    -v <log_dir>:/var/log/nginx \
     <lazy_balancer>:<v0.8.0beta>
 ```
 * 初始化数据库
