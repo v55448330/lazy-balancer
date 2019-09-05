@@ -36,6 +36,25 @@
 * 请求统计
 
 ## 运行
+### 容器
+* 编译镜像
+```
+docker build -t <lazy_balancer>:<v0.8.1beta>
+```
+* 启动命令
+```
+docker run -d --restart=always --name=lazy_balancer \
+    -p 8000:8000 -p 80:80 -p 443:443 \
+    -v <nginx_config_dir>:</etc/nginx> \
+    -v <db_dir>:/app/lazy_balancer/db \
+    <lazy_balancer>:<v0.8.1beta>
+```
+* 初始化数据库
+```
+docker exec lazy_balancer python manage.py makemigrations --noinput
+docker exec lazy_balancer python manage.py migrate
+```
+### 主机
 * 克隆代码
 ```
 mkdir -p /app  

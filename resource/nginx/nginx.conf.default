@@ -1,0 +1,85 @@
+##
+# Config ID : default
+##
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+daemon off;
+
+events {
+    use epoll;
+    multi_accept off;
+    # reuse_port on;
+    worker_connections 65535;
+    # multi_accept on;
+}
+
+http {
+
+    ##
+    # Basic Settings
+    ##
+
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    server_tokens off;
+
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    client_max_body_size 50m;
+
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    ##
+    # Logging Settings
+    ##
+
+    access_log /dev/stdout;
+    error_log /dev/stdout;
+
+    #access_log {{ access_log }};
+    #error_log {{ error_log }};
+
+    ##
+    # Gzip Settings
+    ##
+
+    gzip on;
+    gzip_disable "msie6";
+
+    ##
+    # Status Settings
+    ##
+
+    req_status_zone server "$host,$server_addr:$server_port" 32M;
+    #req_status_zone_add_indicator server $limit;
+
+    server {
+        listen 80 default;
+
+        location / {
+            return 444;
+        }
+
+        location /up_status {
+            check_status;
+            allow 127.0.0.1;
+            deny all;
+        }
+        location /req_status {
+            req_status_show;
+            #req_status_show_field req_total $limit;
+            allow 127.0.0.1;
+            deny all;
+        }
+    }
+
+    ##
+    # Virtual Host Configs
+    ##
+
+    include /etc/nginx/conf.d/*.conf;
+
+}
