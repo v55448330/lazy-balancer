@@ -16,7 +16,7 @@ Vagrant.configure(2) do |config|
     config.vm.provision "shell", inline: <<-SHELL
       sudo apt-get update --fix-missing
       sudo apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev
-      sudo apt-get install -y nginx supervisor python-dev python-pip iptables
+      sudo apt-get install -y supervisor python-dev python-pip 
       sudo apt-get -y purge nginx* nginx-*
       sudo apt-get -y autoremove
 
