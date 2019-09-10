@@ -22,7 +22,7 @@ Vagrant.configure(2) do |config|
 
       sudo mkdir -p /app/lazy_balancer/db
       sudo cd /tmp
-      cp -r /Vagrant/* /app/lazy_balancer
+      cp -r /vagrant/* /app/lazy_balancer
       curl -fsSL https://github.com/alibaba/tengine/archive/2.3.2.tar.gz -o tengine.tar.gz
       tar -zxf tengine.tar.gz && cd tengine-2.3.2
       ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid
@@ -31,15 +31,18 @@ Vagrant.configure(2) do |config|
       echo "daemon off;" | sudo tee -a /etc/nginx/nginx.conf
 
       cd /app/lazy_balancer
-      sudo update-rc.d supervisor enable
+      sudo systemctl enable supervisor
       sudo cp -rf service/* /etc/supervisor/
+      sudo rm -rf /etc/supervisor/conf.d/supervisor_balancer_docker.conf
 
       sudo pip install pip --upgrade
       sudo pip install -r requirements.txt --upgrade
 
-      python manage.py makemigrations
+      sudo rm -rf db/*
+      sudo rm -rf */migrations
+      python manage.py makemigrations --noinput
       python manage.py migrate
-      sudo service supervisor restart
+      sudo systemctl start supervisor 
     SHELL
   end
 end
