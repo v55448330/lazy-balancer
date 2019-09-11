@@ -15,23 +15,21 @@ Vagrant.configure(2) do |config|
     end
     config.vm.provision "shell", inline: <<-SHELL
       sudo apt-get update --fix-missing
-      sudo apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev
+      sudo apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev libxml2-dev libxslt1-dev libgd-dev libgeoip-dev
       sudo apt-get install -y supervisor python-dev python-pip 
       sudo apt-get -y purge nginx* nginx-*
       sudo apt-get -y autoremove
 
       sudo mkdir -p /app/lazy_balancer/db
       sudo cp -r /vagrant/* /app/lazy_balancer
-      sudo cd /tmp
-      curl -fsSL https://github.com/openresty/luajit2/archive/v2.1-20190626.tar.gz -o luajit.tar.gz 
-      tar zxf luajit.tar.gz -C /tmp
-      cd /tmp/luajit2-2.1-20190626
+      curl -fsSL https://github.com/openresty/luajit2/archive/v2.1-20190626.tar.gz -o /tmp/luajit.tar.gz 
+      tar zxf /tmp/luajit.tar.gz -C /tmp && cd /tmp/luajit2-2.1-20190626
       make && make install
       export LUAJIT_INC=/usr/local/include/luajit-2.1
       export LUAJIT_LIB=/usr/local/lib
       ln -sf luajit /usr/local/bin/luajit
-      curl -fsSL https://github.com/alibaba/tengine/archive/2.3.2.tar.gz -o tengine.tar.gz
-      tar -zxf tengine.tar.gz && cd tengine-2.3.2
+      curl -fsSL https://github.com/alibaba/tengine/archive/2.3.2.tar.gz -o /tmp/tengine.tar.gz
+      tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-2.3.2
       ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin \
             --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid \
             --with-http_secure_link_module \
@@ -83,7 +81,7 @@ Vagrant.configure(2) do |config|
       sudo rm -rf */migrations
       python manage.py makemigrations --noinput
       python manage.py migrate
-      sudo systemctl start supervisor 
+      sudo systemctl restart supervisor 
     SHELL
   end
 end
