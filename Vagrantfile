@@ -21,19 +21,60 @@ Vagrant.configure(2) do |config|
       sudo apt-get -y autoremove
 
       sudo mkdir -p /app/lazy_balancer/db
+      sudo cp -r /vagrant/* /app/lazy_balancer
       sudo cd /tmp
-      cp -r /vagrant/* /app/lazy_balancer
+      curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz 
+      tar zxf luajit.tar.gz -C /tmp
+      cd /tmp/luajit2-2.1-20190626
+      make && make install \
+      export LUAJIT_INC=/usr/local/include/luajit-2.1
+      export LUAJIT_LIB=/usr/local/lib
+      ln -sf luajit /usr/local/bin/luajit
       curl -fsSL https://github.com/alibaba/tengine/archive/2.3.2.tar.gz -o tengine.tar.gz
       tar -zxf tengine.tar.gz && cd tengine-2.3.2
-      ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid
+      ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin \
+            --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid \
+            --with-http_secure_link_module \
+            --with-http_image_filter_module \
+            --with-http_random_index_module \
+            --with-threads \
+            --with-http_ssl_module \
+            --with-http_sub_module \
+            --with-http_stub_status_module \
+            --with-http_gunzip_module \
+            --with-http_gzip_static_module \
+            --with-http_realip_module \
+            --with-compat \
+            --with-file-aio \
+            --with-http_dav_module \
+            --with-http_degradation_module \
+            --with-http_flv_module \
+            --with-http_mp4_module \
+            --with-http_xslt_module \
+            --with-http_auth_request_module \
+            --with-http_addition_module \
+            --with-http_v2_module \
+            --add-module=./modules/ngx_http_upstream_check_module \
+            --add-module=./modules/ngx_http_upstream_session_sticky_module \
+            --add-module=./modules/ngx_http_upstream_dynamic_module \
+            --add-module=./modules/ngx_http_upstream_consistent_hash_module \
+            --add-module=./modules/ngx_http_upstream_dyups_module \
+            --add-module=./modules/ngx_http_user_agent_module \
+            --add-module=./modules/ngx_http_proxy_connect_module \
+            --add-module=./modules/ngx_http_concat_module \
+            --add-module=./modules/ngx_http_footer_filter_module \
+            --add-module=./modules/ngx_http_sysguard_module \
+            --add-module=./modules/ngx_http_slice_module \
+            --add-module=./modules/ngx_http_lua_module \
+            --add-module=./modules/ngx_http_reqstat_module \
+            --with-http_geoip_module=dynamic
       make && sudo make install
       sudo mkdir -p /etc/nginx/conf.d
-      echo "daemon off;" | sudo tee -a /etc/nginx/nginx.conf
 
       cd /app/lazy_balancer
       sudo systemctl enable supervisor
-      sudo cp -rf service/* /etc/supervisor/
-      sudo rm -rf /etc/supervisor/conf.d/supervisor_balancer_docker.conf
+      sudo cp -rf service/conf.d/supervisor_balancer.conf /etc/supervisor/conf.d/
+      sudo cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf
 
       sudo pip install pip --upgrade
       sudo pip install -r requirements.txt --upgrade
