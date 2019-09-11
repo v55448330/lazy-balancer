@@ -23,10 +23,10 @@ Vagrant.configure(2) do |config|
       sudo mkdir -p /app/lazy_balancer/db
       sudo cp -r /vagrant/* /app/lazy_balancer
       sudo cd /tmp
-      curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz 
+      curl -fsSL https://github.com/openresty/luajit2/archive/v2.1-20190626.tar.gz -o luajit.tar.gz 
       tar zxf luajit.tar.gz -C /tmp
       cd /tmp/luajit2-2.1-20190626
-      make && make install \
+      make && make install
       export LUAJIT_INC=/usr/local/include/luajit-2.1
       export LUAJIT_LIB=/usr/local/lib
       ln -sf luajit /usr/local/bin/luajit
