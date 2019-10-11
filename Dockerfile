@@ -87,6 +87,7 @@ RUN set -x \
     && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ && rm -rf /etc/supervisor/conf.d/supervisor_balancer.conf \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
+    && rm -rf */migrations/00*.py \
     && pip install -r requirements.txt \
     && apk del .build-deps \
     && rm -rf ${tempDir}
