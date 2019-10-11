@@ -27,12 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Crontab 
-
-CRONJOBS = (
-    ('*/5 * * * *', 'settings.sync.sync_config','>> /var/log/sync_config.log'),
-)
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_crontab',
+    'django_apscheduler',
     'customfilter',
     'settings',
     'nginx',

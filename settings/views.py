@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core import serializers
 from django.http import HttpResponse
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 from proxy.models import *
 from main.models import *
 from lazy_balancer.views import is_auth
@@ -18,6 +20,8 @@ import time
 import hashlib
 
 logger = logging.getLogger('django')
+scheduler = BackgroundScheduler()
+scheduler.add_jobstore(DjangoJobStore(), 'default')
 
 @login_required(login_url="/login/")
 def view(request):
@@ -85,17 +89,21 @@ def save_sync(config):
             s_config.config_sync_master_url = None
             s_config.config_sync_scope = None
             sync_status.objects.all().delete()
+            scheduler.remove_all_jobs()
         elif int(config.get('config_sync_type')) == 1:
             s_config.config_sync_type = 1
             s_config.config_sync_access_key = str(uuid.uuid4())
             s_config.config_sync_master_url = None
             s_config.config_sync_scope = None
+            scheduler.remove_all_jobs()
         elif int(config.get('config_sync_type')) == 2:
             if config.get('config_sync_master_api'):
                 s_config.config_sync_type = 2
                 s_config.config_sync_access_key = None
                 s_config.config_sync_master_url = config.get('config_sync_master_api').strip('/')
                 s_config.config_sync_scope = bool(config.get('config_sync_scope',''))
+                scheduler.remove_all_jobs()
+                scheduler.add_job(sync, "interval", seconds=300)
             else:
                 return False
         else:
@@ -258,3 +266,44 @@ def config(request, action):
             content = { "flag": "Error", "context": str(e) }
 
     return HttpResponse(json.dumps(content))
+
+def sync():
+    settings = system_settings.objects.last()
+    if settings.config_sync_type == 2:
+        master_url = settings.config_sync_master_url
+        logger.info('start syncing configuration from ' + master_url)
+        try:
+            sync_status.objects.all().delete()
+            sync_task = sync_status.objects.create(
+                address=master_url,
+                update_time=datetime.now(),
+                status=1
+            )
+
+            if bool(settings.config_sync_scope):
+                logger.info('get config from ' + master_url + ', scope is only proxy')
+                r = requests.get(master_url + "/settings/sync/get_config", params={ "access_key": settings.config_sync_access_key, "scope": 0 }, timeout=3)
+            else:
+                logger.info('get config from ' + master_url + ', scope is all')
+                r = requests.get(master_url + "/settings/sync/get_config", params={ "access_key": settings.config_sync_access_key, "scope": 1 }, timeout=3)
+
+            if r.status_code == 200:
+                if import_config(r.json()):
+                    logger.error('task ' + master_url + ' sync finished')
+                    sync_task.change_task_status(2)
+                else:
+                    logger.error('task ' + master_url + ' sync failed, import config error.')
+                    sync_task.change_task_status(3)
+            else:
+                logger.error('task ' + master_url + ' sync failed, get config error.')
+
+        except Exception,e:
+            logger.error('task ' + master_url + ' sync failed')
+            sync_task = sync_status.objects.get(address=master_url)
+            if sync_task:
+                sync_task.change_task_status(3)
+    else:
+        logger.info('syncing configuration disabled.')
+
+register_events(scheduler)
+scheduler.start()
