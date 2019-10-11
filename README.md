@@ -39,7 +39,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy_balancer>:<v0.8.1beta>
+docker build -t <lazy_balancer>:<v0.8.2beta>
 ```
 * 启动命令
 ```
