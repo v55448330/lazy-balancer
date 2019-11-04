@@ -103,9 +103,9 @@ def save_sync(config):
             if config.get('config_sync_master_api'):
                 sync_interval = int(config.get('config_sync_interval', 60))
                 s_config.config_sync_type = 2
-                s_config.config_sync_access_key = None
                 s_config.config_sync_master_url = config.get('config_sync_master_api').strip('/')
                 s_config.config_sync_access_key = config.get('config_sync_access_key') 
+                s_config.config_sync_interval = sync_interval
                 s_config.config_sync_scope = bool(config.get('config_sync_scope',''))
                 scheduler.remove_all_jobs()
                 scheduler.add_job(sync, "interval", seconds=sync_interval)
@@ -311,6 +311,7 @@ def sync():
                     sync_task.change_task_status(3)
             else:
                 logger.error('task ' + master_url + ' sync failed, get config error.')
+                sync_task.change_task_status(3)
 
         except Exception,e:
             logger.error('task ' + master_url + ' sync failed')
