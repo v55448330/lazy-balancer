@@ -125,19 +125,23 @@ def proxy_logs(request):
 
             curr_position['access'] = file_.tell()
 
-        with open(proxy.error_log) as file_:
-            file_.seek(0,2)
+        if proxy.protocol == 'http':
+            with open(proxy.error_log) as file_:
+                file_.seek(0,2)
 
-            if curr_position['error'] != 0:
-                file_.seek(curr_position['error'])
-                line = file_.readline()
-
-                while line:
-                    log_body['error'] += line
-                    curr_position['error'] = file_.tell()
+                if curr_position['error'] != 0:
+                    file_.seek(curr_position['error'])
                     line = file_.readline()
 
-            curr_position['error'] = file_.tell()
+                    while line:
+                        log_body['error'] += line
+                        curr_position['error'] = file_.tell()
+                        line = file_.readline()
+
+                curr_position['error'] = file_.tell()
+        else:
+            log_body['error'] == 'None'
+            curr_position['error'] = 0
 
         content = { "flag":"Success" , "log_body":log_body , "curr_position":curr_position }
     except Exception, e:
