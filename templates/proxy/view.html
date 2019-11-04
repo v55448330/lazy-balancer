@@ -70,7 +70,8 @@
                 <div class="nav-tabs-custom">
                     <ul class="nav nav-tabs">
                         <li class="active"><a href="#tab_base_config" data-toggle="tab" id="a_default_conf">基础配置</a></li>
-                        <li><a href="#tab_ssl_config" data-toggle="tab">证书配置</a></li>
+                        <li><a href="#tab_ssl_config" data-toggle="tab">SSL 配置</a></li>
+                        <li><a href="#tab_custom_config" data-toggle="tab">自定义配置</a></li>
                         <li><a href="#tab_proxy_config" data-toggle="tab">节点配置</a></li>
                     </ul>
                     <div class="tab-content">
@@ -84,15 +85,30 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">服务端口</label>
-                                    <div class="col-sm-9" id="div_listen">
-                                        <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
+                                    <label class="col-sm-2 control-label">协议类型</label>
+                                    <div class="col-sm-9">
+                                        <div class="radio">
+                                            <label class="col-sm-2">
+                                                <input type="radio" name="proxy_protocol" id="radio_protocol_http" value="http"
+                                                    onclick="change_proxy_protocol('http')"> HTTP
+                                            </label>
+                                            <label class="col-sm-2">
+                                                <input type="radio" name="proxy_protocol" id="radio_protocol_tcp" value="tcp"
+                                                    onclick="change_proxy_protocol('tcp')"> TCP 
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">访问域名</label>
+                                    <label class="col-sm-2 control-label">服务端口</label>
+                                    <div class="col-sm-9" id="div_listen">
+                                        <input type="text" class="form-control" name="proxy_listen" id="input_proxy_listen" placeholder="负载均衡器对外提供服务的监听端口，8000 为保留端口" onblur="check_form(this)" data-inputmask="'mask':'[9]{1,5}'" data-mask>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 访问域名</label>
                                     <div class="col-sm-9" id="div_server_name">
-                                        <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）" onblur="check_form(this)">
+                                        <input type="text" class="form-control" name="proxy_server_name" id="input_proxy_server_name" placeholder="用于配置访问负载均衡器的域名（空格分隔）">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -128,6 +144,16 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <label class="col-sm-2 control-label">* GZip 压缩</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="proxy_gzip" id="check_proxy_gzip" onchange=""> 启用
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label class="col-sm-2 control-label">* 描述</label>
                                     <div class="col-sm-9">
                                         <textarea class="form-control" rows="4" name="proxy_description" id="input_proxy_description" placeholder="此负载均衡详细描述"></textarea>
@@ -145,11 +171,21 @@
                         <div class="tab-pane" id="tab_ssl_config">
                             <form class="form-horizontal" id="form_ssl_config">
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">证书状态</label>
+                                    <label class="col-sm-2 control-label">SSL 状态</label>
                                     <div class="col-sm-9">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl(this)"> 启用
+                                                <input type="checkbox" name="ssl_status" id="check_ssl_status" onchange="check_balancer_ssl()"> 启用
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">HTTP/2</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="ssl_http2" id="check_ssl_http2" onchange=""> 启用
                                             </label>
                                         </div>
                                     </div>
@@ -167,13 +203,13 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">证书</label>
                                     <div id="div_ssl_cert_body" class="col-sm-9">
-                                        <textarea class="form-control" rows="8" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
+                                        <textarea class="form-control" rows="10" name="ssl_cert_body" id="txt_ssl_cert_body" placeholder="请粘贴证书文件（.crt）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">私钥</label>
                                     <div id="div_ssl_key_body" class="col-sm-9">
-                                        <textarea class="form-control" rows="8" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
+                                        <textarea class="form-control" rows="10" name="ssl_key_body" id="txt_ssl_key_body" placeholder="请粘贴私钥文件（.key）正文" onblur="check_form(this)" style="font-family:monospace;font-size:initial"></textarea>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -186,12 +222,37 @@
 
                             </form>
                         </div>
-                        <!-- /.tab-pane -->
-                        <div class="tab-pane" id="tab_proxy_config">
-                            <form class="form-horizontal" id="form_ssl_config">
+                        <div class="tab-pane" id="tab_custom_config">
+                            <form class="form-horizontal" id="form_custom_config">
                                 <div class="form-group">
                                     <div class="col-sm-12">
-                                        <a class="btn btn-primary btn-xs" href="#" onclick="edit_upstream(1,null)"><i class="fa fa-plus"> 增加节点</i></a>
+                                        <div id="div_custom_config_body" class="" style="height:450px;width:100%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <span class="control-label pull-right">
+                                            <small>虚拟主机用户自定义配置，如 Location 配置等</small>
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                        <!-- /.tab-pane -->
+                        <div class="tab-pane" id="tab_proxy_config">
+                            <form class="form-horizontal" id="form_upstram_config">
+                                <div class="form-group">
+                                    <div class="pull-left control-label col-sm-1">
+                                        <a class="btn btn-primary btn-xs" onclick="edit_upstream(1,null)"><i class="fa fa-plus"> 增加节点</i></a>
+                                    </div>
+                                    <div class="pull-right control-label col-sm-4 checkbox">
+                                        <label>
+                                            <small>
+                                                <input type="checkbox" id="check_proxy_backend_protocol"> 设置后端协议为 HTTPS
+                                            </small>
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -263,13 +324,17 @@
                             <td class="col-sm-3">
                                 <button type="button" class="btn btn-default btn-xs col-sm-10" onclick="edit_balancer(0,'{{ server.config_id }}')">{{ server.proxy_name }}</button>
                             </td>
-                            {% if server.protocols %}
+                            {% if server.protocol and server.ssl %}
                             <td>
                                 <button class="btn btn-warning btn-xs" disabled>HTTPS</button>
                             </td>
-                            {% else %}
+                            {% elif server.protocol and not server.ssl %}
                             <td>
                                 <button class="btn btn-primary btn-xs" disabled>HTTP</button>
+                            </td>
+                            {% else %}
+                            <td>
+                                <button class="btn btn-success btn-xs" disabled>TCP</button>
                             </td>
                             {% endif %}
                             <td>{{ server.listen }}</td>
@@ -281,13 +346,13 @@
                             <td>
                                 <button type="button" class="btn btn-danger btn-xs" onclick="change_status('{{ server.pk }}',1)">禁用</button>
                             </td>
-                            {% endif %} {% if server.check_type == "tcp" %}
+                            {% endif %} {% if server.http_check %}
                             <td>
-                                <button type="button" class="btn btn-warning btn-xs" disabled>TCP</button>
+                                <button type="button" class="btn btn-primary btn-xs" onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
                             </td>
                             {% else %}
                             <td>
-                                <button type="button" class="btn btn-primary btn-xs" onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
+                                <button type="button" class="btn btn-warning btn-xs" disabled>TCP</button>
                             </td>
                             {% endif %}
                             <td>{{ server.update_time | timestamp_to_date }}</td>
@@ -327,10 +392,16 @@ $('#page_header_descript').text('用于管理 Nginx 虚拟主机相关配置')
 $('#page_nav').text('服务管理')
 $('#page_name').text('负载均衡配置')
 
+var editor = ace.edit('div_custom_config_body');
+editor.setTheme("ace/theme/monokai");
+editor.getSession().setMode("ace/mode/nginx");
+editor.setShowPrintMargin(false);
+editor.setValue('')
+
 function check_form(input) {
     if ($(input).attr('name') == 'proxy_http_check') {
         if ($(input).prop('checked') == true) {
-            alert('您选择了使用 HTTP 方式检测后端节点，这种方式将视所有状态码为非 2XX 以及 3XX 的节点为不可用，有可能造成访问异常以及效率下降，若有以上问题请修改配置！')
+            alert('您选择了使用 HTTP 方式检测后端节点，这种方式将视所有状态码为非 2XX 以及 3XX 的节点为不可用，有可能造成访问异常以及效率下降，启用 SSL 后将使用发送 SSL Hello 包方式探测，若有以上问题请修改配置！')
         }
         return
     }
@@ -344,20 +415,52 @@ function check_form(input) {
     }
 }
 
-function check_balancer_ssl(self) {
-    if ($(self)[0].checked == true) {
+function check_balancer_ssl() {
+    if ($('#check_ssl_status')[0].checked) {
         $('#txt_ssl_cert_body').removeAttr('disabled')
         $('#txt_ssl_key_body').removeAttr('disabled')
         $('#check_ssl_port').removeAttr('disabled')
+        $('#check_ssl_http2').removeAttr('disabled')
         $('#div_ssl_cert_body').removeClass('has-success')
         $('#div_ssl_key_body').removeClass('has-success')
     } else {
-        $('#txt_ssl_cert_body').text('')
-        $('#txt_ssl_key_body').text('')
+        $('#txt_ssl_cert_body').val('')
+        $('#txt_ssl_key_body').val('')
         $('#check_ssl_port').prop('checked', false)
         $('#check_ssl_port').attr('disabled', 'disabled')
+        $('#check_ssl_http2').prop('checked', false)
+        $('#check_ssl_http2').attr('disabled', 'disabled')
         $('#txt_ssl_cert_body').attr('disabled', 'disabled')
         $('#txt_ssl_key_body').attr('disabled', 'disabled')
+        $('#div_ssl_cert_body').removeClass('has-success')
+        $('#div_ssl_key_body').removeClass('has-success')
+    }
+}
+
+function change_proxy_protocol(type) {
+    if (type == "http") {
+        $("#radio_protocol_http").prop('checked', true)
+        $('#input_proxy_server_name').removeAttr('disabled')
+        $("#check_proxy_http_check").removeAttr('disabled');
+        $("#check_proxy_gzip").removeAttr('disabled');
+        $("#check_ssl_status").removeAttr('disabled');
+        $("#check_proxy_backend_protocol").removeAttr('disabled');
+        editor.setReadOnly(false)
+    } else {
+        $("#radio_protocol_tcp").prop('checked', true)
+        $('#input_proxy_server_name').val('')
+        $('#input_proxy_server_name').attr('disabled', 'disabled')
+        $("#check_proxy_http_check").prop('checked', false);
+        $("#check_proxy_http_check").attr('disabled', 'disabled');
+        $("#check_proxy_gzip").prop('checked', false);
+        $("#check_proxy_gzip").attr('disabled', 'disabled');
+        $("#check_ssl_status").prop('checked', false);
+        $("#check_ssl_status").attr('disabled', 'disabled');
+        $("#check_proxy_backend_protocol").prop('checked', false);
+        $("#check_proxy_backend_protocol").attr('disabled', 'disabled');
+        editor.setValue('')
+        editor.setReadOnly(true)
+        check_balancer_ssl()
     }
 }
 
@@ -391,6 +494,7 @@ function edit_upstream(add, upstream) {
 
 function edit_balancer(create, config_id) {
     $('#a_default_conf').trigger('click')
+    $('.CodeMirror').remove()
     if (create == 1) {
         $('#edit_balancer_title').text('创建负载均衡器')
         $('#edit_balancer_mtitle').text('')
@@ -402,8 +506,12 @@ function edit_balancer(create, config_id) {
         $('#input_proxy_error_log').val('')
         $('#check_proxy_ip_hash').attr('checked', false)
         $('#check_proxy_http_check').attr('checked', false)
+        $("#check_proxy_backend_protocol").prop('checked', false);
         $('#div_upstream_list').empty()
         $("[data-mask]").inputmask()
+        check_balancer_ssl()
+        change_proxy_protocol('http')
+        editor.setValue('')
         $('#edit_balancer').modal('show')
     } else {
         var post = {
@@ -416,43 +524,62 @@ function edit_balancer(create, config_id) {
             dataType: "json",
             success: function(p) {
                 if (p.flag == "Success") {
+                    //console.log(p)
                     $('#edit_balancer_title').text('编辑负载均衡器')
                     $('#edit_balancer_mtitle').text(config_id)
                     $('#input_proxy_config_id').val(config_id)
                     $('#div_upstream_list').empty()
-
                     $('#input_proxy_proxy_name').val(p.context.proxy.proxy_name)
                     $('#input_proxy_listen').val(p.context.proxy.listen)
                     $('#input_proxy_server_name').val(p.context.proxy.server_name)
                     $('#input_proxy_access_log').val(p.context.proxy.access_log)
                     $('#input_proxy_error_log').val(p.context.proxy.error_log)
                     $('#input_proxy_description').text(p.context.proxy.description)
+                    if (p.context.proxy.protocol) {
+                        change_proxy_protocol('http')
+                    } else {
+                        change_proxy_protocol('tcp')
+                    }
                     if (p.context.proxy.balancer_type == "ip_hash") {
                         $('#check_proxy_ip_hash').prop('checked', true)
                     } else {
                         $('#check_proxy_ip_hash').prop('checked', false)
                     }
-                    if (p.context.proxy.check_type == "http") {
+                    if (p.context.proxy.http_check) {
                         $('#check_proxy_http_check').prop('checked', true)
                     } else {
                         $('#check_proxy_http_check').prop('checked', false)
                     }
-                    for (var f in p.context.upstream) {
-                        edit_upstream(1, p.context.upstream[f])
+                    if (p.context.proxy.gzip) {
+                        $('#check_proxy_gzip').prop('checked', true)
+                    } else {
+                        $('#check_proxy_gzip').prop('checked', false)
                     }
-                    if (p.context.proxy.protocols == true) {
+                    if (p.context.proxy.ssl) {
                         $('#check_ssl_status').prop('checked', true)
-                        $('#txt_ssl_cert_body').text(p.context.proxy.ssl_cert)
-                        $('#txt_ssl_key_body').text(p.context.proxy.ssl_key)
+                        $('#txt_ssl_cert_body').val(p.context.proxy.ssl_cert)
+                        $('#txt_ssl_key_body').val(p.context.proxy.ssl_key)
                     } else {
                         $('#check_ssl_status').prop('checked', false)
+                    }
+                    if (p.context.proxy.ssl_http2) {
+                        $('#check_ssl_http2').prop('checked', true)
+                    } else {
+                        $('#check_ssl_http2').prop('checked', false)
                     }
                     if (p.context.proxy.listen == 443) {
                         $('#check_ssl_port').prop('checked', false)
                     } else {
                         $('#check_ssl_port').prop('checked', true)
                     }
-                    check_balancer_ssl($('#check_ssl_status'))
+                    editor.setValue(p.context.proxy.custom_config)
+                    if (p.context.proxy.backend_protocol == "https") {
+                        $('#check_proxy_backend_protocol').prop('checked', true)
+                    }
+                    for (var f in p.context.upstream) {
+                        edit_upstream(1, p.context.upstream[f])
+                    }
+                    check_balancer_ssl()
                     $('#edit_balancer').modal('show')
                 } else if (p.flag == "Error" && p.context == "AuthFailed") {
                     alert('认证失败！请重新登录！')
@@ -499,14 +626,6 @@ function delete_proxy(pk, name) {
 var t
 $(function() {
     $('#proxy_logs').on('hide.bs.modal', function() {
-        $("#tail_access").empty()
-        $("#tail_error").empty()
-        clearTimeout(t)
-    })
-});
-
-$(function() {
-    $('#proxy_status').on('hide.bs.modal', function() {
         $("#tail_access").empty()
         $("#tail_error").empty()
         clearTimeout(t)
@@ -671,7 +790,11 @@ function proxy_filter() {
 function save_balancer() {
     if (confirm("确认要保存这样的配置？")) {
         var base_config = $('#form_base_config').serializeObject()
+        if ($('#check_proxy_backend_protocol').prop('checked')) {
+            base_config['proxy_backend_protocol'] = "on"
+        }
         var ssl_config = $('#form_ssl_config').serializeObject()
+        var custom_config = editor.getValue()
         var upstream_list = []
         $('#div_upstream_list form').each(function() {
             upstream_list.push($(this).serializeObject())
@@ -679,7 +802,8 @@ function save_balancer() {
         var post = {
             'base_config': base_config,
             'ssl_config': ssl_config,
-            'upstream_list': upstream_list
+            'upstream_list': upstream_list,
+            'custom_config': custom_config
         }
 
         jQuery.ajax({
@@ -707,5 +831,7 @@ function save_balancer() {
     }
 
 }
+
+
 </script>
 {% endblock %}

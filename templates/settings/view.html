@@ -97,6 +97,15 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">Access Key</label>
+                            <div class="col-sm-4">
+                                <div>
+                                    <input type="input" class="form-control" name="config_sync_access_key"
+                                        id="input_config_sync_access_key_slave">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-2 control-label">同步选项</label>
                             <div class="col-sm-8">
                                 <div class="checkbox">
@@ -121,7 +130,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody> 
-                                                {% for s in sync_status %}
+                                                {% for s in sync_status %}<tr>
                                                     <td>{{ s.address }}</td>
                                                     <td>{{ s.update_time | date:'Y-m-d H:i:s' }}</td>
                                                     {% if s.status == 1 %}
@@ -129,8 +138,8 @@
                                                     {% elif s.status == 2 %}
                                                     <td><button class="btn btn-success btn-xs">同步完成</button></td>
                                                     {% elif s.status == 3 %}
-                                                    <td><button class="btn btn-denger btn-xs">同步失败</button></td>
-                                                    {% endif %}
+                                                    <td><button class="btn btn-danger btn-xs">同步失败</button></td>
+                                                    {% endif %}</tr>
                                                 {% endfor %}
                                             </tbody>
                                         </table>
@@ -351,6 +360,7 @@
         $('#radio_sync_master').click() 
         {% elif settings.config_sync_type == 2 %}
         $('#input_config_sync_master_api').val("{{ settings.config_sync_master_url }}")
+        $('#input_config_sync_access_key_slave').val("{{ settings.config_sync_access_key }}")
             {% if settings.config_sync_scope == 1 %}
             $('#check_sync_scope').prop("checked",true);
             {% endif %}

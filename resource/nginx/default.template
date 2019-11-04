@@ -1,5 +1,5 @@
 {%- for listen in listen_list %}
-{%- if listen != 80 %}
+{%- if listen != 443 %}
 server {
   listen {{ listen }} default;
   return 444;

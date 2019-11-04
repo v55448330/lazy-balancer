@@ -71,14 +71,15 @@ def reload_config():
         u_list = []
         for u in p.upstream_list.all():
             u_list.append(u.__dict__)
-            pass
         p_config = { 'proxy' : p.__dict__ , 'upstream' : u_list }
-        config_proxy_path = "/etc/nginx/conf.d/%s.conf" % p.config_id
-        if p.protocols:
+        if p.protocol:
+            config_proxy_path = "/etc/nginx/conf.d/%s-http.conf" % p.config_id
+            proxy_port_list.append(p.listen)
+        else:
+            config_proxy_path = "/etc/nginx/conf.d/%s-tcp.conf" % p.config_id
+        if p.ssl:
             write_config(p.ssl_cert_path,p.ssl_cert)
             write_config(p.ssl_key_path,p.ssl_key)
-        pass
-        proxy_port_list.append(p.listen)
         write_config(config_proxy_path,build_proxy_config(p_config))
 
     write_config(config_default_path,build_default_config({'listen_list':list(set(proxy_port_list))}))

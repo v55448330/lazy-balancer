@@ -78,6 +78,7 @@ RUN set -x \
             --add-module=./modules/ngx_http_lua_module \
             --add-module=./modules/ngx_http_reqstat_module \
             --with-http_geoip_module=dynamic \
+            --with-stream \
     && make && make install \
     && mkdir -p /app/lazy_balancer \
     && curl -fsSL https://github.com/v55448330/lazy-balancer/archive/${LAZYBALANCER_VERSION}.tar.gz -o lazybalancer.tar.gz \

@@ -67,9 +67,10 @@ def sync_config(request, action):
                 content = { "flag":"Error", "context": "get config error" }
         elif action == "ack":
             if len(sync_task):
+                ack = int(request.GET.get('status', '2'))
                 task = sync_task[0]
                 task.update_time = datetime.now()
-                task.status = 2
+                task.status = ack
                 task.save()
                 content = { "flag":"Success" }
             else:
@@ -83,6 +84,7 @@ def sync_config(request, action):
 def save_sync(config):
     try:
         s_config = system_settings.objects.all()[0]
+        sync_status.objects.all().delete()
         if int(config.get('config_sync_type')) == 0:
             s_config.config_sync_type = 0
             s_config.config_sync_access_key = None
@@ -96,14 +98,16 @@ def save_sync(config):
             s_config.config_sync_master_url = None
             s_config.config_sync_scope = None
             scheduler.remove_all_jobs()
+            scheduler.add_job(sync, "interval", seconds=60)
         elif int(config.get('config_sync_type')) == 2:
             if config.get('config_sync_master_api'):
                 s_config.config_sync_type = 2
                 s_config.config_sync_access_key = None
                 s_config.config_sync_master_url = config.get('config_sync_master_api').strip('/')
+                s_config.config_sync_access_key = config.get('config_sync_access_key') 
                 s_config.config_sync_scope = bool(config.get('config_sync_scope',''))
                 scheduler.remove_all_jobs()
-                scheduler.add_job(sync, "interval", seconds=300)
+                scheduler.add_job(sync, "interval", seconds=60)
             else:
                 return False
         else:
@@ -269,7 +273,14 @@ def config(request, action):
 
 def sync():
     settings = system_settings.objects.last()
-    if settings.config_sync_type == 2:
+    if settings.config_sync_type == 1:
+        logger.info('check syncing task')
+        for status in sync_status.objects.all():
+            if (datetime.now() - status.update_time).seconds >= 30 and status.status == 1:
+                logger.info('syncing task [%s] timeout', status.address)
+                status.status = 3
+                status.save()
+    elif settings.config_sync_type == 2:
         master_url = settings.config_sync_master_url
         logger.info('start syncing configuration from ' + master_url)
         try:
@@ -282,16 +293,19 @@ def sync():
 
             if bool(settings.config_sync_scope):
                 logger.info('get config from ' + master_url + ', scope is only proxy')
-                r = requests.get(master_url + "/settings/sync/get_config", params={ "access_key": settings.config_sync_access_key, "scope": 0 }, timeout=3)
+                r = requests.get(master_url + "/settings/sync/get_config/", params={ "access_key": settings.config_sync_access_key, "scope": 0 }, timeout=3)
             else:
                 logger.info('get config from ' + master_url + ', scope is all')
-                r = requests.get(master_url + "/settings/sync/get_config", params={ "access_key": settings.config_sync_access_key, "scope": 1 }, timeout=3)
+                r = requests.get(master_url + "/settings/sync/get_config/", params={ "access_key": settings.config_sync_access_key, "scope": 1 }, timeout=3)
 
             if r.status_code == 200:
-                if import_config(r.json()):
-                    logger.error('task ' + master_url + ' sync finished')
+                #print(r.json().get('context')) 
+                if import_config(r.json().get('context')):
+                    requests.get(master_url + "/settings/sync/ack/", params={ "access_key": settings.config_sync_access_key, "status": 2 }, timeout=3)
+                    logger.info('task ' + master_url + ' sync finished')
                     sync_task.change_task_status(2)
                 else:
+                    requests.get(master_url + "/settings/sync/ack/", params={ "access_key": settings.config_sync_access_key, "status": 3 }, timeout=3)
                     logger.error('task ' + master_url + ' sync failed, import config error.')
                     sync_task.change_task_status(3)
             else:
