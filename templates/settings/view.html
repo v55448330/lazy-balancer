@@ -195,6 +195,9 @@
                         if (p.flag == "Success") {
                             alert("保存成功!")
                             top.location = '/settings/'
+                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                            alert('认证失败！请重新登录！')
+                            top.location = '/login/'
                         } else {
                             alert("保存失败!请检查参数！")
                         }

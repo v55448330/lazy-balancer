@@ -4,7 +4,6 @@ django-apscheduler==0.3.0
 django-crontab==0.7.1
 funcsigs==1.0.2
 futures==3.3.0
-gunicorn==19.6.0
 Jinja2==2.8
 MarkupSafe==0.23
 meld3==1.0.2

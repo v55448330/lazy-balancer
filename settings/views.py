@@ -20,8 +20,6 @@ import time
 import hashlib
 
 logger = logging.getLogger('django')
-scheduler = BackgroundScheduler()
-scheduler.add_jobstore(DjangoJobStore(), 'default')
 
 @login_required(login_url="/login/")
 def view(request):
@@ -85,11 +83,14 @@ def save_sync(config):
     try:
         s_config = system_settings.objects.all()[0]
         sync_status.objects.all().delete()
+        scheduler = BackgroundScheduler()
+        scheduler.add_jobstore(DjangoJobStore(), 'default')
         if int(config.get('config_sync_type')) == 0:
             s_config.config_sync_type = 0
             s_config.config_sync_access_key = None
             s_config.config_sync_master_url = None
             s_config.config_sync_scope = None
+            DjangoJobStore().remove_all_jobs()
             sync_status.objects.all().delete()
             scheduler.remove_all_jobs()
         elif int(config.get('config_sync_type')) == 1:
@@ -97,8 +98,11 @@ def save_sync(config):
             s_config.config_sync_access_key = str(uuid.uuid4())
             s_config.config_sync_master_url = None
             s_config.config_sync_scope = None
-            scheduler.remove_all_jobs()
-            scheduler.add_job(sync, "interval", seconds=60)
+            DjangoJobStore().remove_all_jobs()
+            sync_status.objects.all().delete()
+            scheduler.add_job(sync, "interval", seconds=60, name="master")
+            register_events(scheduler)
+            scheduler.start()
         elif int(config.get('config_sync_type')) == 2:
             if config.get('config_sync_master_api'):
                 sync_interval = int(config.get('config_sync_interval', 60))
@@ -107,8 +111,11 @@ def save_sync(config):
                 s_config.config_sync_access_key = config.get('config_sync_access_key') 
                 s_config.config_sync_interval = sync_interval
                 s_config.config_sync_scope = bool(config.get('config_sync_scope',''))
-                scheduler.remove_all_jobs()
-                scheduler.add_job(sync, "interval", seconds=sync_interval)
+                DjangoJobStore().remove_all_jobs()
+                sync_status.objects.all().delete()
+                scheduler.add_job(sync, "interval", seconds=sync_interval, name="slave")
+                register_events(scheduler)
+                scheduler.start()
             else:
                 return False
         else:
@@ -303,6 +310,7 @@ def sync():
                 #print(r.json().get('context')) 
                 if import_config(r.json().get('context')):
                     requests.get(master_url + "/settings/sync/ack/", params={ "access_key": settings.config_sync_access_key, "status": 2 }, timeout=3)
+                    reload_config()
                     logger.info('task ' + master_url + ' sync finished')
                     sync_task.change_task_status(2)
                 else:
@@ -321,5 +329,3 @@ def sync():
     else:
         logger.info('syncing configuration disabled.')
 
-register_events(scheduler)
-scheduler.start()
