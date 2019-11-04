@@ -20,6 +20,8 @@ import time
 import hashlib
 
 logger = logging.getLogger('django')
+scheduler = BackgroundScheduler()
+scheduler.add_jobstore(DjangoJobStore(), 'default')
 
 @login_required(login_url="/login/")
 def view(request):
@@ -83,8 +85,6 @@ def save_sync(config):
     try:
         s_config = system_settings.objects.all()[0]
         sync_status.objects.all().delete()
-        scheduler = BackgroundScheduler()
-        scheduler.add_jobstore(DjangoJobStore(), 'default')
         if int(config.get('config_sync_type')) == 0:
             s_config.config_sync_type = 0
             s_config.config_sync_access_key = None
@@ -101,8 +101,6 @@ def save_sync(config):
             DjangoJobStore().remove_all_jobs()
             sync_status.objects.all().delete()
             scheduler.add_job(sync, "interval", seconds=60, name="master")
-            register_events(scheduler)
-            scheduler.start()
         elif int(config.get('config_sync_type')) == 2:
             if config.get('config_sync_master_api'):
                 sync_interval = int(config.get('config_sync_interval', 60))
@@ -114,8 +112,6 @@ def save_sync(config):
                 DjangoJobStore().remove_all_jobs()
                 sync_status.objects.all().delete()
                 scheduler.add_job(sync, "interval", seconds=sync_interval, name="slave")
-                register_events(scheduler)
-                scheduler.start()
             else:
                 return False
         else:
@@ -329,3 +325,5 @@ def sync():
     else:
         logger.info('syncing configuration disabled.')
 
+register_events(scheduler)
+scheduler.start()
