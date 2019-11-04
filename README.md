@@ -16,7 +16,7 @@
 * 新增 TCP 负载均衡支持
 * 新增配置同步功能
 * 允许后端服务器为 HTTPS 协议，当后端为 HTTPS 协议时，HTTP 健康检测将使用发送 SSL Hello 包的方式
-* 新增 HTTP/2，GZIP 等配置
+* 新增 HTTP/2，Gzip 等配置
 * 增加 Docker 支持
 * 去除原 iptables 防火墙管理功能
 * 协议为 HTTP/HTTPS 时，允许用户自定义 Server 级别 Nginx 配置
@@ -49,7 +49,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy_balancer>:<v0.8.8beta>
+docker build -t <lazy_balancer>:<v0.8.9beta>
 ```
 * 启动命令
 ```
@@ -58,7 +58,7 @@ docker run -d --restart=always --name=lazy_balancer \
     -v <nginx_config_dir>:</etc/nginx> \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy_balancer>:<v0.8.8beta>
+    <lazy_balancer>:<v0.8.9beta>
 ```
 * 初始化数据库
 ```

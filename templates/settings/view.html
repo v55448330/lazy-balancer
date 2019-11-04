@@ -375,7 +375,7 @@
         {% elif settings.config_sync_type == 2 %}
         $('#input_config_sync_master_api').val("{{ settings.config_sync_master_url }}")
         $('#input_config_sync_access_key_slave').val("{{ settings.config_sync_access_key }}")
-        $('#input_config_sync_interval').val("{{ settings.config_sync_interval }}")
+        $('#input_config_sync_interval_slave').val("{{ settings.config_sync_interval }}")
         {% if settings.config_sync_scope == 1 %}
         $('#check_sync_scope').prop("checked",true);
         {% endif %}
