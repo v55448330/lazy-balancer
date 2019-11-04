@@ -160,7 +160,7 @@ def get_sys_info():
             'release' : platform.release(),
             'processor' : platform.processor()
         },
-        'nginx' : run_shell('nginx -v')['output'].split(': ')[1]
+        'nginx' : run_shell('nginx -v')['output'].replace('\nnginx version:',',').split(':')[1].strip()
     }
     return sysinfo
 
