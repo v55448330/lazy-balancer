@@ -142,7 +142,7 @@ def proxy_logs(request):
         else:
             log_body['error'] == 'None'
             curr_position['error'] = 0
-
+        
         content = { "flag":"Success" , "log_body":log_body , "curr_position":curr_position }
     except Exception, e:
         content = { "flag":"Error","context":str(e) }
