@@ -49,7 +49,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy_balancer>:<v0.8.7beta>
+docker build -t <lazy_balancer>:<v0.8.8beta>
 ```
 * 启动命令
 ```
@@ -58,7 +58,7 @@ docker run -d --restart=always --name=lazy_balancer \
     -v <nginx_config_dir>:</etc/nginx> \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy_balancer>:<v0.8.7beta>
+    <lazy_balancer>:<v0.8.8beta>
 ```
 * 初始化数据库
 ```
