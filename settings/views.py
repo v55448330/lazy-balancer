@@ -93,12 +93,14 @@ def save_sync(config):
             sync_status.objects.all().delete()
             scheduler.remove_all_jobs()
         elif int(config.get('config_sync_type')) == 1:
+            sync_interval = config.get(int('config_sync_interval'), 60)
             s_config.config_sync_type = 1
             s_config.config_sync_access_key = str(uuid.uuid4())
             s_config.config_sync_master_url = None
+            s_config.config_sync_interval = sync_interval
             s_config.config_sync_scope = None
             scheduler.remove_all_jobs()
-            scheduler.add_job(sync, "interval", seconds=60)
+            scheduler.add_job(sync, "interval", seconds=sync_interval)
         elif int(config.get('config_sync_type')) == 2:
             if config.get('config_sync_master_api'):
                 s_config.config_sync_type = 2

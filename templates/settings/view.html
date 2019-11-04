@@ -106,6 +106,20 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label class="col-sm-2 control-label">同步间隔</label>
+                            <div class="col-sm-4">
+                                <div class="input-group">
+                                    <div>
+                                        <input type="input" class="form-control" name="config_sync_interval"
+                                            id="input_config_sync_interval_slave" placeholder="默认间隔 60 秒">
+                                    </div>
+                                    <div class="input-group-addon">
+                                            <span><b>秒</b></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label class="col-sm-2 control-label">同步选项</label>
                             <div class="col-sm-8">
                                 <div class="checkbox">
@@ -361,9 +375,10 @@
         {% elif settings.config_sync_type == 2 %}
         $('#input_config_sync_master_api').val("{{ settings.config_sync_master_url }}")
         $('#input_config_sync_access_key_slave').val("{{ settings.config_sync_access_key }}")
-            {% if settings.config_sync_scope == 1 %}
-            $('#check_sync_scope').prop("checked",true);
-            {% endif %}
+        $('#input_config_sync_interval').val("{{ settings.config_sync_interval }}")
+        {% if settings.config_sync_scope == 1 %}
+        $('#check_sync_scope').prop("checked",true);
+        {% endif %}
         $('#radio_sync_slave').click() 
         {% else %}
         $('#radio_sync_disable').click() 
