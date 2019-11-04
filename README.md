@@ -12,6 +12,16 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
+## 更新（2019-11-05）
+* 新增 TCP 负载均衡支持
+* 新增配置同步功能
+* 允许后端服务器为 HTTPS 协议，当后端为 HTTPS 协议时，HTTP 健康检测将使用发送 SSL Hello 包的方式
+* 新增 HTTP/2，GZIP 等配置
+* 增加 Docker 支持
+* 去除原 iptables 防火墙管理功能
+* 协议为 HTTP/HTTPS 时，允许用户自定义 Server 级别 Nginx 配置
+* 修复其他 Bug
+
 ## 更新
 * 将 Nginx 更换为 Tengine 以提供更灵活的功能支持以及性能提升
 * 新增 HTTP 状态码方式检测后端服务器，默认 TCP 方式
