@@ -398,6 +398,9 @@ editor.getSession().setMode("ace/mode/nginx");
 editor.setShowPrintMargin(false);
 editor.setValue('')
 
+var status_t;
+var log_t;
+
 function check_form(input) {
     if ($(input).attr('name') == 'proxy_http_check') {
         if ($(input).prop('checked') == true) {
@@ -655,11 +658,9 @@ function proxy_status(pk, getdata) {
                             $('#div_proxy_status_list').append(tb)
                         }
                     }
-                    if ($("#proxy_status").css('display') == "block") {
-                        setTimeout(function() {
-                            proxy_status(pk, 1);
-                        }, 3000)
-                    }
+                    status_t = setTimeout(function() {
+                        proxy_status(pk, 1);
+                    }, 3000)
 
                 } else if (p.flag == "Error" && p.context == "AuthFailed") {
                     alert('认证失败！请重新登录！')
@@ -723,10 +724,9 @@ function get_proxy_logs(pk, position) {
                         tailScroll($("#tail_error"))
                     }
 
-                    if ($("#proxy_logs").css('display') == "block") {
-                        setTimeout(function() {
-                            get_proxy_logs(pk, p.curr_position);
-                        }, 3000)
+                    log_t = setTimeout(function() {
+                        get_proxy_logs(pk, p.curr_position);
+                    }, 3000)
 
                 } else if (p.flag == "Error") {
                     $("#tail_access").empty()
@@ -738,7 +738,7 @@ function get_proxy_logs(pk, position) {
                     alert('认证失败！请重新登录！')
                     top.location = '/login/'
                 }
-            },
+            }
         })
     }
 }
@@ -776,6 +776,16 @@ function proxy_filter() {
     window.location = '/proxy/?filter=' + $('#input_proxy_filter').val()
 }
 
+$(function() {
+    $('#proxy_logs').on('hide.bs.modal', function() {
+        $("#tail_access").empty()
+        $("#tail_error").empty()
+        clearTimeout(log_t)
+    })
+    $('#proxy_status').on('hide.bs.modal', function() {
+        clearTimeout(status_t)
+    })
+});
 
 function save_balancer() {
     if (confirm("确认要保存这样的配置？")) {
