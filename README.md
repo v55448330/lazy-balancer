@@ -65,42 +65,10 @@ docker exec lazy_balancer python manage.py makemigrations --noinput
 docker exec lazy_balancer python manage.py migrate
 ```
 ### 主机
-* 克隆代码
-```
-mkdir -p /app  
-git clone https://github.com/v55448330/lazy-balancer.git /app/lazy_balancer  
-cd /app/lazy_balancer
-```
-* 卸载 nginx
-```
-apt-get -y purge nginx-* nginx*
-apt-get -y autoremove
-```
-* 安装 tengine
-```
-git submodule update --init --recursive
-cd resource/nginx/tengine
-apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev
-./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid
-make
-make install
-mkdir -p /etc/nginx/conf.d
-echo "daemon off;" >> /etc/nginx/nginx.conf  
-```
-* 安装 supervisor
-```
-apt-get install supervisor  
-update-rc.d supervisor enable  
-```
-* 配置 supervisor
-```
-cp -rf service/* /etc/supervisor/
-```
-* 安装依赖
-```
-apt-get install -y python-dev python-pip iptables libcurl4-openssl-dev
-pip install -r requirements.txt  
-```
+* 部署
+
+部署方式参照 `deploy.sh` 脚本
+
 * 初始化数据库
 ```
 python manage.py makemigrations  
@@ -108,7 +76,12 @@ python manage.py migrate
 ```
 * 启动服务
 ```
-service supervisor restart  
+systemctl start supervisor
+
+or
+
+supervisorctl start webui
+supervisorctl start nginx
 ```
 * 登录系统
 ```
