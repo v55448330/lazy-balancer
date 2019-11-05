@@ -623,15 +623,6 @@ function delete_proxy(pk, name) {
     }
 }
 
-var t
-$(function() {
-    $('#proxy_logs').on('hide.bs.modal', function() {
-        $("#tail_access").empty()
-        $("#tail_error").empty()
-        clearTimeout(t)
-    })
-});
-
 function proxy_status(pk, getdata) {
     if (getdata == 1) {
         var post = {
@@ -664,21 +655,20 @@ function proxy_status(pk, getdata) {
                             $('#div_proxy_status_list').append(tb)
                         }
                     }
-                    t = setTimeout(function() {
-                        proxy_status(pk, 1);
-                    }, 3000)
-
+                    if ($("#proxy_status").css('display') == "block") {
+                        setTimeout(function() {
+                            proxy_status(pk, 1);
+                        }, 3000)
+                    }
 
                 } else if (p.flag == "Error" && p.context == "AuthFailed") {
                     alert('认证失败！请重新登录！')
                     top.location = '/login/'
                 } else {
-                    clearTimeout(t)
                     alert('查询失败！' + p.context)
                 }
             },
             error: function(e) {
-                clearTimeout(t)
                 alert('请求失败!')
             }
         })
@@ -733,14 +723,14 @@ function get_proxy_logs(pk, position) {
                         tailScroll($("#tail_error"))
                     }
 
-                    t = setTimeout(function() {
-                        get_proxy_logs(pk, p.curr_position);
-                    }, 3000)
+                    if ($("#proxy_logs").css('display') == "block") {
+                        setTimeout(function() {
+                            get_proxy_logs(pk, p.curr_position);
+                        }, 3000)
 
                 } else if (p.flag == "Error") {
                     $("#tail_access").empty()
                     $("#tail_error").empty()
-                    clearTimeout(t)
                     alert('查询失败！错误：' + p.context)
                 }
 
