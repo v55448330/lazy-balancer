@@ -50,6 +50,8 @@
 ```
 docker build -t <lazy_balancer>:<v0.9.3beta>
 ```
+> 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
+
 * 启动命令
 ```
 docker run -d --restart=always --name=lazy_balancer \
