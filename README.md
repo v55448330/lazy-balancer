@@ -67,7 +67,7 @@ docker exec lazy_balancer python manage.py migrate
 ### 主机
 * 部署
 
-部署方式参照 `deploy.sh` 脚本
+> 部署方式参照 `deploy.sh` 脚本
 
 * 初始化数据库
 ```
