@@ -34,7 +34,7 @@ upstream {{ proxy.config_id | lower }} {
 {%- if proxy.protocol %}
 {%- if proxy.ssl %}
 server {
-    {%- if proxy.http2 %}
+    {%- if proxy.ssl_http2 %}
     listen {{ proxy.listen }} ssl http2;
     {%- else %}
     listen {{ proxy.listen }} ssl;
