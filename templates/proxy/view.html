@@ -500,17 +500,20 @@ function change_proxy_protocol(type) {
     if (type == "http") {
         $("#radio_protocol_http").prop('checked', true)
         $('#input_proxy_server_name').removeAttr('disabled')
+        $("#check_proxy_ip_hash").removeAttr('disabled');
         $("#check_proxy_http_check").removeAttr('disabled');
         $("#check_proxy_gzip").removeAttr('disabled');
         $("#check_ssl_status").removeAttr('disabled');
         $("#check_proxy_backend_protocol").removeAttr('disabled');
         $("#check_proxy_to_domain_toggle").removeAttr('disabled');
         editor.setReadOnly(false)
-        change_to_domain(true)
+        //change_to_domain(true)
     } else {
         $("#radio_protocol_tcp").prop('checked', true)
         $('#input_proxy_server_name').val('')
         $('#input_proxy_server_name').attr('disabled', 'disabled')
+        $("#check_proxy_ip_hash").prop('checked', false)
+        $("#check_proxy_ip_hash").attr('disabled', 'disabled')
         $("#check_proxy_http_check").prop('checked', false);
         $("#check_proxy_http_check").attr('disabled', 'disabled');
         $("#check_proxy_gzip").prop('checked', false);
@@ -524,7 +527,7 @@ function change_proxy_protocol(type) {
         editor.setValue('')
         editor.setReadOnly(true)
         check_balancer_ssl()
-        change_to_domain(false)
+        //change_to_domain(false)
     }
 }
 
