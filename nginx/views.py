@@ -152,13 +152,14 @@ def get_sys_info():
         if ":" not in addrs[0].address:
             if nic != "lo":
                 nic_info.append({'nic':nic,'address':addrs[0].address})
+    uname = platform.uname()
     sysinfo = {
         'nic' : nic_info,
         'platform' : {
-            'node' : platform.node(),
-            'system' : platform.system(),
-            'release' : platform.release(),
-            'processor' : platform.processor()
+            'node' : uname[1],
+            'system' : uname[0],
+            'release' : uname[2],
+            'processor' : uname[4]
         },
         'nginx' : run_shell('nginx -v')['output'].replace('\nnginx version:',',').split(':')[1].strip()
     }
