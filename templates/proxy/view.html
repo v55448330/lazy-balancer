@@ -580,6 +580,7 @@ function edit_balancer(create, config_id) {
         $('#div_upstream_list').empty()
         $("[data-mask]").inputmask()
         check_balancer_ssl()
+        change_to_domain(false)
         change_proxy_protocol('http')
         editor.setValue('')
         $('#edit_balancer').modal('show')

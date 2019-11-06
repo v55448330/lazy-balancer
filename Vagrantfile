@@ -6,13 +6,13 @@ Vagrant.require_version ">= 1.6.0"
 vms = [
     {
         :name => "balancer1",
-        :eth1 => "1.1.1.101",
+        :eth1 => "192.168.100.101",
         :mem => "2048",
         :cpu => "1"
     },
     {
         :name => "balancer2",
-        :eth1 => "1.1.1.102",
+        :eth1 => "192.168.100.102",
         :mem => "2048",
         :cpu => "1"
     }
