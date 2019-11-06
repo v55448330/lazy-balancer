@@ -1,7 +1,7 @@
 FROM alpine:3.10
 
 ENV TENGINE_VERSION 2.3.2
-ENV LAZYBALANCER_VERSION v1.0.1beta
+ENV LAZYBALANCER_VERSION v1.0.2beta
 ENV LUAJIT_VERSION v2.1-20190626
 
 RUN set -x \
@@ -80,12 +80,12 @@ RUN set -x \
             --with-http_geoip_module=dynamic \
             --with-stream \
     && make && make install \
-    && mkdir -p /app/lazy-balancer \
+    && mkdir -p /app/lazy_balancer \
     && curl -fsSL https://github.com/v55448330/lazy-balancer/archive/${LAZYBALANCER_VERSION}.tar.gz -o lazybalancer.tar.gz \
-    && tar zxf lazybalancer.tar.gz --strip-components=1 -C /app/lazy-balancer \
-    && mkdir -p /app/lazy-balancer/db \
+    && tar zxf lazybalancer.tar.gz --strip-components=1 -C /app/lazy_balancer \
+    && mkdir -p /app/lazy_balancer/db \
     && chown -R www-data:www-data /app \
-    && cd /app/lazy-balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ && rm -rf /etc/supervisor/conf.d/supervisor_balancer.conf \
+    && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ && rm -rf /etc/supervisor/conf.d/supervisor_balancer.conf \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && rm -rf */migrations/00*.py \

@@ -49,22 +49,21 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.0.1beta>
+docker build -t <lazy-balancer>:<v1.0.2beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
 * 启动命令
 ```
-docker run -d --restart=always --net=host --name=lazy-balancer \
-    -v <nginx_config_dir>:/etc/nginx \
-    -v <db_dir>:/app/lazy-balancer/db \
+docker run -d --restart=always --net=host --name=lazy_balancer \
+    -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.0.1beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.0.2beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```
-docker exec lazy-balancer python manage.py makemigrations --noinput
-docker exec lazy-balancer python manage.py migrate
+docker exec lazy_balancer python manage.py makemigrations --noinput
+docker exec lazy_balancer python manage.py migrate
 ```
 ### 主机
 * 部署

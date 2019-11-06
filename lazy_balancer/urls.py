@@ -18,6 +18,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 from django.conf import settings
 from .views import logout_view,login_view,create_superuser
+from nginx.views import reload_config
+
+reload_config()
 
 urlpatterns = [
     url(r'^login/$', login_view),
