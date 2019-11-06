@@ -60,7 +60,7 @@ def test_config():
 def reload_config():
     config_nginx_path = "/etc/nginx/nginx.conf"
     config_default_path = "/etc/nginx/conf.d/default.conf"
-    os.remove(config_nginx_path)
+    # os.remove(config_nginx_path)
     clean_dir("/etc/nginx/conf.d")
     m_config = main_config.objects.all()[0].__dict__
     write_config(config_nginx_path,build_main_config(m_config))

@@ -18,9 +18,15 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 from django.conf import settings
 from .views import logout_view,login_view,create_superuser
-from nginx.views import reload_config
+import os
 
-reload_config()
+if os.path.join(settings.BASE_DIR + '/db', 'db.sqlite3'):
+    try:
+        from nginx.views import reload_config
+        reload_config()
+        print("reload config ok")
+    except:
+        print("reload config error")
 
 urlpatterns = [
     url(r'^login/$', login_view),
