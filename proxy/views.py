@@ -1,3 +1,4 @@
+from urlparse import urlparse
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
@@ -167,9 +168,17 @@ def save(request):
         error_log = post['base_config']['proxy_error_log']
         description = post['base_config']['proxy_description']
 
+        to_domain = post['base_config'].get('proxy_to_domain', '') 
+        if post['base_config'].has_key('proxy_to_domain_toggle'):
+            to_domain_toggle = True
+            host = urlparse(to_domain).netloc
+        else:
+            to_domain_toggle = False
+            host = server_name.split(' ')[0]
+
         balancer_type = ""
 
-        if proxy_name and listen and len(post['upstream_list']) and proxy_protocol and not listen=="8000":
+        if proxy_name and listen and (len(post['upstream_list']) or to_domain_toggle) and proxy_protocol and not listen=="8000":
             create_flag = False
             if config_id == "0":
                 config_id = str(uuid.uuid1())
@@ -227,9 +236,11 @@ def save(request):
                 'protocol': protocol,
                 'listen' : int(listen),
                 'server_name' : server_name,
-                'host' : server_name.split(' ')[0],
+                'host' : host,
                 'access_log' : access_log,
                 'error_log' : error_log,
+                'to_domain_toggle' : to_domain_toggle,
+                'to_domain' : to_domain,
                 'balancer_type' : balancer_type,
                 'http_check' : http_check,
                 'gzip' : gzip,
@@ -282,31 +293,31 @@ def save(request):
 
             upstream_list = []
 
-            for upstream in post['upstream_list']:
-                weight = upstream['upstream_weight']
-                fail_timeout = upstream['upstream_fail_timeout']
-                max_fails = upstream['upstream_max_fails']
+            if not to_domain_toggle:
+                for upstream in post['upstream_list']:
+                    weight = upstream['upstream_weight']
+                    fail_timeout = upstream['upstream_fail_timeout']
+                    max_fails = upstream['upstream_max_fails']
 
-                if not weight:
-                    weight = 10
+                    if not weight:
+                        weight = 10
 
-                if not fail_timeout:
-                    fail_timeout = 5
+                    if not fail_timeout:
+                        fail_timeout = 5
 
-                if not max_fails:
-                    max_fails = 3
+                    if not max_fails:
+                        max_fails = 3
 
-                upstream_list.append({
-                    'status' : True,
-                    'address' : upstream['upstream_address'],
-                    'port' : int(upstream['upstream_port']),
-                    'weight' : int(weight),
-                    'max_fails' : int(max_fails),
-                    'fail_timeout' : int(fail_timeout),
-                })
+                    upstream_list.append({
+                        'status' : True,
+                        'address' : upstream['upstream_address'],
+                        'port' : int(upstream['upstream_port']),
+                        'weight' : int(weight),
+                        'max_fails' : int(max_fails),
+                        'fail_timeout' : int(fail_timeout),
+                    })
 
             p_config = { 'proxy' : proxy, 'upstream' : upstream_list }
-
 
             config_context = build_proxy_config(p_config)
             write_config(config_path,config_context)
@@ -324,6 +335,7 @@ def save(request):
                     obj_p_config = proxy_config.objects.get(config_id=config_id)
 
                 obj_p_config.upstream_list.all().delete()
+
                 for up in upstream_list:
                     obj_p_config.upstream_list.add(upstream_config.objects.create(**up))
                     obj_p_config.save()

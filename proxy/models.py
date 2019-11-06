@@ -19,6 +19,8 @@ class proxy_config(models.Model):
     server_name = models.CharField(max_length=128,null=True)
     access_log = models.CharField(max_length=128,null=True)
     error_log = models.CharField(max_length=128,null=True)
+    to_domain_toggle = models.BooleanField(default=False,null=False)
+    to_domain = models.CharField(max_length=128,null=True)
     balancer_type = models.CharField(max_length=64,null=True)
     http_check = models.BooleanField(default=False)
     gzip = models.BooleanField(default=False)

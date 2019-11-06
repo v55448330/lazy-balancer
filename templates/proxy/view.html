@@ -124,6 +124,17 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 域名代理</label>
+                                    <div class="col-sm-9">
+                                        <div class="input-group">
+                                                <span class="input-group-addon">
+                                                  <input type="checkbox" data-enpassusermodified="yes" name="proxy_to_domain_toggle" id="check_proxy_to_domain_toggle" onchange="check_form(this)">
+                                                </span>
+                                            <input type="text" class="form-control" name="proxy_to_domain" id="input_proxy_to_domain" placeholder="请输入完整域名，如 https://123.com">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label class="col-sm-2 control-label">* IP_HASH</label>
                                     <div class="col-sm-9">
                                         <div class="checkbox">
@@ -245,7 +256,7 @@
                             <form class="form-horizontal" id="form_upstram_config">
                                 <div class="form-group">
                                     <div class="pull-left control-label col-sm-1">
-                                        <a class="btn btn-primary btn-xs" onclick="edit_upstream(1,null)"><i class="fa fa-plus"> 增加节点</i></a>
+                                        <a class="btn btn-primary btn-xs" onclick="edit_upstream(1,null)" id="a_add_upstream"><i class="fa fa-plus"> 增加节点</i></a>
                                     </div>
                                     <div class="pull-right control-label col-sm-4 checkbox">
                                         <label>
@@ -346,9 +357,13 @@
                             <td>
                                 <button type="button" class="btn btn-danger btn-xs" onclick="change_status('{{ server.pk }}',1)">禁用</button>
                             </td>
-                            {% endif %} {% if server.http_check %}
+                            {% endif %} {% if server.http_check and not server.to_domain_toggle %}
                             <td>
                                 <button type="button" class="btn btn-primary btn-xs" onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
+                            </td>
+                            {% elif not server.http_check and server.to_domain_toggle %}
+                            <td>
+                                <button type="button" class="btn btn-primary btn-xs" disabled>None</button>
                             </td>
                             {% else %}
                             <td>
@@ -408,6 +423,15 @@ function check_form(input) {
         }
         return
     }
+    if ($(input).attr('name') == 'proxy_to_domain_toggle') {
+        if ($(input).prop('checked') == true) {
+            alert('您选择了启用直接域名代理，该方式将禁用后端节点配置功能，直接将流量转发至您指定的域名。')
+            change_to_domain(true)
+        } else {
+            change_to_domain(false)
+        }
+        return
+    }
     var input_div = $(input.closest("div"))
     input_div.removeClass('has-error')
     input_div.removeClass('has-success')
@@ -415,6 +439,38 @@ function check_form(input) {
         input_div.addClass('has-error')
     } else {
         input_div.addClass('has-success')
+    }
+}
+
+function change_to_domain(type) {
+    if (type) {
+        if ($('#check_proxy_to_domain_toggle').prop('checked')) {
+            $('#input_proxy_to_domain').removeAttr('disabled')
+        } else {
+            $('#input_proxy_to_domain').attr('disabled','disabled')
+            $('#input_proxy_to_domain').val('')
+        }
+        edit_upstream(0,null)
+        $('#a_add_upstream').removeAttr('onclick')
+        $('#a_add_upstream').attr('disabled','disabled')
+        $("#check_proxy_ip_hash").prop('checked', false)
+        $("#check_proxy_ip_hash").attr('disabled', 'disabled')
+        $("#check_proxy_http_check").prop('checked', false)
+        $("#check_proxy_http_check").attr('disabled', 'disabled')
+        $("#check_proxy_gzip").prop('checked', false)
+        $("#check_proxy_gzip").attr('disabled', 'disabled')
+        $('#check_proxy_backend_protocol').prop('checked', false)
+        $('#check_proxy_backend_protocol').attr('disabled','disabled')
+    } else {
+        $('#input_proxy_to_domain').attr('disabled', 'disabled')
+        $('#input_proxy_to_domain').val('')
+        $('#a_add_upstream').attr('onclick','edit_upstream(1,null)')
+        $('#a_add_upstream').removeAttr('disabled')
+        $("#check_proxy_ip_hash").removeAttr('disabled')
+        $("#check_proxy_http_check").removeAttr('disabled')
+        $("#check_proxy_gzip").removeAttr('disabled')
+        $('#check_proxy_backend_protocol').removeAttr('disabled')
+        $("#input_proxy_to_domain").val('')
     }
 }
 
@@ -448,7 +504,9 @@ function change_proxy_protocol(type) {
         $("#check_proxy_gzip").removeAttr('disabled');
         $("#check_ssl_status").removeAttr('disabled');
         $("#check_proxy_backend_protocol").removeAttr('disabled');
+        $("#check_proxy_to_domain_toggle").removeAttr('disabled');
         editor.setReadOnly(false)
+        change_to_domain(true)
     } else {
         $("#radio_protocol_tcp").prop('checked', true)
         $('#input_proxy_server_name').val('')
@@ -461,9 +519,12 @@ function change_proxy_protocol(type) {
         $("#check_ssl_status").attr('disabled', 'disabled');
         $("#check_proxy_backend_protocol").prop('checked', false);
         $("#check_proxy_backend_protocol").attr('disabled', 'disabled');
+        $("#check_proxy_to_domain_toggle").prop('checked', false);
+        $("#check_proxy_to_domain_toggle").attr('disabled', 'disabled');
         editor.setValue('')
         editor.setReadOnly(true)
         check_balancer_ssl()
+        change_to_domain(false)
     }
 }
 
@@ -490,7 +551,11 @@ function edit_upstream(add, upstream) {
         $('#div_upstream_list').append(tb)
         $("[data-mask]").inputmask()
     } else {
-        $(upstream).parents('form')[0].remove()
+        if (upstream) {
+            $(upstream).parents('form')[0].remove()
+        } else {
+            $('#div_upstream_list').empty()
+        }
     }
 }
 
@@ -507,6 +572,7 @@ function edit_balancer(create, config_id) {
         $('#input_proxy_server_name').val('')
         $('#input_proxy_access_log').val('')
         $('#input_proxy_error_log').val('')
+        $('#check_proxy_to_domain_toggle').attr('checked', false)
         $('#check_proxy_ip_hash').attr('checked', false)
         $('#check_proxy_http_check').attr('checked', false)
         $("#check_proxy_backend_protocol").prop('checked', false);
@@ -542,6 +608,14 @@ function edit_balancer(create, config_id) {
                         change_proxy_protocol('http')
                     } else {
                         change_proxy_protocol('tcp')
+                    }
+                    if (p.context.proxy.to_domain_toggle) {
+                        $('#check_proxy_to_domain_toggle').prop('checked', true)
+                        $('#input_proxy_to_domain').val(p.context.proxy.to_domain)
+                        change_to_domain(true)
+                    } else {
+                        $('#check_proxy_to_domain_toggle').prop('checked', false)
+                        change_to_domain(false)
                     }
                     if (p.context.proxy.balancer_type == "ip_hash") {
                         $('#check_proxy_ip_hash').prop('checked', true)
