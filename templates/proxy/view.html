@@ -576,6 +576,7 @@ function edit_balancer(create, config_id) {
         $('#check_proxy_ip_hash').attr('checked', false)
         $('#check_proxy_http_check').attr('checked', false)
         $("#check_proxy_backend_protocol").prop('checked', false);
+        $('#check_ssl_status').prop('checked', false)
         $('#div_upstream_list').empty()
         $("[data-mask]").inputmask()
         check_balancer_ssl()
