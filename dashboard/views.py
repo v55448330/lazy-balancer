@@ -23,6 +23,7 @@ def get_status_info(request):
     for r in req_status:
         rs = {
             'req_url' : r[0],
+            'req_ip' : r[1],
             'bytes_in' : r[2],
             'bytes_out' : r[3],
             'conn_total' : r[4],
