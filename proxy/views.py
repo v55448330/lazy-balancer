@@ -8,6 +8,7 @@ from django.forms.models import model_to_dict
 from django.db.models import Q
 from lazy_balancer.views import is_auth
 from proxy.models import proxy_config,upstream_config
+from main.models import main_config
 from settings.models import system_settings
 from nginx.views import *
 import json
@@ -155,9 +156,12 @@ def proxy_logs(request):
 def save(request):
     try:
         post = json.loads(request.body)
-        # print(str(post))
+        print(str(post))
         # content = {"flag":"Debug","context":"Debug"}
         # return HttpResponse(json.dumps(content))
+        if not len(main_config.objects.all()):
+            content = {"flag":"Error","context":"MainConfigNotFound"}
+            return HttpResponse(json.dumps(content))
 
         config_id = post['base_config']['proxy_config_id']
         proxy_name = post['base_config']['proxy_proxy_name']
@@ -193,10 +197,10 @@ def save(request):
             if not error_log:
                 error_log = "/var/log/nginx/error-%s.log" % config_id
 
-            if post['base_config'].has_key('proxy_ip_hash'):
+            if post['base_config'].has_key('upstream_ip_hash'):
                 balancer_type = "ip_hash"
 
-            if post['base_config'].has_key('proxy_http_check'):
+            if post['base_config'].has_key('upstream_http_check'):
                 http_check = True
             else:
                 http_check = False
@@ -206,7 +210,7 @@ def save(request):
             else:
                 gzip = False
 
-            if post['base_config'].has_key('proxy_backend_protocol'):
+            if post['base_config'].has_key('upstream_backend_protocol'):
                 backend_protocol = "https"
             else:
                 backend_protocol = "http"
@@ -291,30 +295,32 @@ def save(request):
             if post['custom_config']:
                 proxy['custom_config'] = post.get('custom_config', '')
 
+            fail_timeout = post['base_config'].get('upstream_fail_timeout',0)
+            max_fails = post['base_config'].get('upstream_max_fails',0)
+
+            if not fail_timeout:
+                fail_timeout = 5
+
+            if not max_fails:
+                max_fails = 3
+            
+            proxy['fail_timeout'] = int(fail_timeout)
+            proxy['max_fails'] = int(max_fails)
+
             upstream_list = []
 
             if not to_domain_toggle:
                 for upstream in post['upstream_list']:
                     weight = upstream['upstream_weight']
-                    fail_timeout = upstream['upstream_fail_timeout']
-                    max_fails = upstream['upstream_max_fails']
 
                     if not weight:
                         weight = 10
-
-                    if not fail_timeout:
-                        fail_timeout = 5
-
-                    if not max_fails:
-                        max_fails = 3
 
                     upstream_list.append({
                         'status' : True,
                         'address' : upstream['upstream_address'],
                         'port' : int(upstream['upstream_port']),
-                        'weight' : int(weight),
-                        'max_fails' : int(max_fails),
-                        'fail_timeout' : int(fail_timeout),
+                        'weight' : int(weight)
                     })
 
             p_config = { 'proxy' : proxy, 'upstream' : upstream_list }

@@ -58,6 +58,7 @@ http {
 
     server {
         listen 80 default;
+        server_name 127.0.0.1;
 
         location / {
             return 444;

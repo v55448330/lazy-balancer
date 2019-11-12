@@ -36,10 +36,10 @@ def build_proxy_config(config):
 
     return template.render(config)
 
-def build_default_config(config):
-    template = load_template('default.template')
-
-    return template.render(config)
+#def build_default_config(config):
+#    template = load_template('default.template')
+#
+#    return template.render(config)
 
 def write_config(conf_path,conf_context):
     f = open(conf_path, 'w')
@@ -59,10 +59,11 @@ def test_config():
 
 def reload_config():
     config_nginx_path = "/etc/nginx/nginx.conf"
-    config_default_path = "/etc/nginx/conf.d/default.conf"
+    # config_default_path = "/etc/nginx/conf.d/default.conf"
     # os.remove(config_nginx_path)
     clean_dir("/etc/nginx/conf.d")
     m_config = main_config.objects.all()[0].__dict__
+
     write_config(config_nginx_path,build_main_config(m_config))
 
     proxy_port_list = []
@@ -82,7 +83,7 @@ def reload_config():
             write_config(p.ssl_key_path,p.ssl_key)
         write_config(config_proxy_path,build_proxy_config(p_config))
 
-    write_config(config_default_path,build_default_config({'listen_list':list(set(proxy_port_list))}))
+    # write_config(config_default_path,build_default_config({'listen_list':list(set(proxy_port_list))}))
 
     return run_shell('nginx -s reload')
 
@@ -161,7 +162,7 @@ def get_sys_info():
             'release' : uname[2],
             'processor' : uname[4]
         },
-        'nginx' : run_shell('nginx -v')['output'].replace('\nnginx version:',',').split(':')[1].strip()
+        'nginx' : run_shell('nginx -v')['output'].replace('\nnginx version: ','(').split(':')[1].strip() + ")"
     }
     return sysinfo
 

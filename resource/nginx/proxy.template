@@ -1,35 +1,31 @@
 
 {%- if not proxy.to_domain_toggle %}
 upstream {{ proxy.config_id | lower }} {
-    {%- if proxy.protocol %}
-    {%- if proxy.balancer_type == "ip_hash" %}
-    ip_hash;
-    {%- endif %}
-    {%- if proxy.http_check %}
-      {%- for server in upstream %}
-      server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
-      {%- endfor %}
-      {%- if proxy.backend_protocol == 'https' %}
-      check interval=3000 rise=2 fall={{ upstream[0].max_fails }} timeout={{ upstream[0].fail_timeout }} type=ssl_hello;
-      check_keepalive_requests 100;
-      {%- else %}
-      check interval=3000 rise=2 fall={{ upstream[0].max_fails }} timeout={{ upstream[0].fail_timeout }} type=http;
-      check_http_expect_alive http_2xx http_3xx;
-      check_keepalive_requests 100;
-      check_http_send "HEAD / HTTP/1.1\r\nConnection: keep-alive\r\nHost: {{ proxy.host }}\r\n\r\n";
-      {%- endif %}
-    {%- else %}
-      {%- for server in upstream %}
-      server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ server.max_fails }} fail_timeout={{ server.fail_timeout }}s;
-      {%- endfor %}
-    {%- endif %}
-    {%- else %}
     {%- if proxy.balancer_type == "ip_hash" %}
     hash $remote_addr consistent;
     {%- endif %}
     {%- for server in upstream %}
-    server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ server.max_fails }} fail_timeout={{ server.fail_timeout }}s;
+    {%- if proxy.protocol %}
+    server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
+    {%- else %}
+    server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ proxy.max_fails }} fail_timeout={{ proxy.fail_timeout }}s;
+    {%- endif %}
     {%- endfor %}
+    {%- if proxy.protocol %}
+    {%- if proxy.http_check %}
+    {%- if proxy.backend_protocol == 'https' %}
+    check interval=3000 rise=2 fall={{ proxy.max_fails }} timeout={{ proxy.fail_timeout * 1000 }} type=ssl_hello;
+    check_keepalive_requests 100;
+    {%- else %}
+    check interval=3000 rise=2 fall={{ proxy.max_fails }} timeout={{ proxy.fail_timeout * 1000 }} type=http;
+    check_http_expect_alive http_2xx http_3xx;
+    check_keepalive_requests 100;
+    check_http_send "HEAD / HTTP/1.1\r\nConnection: keep-alive\r\nHost: {{ proxy.host }}\r\n\r\n";
+    {%- endif %}
+    {%- else %}
+    check interval=3000 rise=2 fall={{ proxy.max_fails }} timeout={{ proxy.fail_timeout * 1000 }} type=tcp;
+    check_keepalive_requests 100;
+    {%- endif %}
     {%- endif %}
 }
 {%- endif %}

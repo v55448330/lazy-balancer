@@ -8,8 +8,6 @@ class upstream_config(models.Model):
     address = models.CharField(max_length=64,null=False)
     port = models.IntegerField(null=False)
     weight = models.IntegerField(null=False)
-    max_fails = models.IntegerField()
-    fail_timeout = models.IntegerField()
 
 class proxy_config(models.Model):
     config_id = models.CharField(max_length=64,null=True)
@@ -39,4 +37,6 @@ class proxy_config(models.Model):
     host = models.CharField(max_length=64,null=True)
     status = models.BooleanField(default=False)
     update_time = models.FloatField(null=False)
+    max_fails = models.IntegerField(default=5)
+    fail_timeout = models.IntegerField(default=5)
     upstream_list = models.ManyToManyField(upstream_config)
