@@ -31,6 +31,28 @@
     </div>
 </div>
 
+<div class="modal fade" id="ssl_cert_status" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="ssl_cert_status_title">SSL 证书状态</h4><small
+                        id="ssl_cert_status_mtitle"></small>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped" style="margin-bottom:0px">
+                        <tbody id="div_ssl_cert_status_body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <div class="modal fade" id="proxy_logs" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -388,7 +410,7 @@
                             </td>
                             {% if server.protocol and server.ssl %}
                             <td>
-                                <button class="btn btn-warning btn-xs" disabled>HTTPS</button>
+                                <button class="btn btn-xs" title="{{ server.pk }}" name="proxy_protocol_https" onclick="get_cert_info('{{ server.pk }}', true)">HTTPS</button>
                             </td>
                             {% elif server.protocol and not server.ssl %}
                             <td>
@@ -396,7 +418,7 @@
                             </td>
                             {% else %}
                             <td>
-                                <button class="btn btn-success btn-xs" disabled>TCP</button>
+                                <button class="btn btn-primary btn-xs" disabled>TCP</button>
                             </td>
                             {% endif %}
                             <td>{{ server.listen }}</td>
@@ -476,6 +498,15 @@
     editor.getSession().setMode("ace/mode/nginx");
     editor.setShowPrintMargin(false);
     editor.setValue('')
+
+    $(':button[name="proxy_protocol_https"]').each(function (){
+        cert_info = get_cert_info($(this)[0].title, false)
+            if (cert_info.has_expired) {
+                $(this).addClass('btn-warning')
+            } else {
+                $(this).addClass('btn-primary')
+            }
+    })
 
     var status_t;
     var log_t;
@@ -989,5 +1020,53 @@
         }
 
     }
+
+    function get_cert_info(pk, type) {
+        var post = {
+            pk: pk
+        }
+        var cert_info;
+        jQuery.ajax({
+            type: 'post',
+            async: false,
+            url: '/proxy/certstatus/',
+            data: JSON.stringify(post),
+            dataType: "json",
+            success: function (p) {
+                if (p.flag == "Success") {
+                    //console.log(p)
+                    if (type) {
+                        $('#ssl_cert_status_mtitle').text(p.config_id)
+                        $('#div_ssl_cert_status_body').empty()
+                        if (p.cert_info.has_expired) {
+                            has_expired = '<span class="label label-warning">已过期</span>'
+                        } else {
+                            has_expired = '<span class="label label-success">正常</span>'
+                        }
+
+                        tb = '<tr><td><strong>证书域名</strong></td><td>' + p.cert_info.subject + '</td></tr>'
+                        tb += '<tr><td><strong>签发机构</strong></td><td>' + p.cert_info.issuer + '</td></tr>'
+                        tb += '<tr><td><strong>过期时间</strong></td><td>' + p.cert_info.datetime_struct + ' ' + has_expired + '</td></tr>'
+                        $('#div_ssl_cert_status_body').append(tb)
+
+                        $('#ssl_cert_status').modal('show')
+                    } else { 
+                        cert_info = p.cert_info
+                    }
+
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('查询失败！' + p.context)
+                }
+            },
+            error: function (e) {
+                alert('请求失败!')
+            }
+        })
+        return cert_info
+    }
+
 </script>
 {% endblock %}

@@ -1,4 +1,6 @@
 from urlparse import urlparse
+from OpenSSL import crypto
+from dateutil import parser
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
@@ -24,7 +26,7 @@ def view(request):
     else:
         p_config = proxy_config.objects.all()
 
-    NUM_PER_PAGE = 8
+    NUM_PER_PAGE = 10
     paginator = Paginator(p_config, NUM_PER_PAGE)
     page = request.GET.get('page')
 
@@ -34,6 +36,9 @@ def view(request):
         contexts = paginator.page(1)
     except EmptyPage:
         contexts = paginator.page(paginator.num_pages)
+
+    print(type(contexts))
+    print("abc")
 
     user = {
         'name':request.user,
@@ -360,5 +365,27 @@ def save(request):
     except Exception, e:
         content = {"flag":"Error","context":str(e)}
 
+    return HttpResponse(json.dumps(content))
+    pass
+
+# @is_auth
+def get_cert_status(request):
+    try:
+        post = json.loads(request.body)
+        proxy = proxy_config.objects.get(pk=post['pk'])
+        cert_file_path = '/etc/nginx/conf.d/%s.crt' % proxy.config_id
+        # print(cert_file_path)
+        cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(cert_file_path).read())
+        cert_issuer = cert.get_issuer()
+        cert_info = {
+            'subject': cert.get_subject().CN,
+            'issuer' : "%s/%s/%s" % (cert_issuer.C,cert_issuer.O,cert_issuer.CN),
+            'datetime_struct' : parser.parse(cert.get_notAfter().decode("UTF-8")).strftime('%Y-%m-%d %H:%M:%S'),
+            'has_expired' : cert.has_expired()
+        }
+
+        content = { "flag":"Success","config_id":proxy.config_id,"cert_info":cert_info}
+    except Exception, e:
+        content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
     pass
