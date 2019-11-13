@@ -20,7 +20,7 @@ pycparser==2.19
 pyOpenSSL==19.0.0
 python-dateutil==2.8.1
 pytz==2019.3
-requests==2.20.0
+requests==2.22.0
 six==1.12.0
 supervisor==3.2.0
 tzlocal==2.0.0
