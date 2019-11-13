@@ -470,6 +470,8 @@
             <div class="box-footer clearfix">
                 <ul class="pagination pagination-sm no-margin pull-right">
                     {% if proxy.has_previous %}
+                    <li><a href="?page=1&filter={{ filter }}"
+                            class="next">首页{{ next_link_decorator|safe }}</a></li>
                     <li><a href="?page={{ proxy.previous_page_number }}&filter={{ filter }}"
                             class="prev">{{ previous_link_decorator|safe }}上一页</a></li>
                     {% else %}
@@ -478,6 +480,8 @@
                     {% endif %} {% if proxy.has_next %}
                     <li><a href="?page={{ proxy.next_page_number }}&filter={{ filter }}"
                             class="next">下一页{{ next_link_decorator|safe }}</a></li>
+                    <li><a href="?page={{ proxy.paginator.num_pages }}&filter={{ filter }}"
+                            class="next">尾页{{ next_link_decorator|safe }}</a></li>
                     {% else %}
                     <li class="paginate_button next disabled"><span
                             class="disabled next">下一页{{ next_link_decorator|safe }}</span></li>
