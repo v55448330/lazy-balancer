@@ -378,9 +378,9 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <button type="button" class="btn btn-primary pull-left" onclick="edit_balancer(1)">创建负载均衡器</button>
-                <div class="input-group pull-right" style="width: 250px;">
+                <div class="input-group pull-right" style="width: 300px;">
                     <input type="text" name="proxy_filter" id="input_proxy_filter" class="form-control pull-right"
-                        placeholder="请输入名称或域名" onkeydown='if(event.keyCode==13){proxy_filter()}'>
+                        placeholder="请输入名称/域名/配置ID" onkeydown='if(event.keyCode==13){proxy_filter()}'>
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-default" onclick="proxy_filter()"><i
                                 class="fa fa-search"></i></button>
@@ -438,16 +438,16 @@
                             </td>
                             {% endif %} {% if server.protocol and server.http_check and not server.to_domain_toggle %}
                             <td>
-                                <button type="button" class="btn btn-primary btn-xs"
+                                <button type="button" title="{{ server.config_id }}" name="proxy_upstream_status" class="btn btn-xs"
                                     onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
                             </td>
                             {% elif server.protocol and not server.http_check and not server.to_domain_toggle %}
                             <td>
-                                <button type="button" class="btn btn-warning btn-xs" onclick="proxy_status('{{ server.pk }}',0)">TCP</button>
+                                <button type="button" title="{{ server.config_id }}" name="proxy_upstream_status" class="btn btn-xs" onclick="proxy_status('{{ server.pk }}',0)">TCP</button>
                             </td>
                             {% elif not server.protocol %}
                             <td>
-                                <button type="button" class="btn btn-warning btn-xs" disabled>TCP</button>
+                                <button type="button" class="btn btn-primary btn-xs" disabled>TCP</button>
                             </td>
                             {% else %}
                             <td>
@@ -502,22 +502,39 @@
     $('#page_name').text('负载均衡配置')
 
     var editor = ace.edit('div_custom_config_body');
-    editor.setTheme("ace/theme/monokai");
-    editor.getSession().setMode("ace/mode/nginx");
-    editor.setShowPrintMargin(false);
-    editor.setValue('')
+    var status_t;
+    var log_t;
 
-    $(':button[name="proxy_protocol_https"]').each(function (){
-        cert_info = get_cert_info($(this)[0].title, false)
+    $(document).ready(function(){
+        editor.setTheme("ace/theme/monokai");
+        editor.getSession().setMode("ace/mode/nginx");
+        editor.setShowPrintMargin(false);
+        editor.setValue('')
+
+        $(':button[name="proxy_protocol_https"]').each(function (){
+            cert_info = get_cert_info($(this)[0].title, false)
             if (cert_info.has_expired) {
                 $(this).addClass('btn-warning')
             } else {
-                $(this).addClass('btn-primary')
+                $(this).addClass('btn-success')
             }
-    })
+        })
 
-    var status_t;
-    var log_t;
+        var upstream_status = proxy_status(0, 2)
+        $(':button[name="proxy_upstream_status"]').each(function (){
+            var down = 0
+            for (s in upstream_status) {
+                if (upstream_status[s].upstream == $(this)[0].title && upstream_status[s].status == "down") {
+                    down++
+                }
+            }
+            if (down == 0) {
+                $(this).addClass('btn-primary')
+            } else {
+                $(this).addClass('btn-warning')
+            }
+        })
+    })
 
     function check_form(input) {
         if ($(input).attr('name') == 'upstream_http_check') {
@@ -673,7 +690,6 @@
         }
     }
 
-
     function edit_balancer(create, config_id) {
         $('#a_default_conf').trigger('click')
         $('.CodeMirror').remove()
@@ -821,10 +837,10 @@
     }
 
     function proxy_status(pk, getdata) {
+        var post = {
+            pk: pk
+        }
         if (getdata == 1) {
-            var post = {
-                pk: pk
-            }
             jQuery.ajax({
                 type: 'post',
                 url: '/proxy/checkhttp/',
@@ -835,8 +851,8 @@
                         $('#proxy_status_mtitle').text(p.config_id)
                         $('#div_proxy_status_list').empty()
 
-                        for (var f in p.status.servers.server) {
-                            var server = p.status.servers.server[f]
+                        for (var f in p.status) {
+                            var server = p.status[f]
                             if (server.upstream == p.config_id) {
                                 tb = '<tr>'
                                 tb += '<td>' + server.index + '</td>'
@@ -867,6 +883,29 @@
                     alert('请求失败!')
                 }
             })
+        } else if (getdata == 2 ) {
+            var upstream_status;
+            jQuery.ajax({
+                type: 'post',
+                url: '/proxy/checkhttp/',
+                data: JSON.stringify(post),
+                async: false,
+                dataType: "json",
+                success: function (p) {
+                    if (p.flag == "Success") {
+                        upstream_status = p.status
+                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else {
+                        alert('查询失败！' + p.context)
+                    }
+                },
+                error: function (e) {
+                    alert('请求失败!')
+                }
+            })
+            return upstream_status
         } else {
             proxy_status(pk, 1)
             $('#proxy_status').modal('show')

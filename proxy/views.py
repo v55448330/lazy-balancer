@@ -22,7 +22,7 @@ import os
 def view(request):
     filter = request.GET.get('filter',"")
     if filter:
-        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter))
+        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter)|Q(config_id__contains=filter))
     else:
         p_config = proxy_config.objects.all()
 
@@ -49,10 +49,19 @@ def view(request):
 def check_http_status(request):
     try:
         post = json.loads(request.body)
-        proxy = proxy_config.objects.get(pk=post['pk'])
         status = get_proxy_http_status()
 
-        content = { "flag":"Success","config_id":proxy.config_id,"status":status}
+        if status.has_key('servers'):
+            status = status['servers']['server']
+        else:
+            status = []
+
+        if post['pk'] == 0:
+            content = { "flag":"Success","status":status}
+        else:
+            proxy = proxy_config.objects.get(pk=post['pk'])
+            content = { "flag":"Success","config_id":proxy.config_id,"status":status}
+        
     except Exception, e:
         content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
