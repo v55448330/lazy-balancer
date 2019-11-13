@@ -50,7 +50,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.1.0beta>
+docker build -t <lazy-balancer>:<v1.1.1beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 

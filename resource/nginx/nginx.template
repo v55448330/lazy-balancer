@@ -33,6 +33,7 @@ http {
 
     keepalive_timeout {{ keepalive_timeout }};
     types_hash_max_size 2048;
+    server_names_hash_bucket_size 512;
     client_max_body_size {{ client_max_body_size }}m;
 
     include /etc/nginx/mime.types;
