@@ -37,9 +37,6 @@ def view(request):
     except EmptyPage:
         contexts = paginator.page(paginator.num_pages)
 
-    print(type(contexts))
-    print("abc")
-
     user = {
         'name':request.user,
         'date':time.time()

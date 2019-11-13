@@ -640,15 +640,15 @@
         if (add == 1) {
             if (upstream == null) {
                 upstream = {
-                    address: null,
-                    port: null,
-                    weight: null
+                    address: "",
+                    port: "",
+                    weight: "" 
                 }
             }
 
             tb = '<form class="form-horizontal"><table class="table table-bordered" style="margin-bottom:0px"><tr>'
             tb +=
-                '<td class="col-sm-5"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_address" placeholder="IP地址" data-inputmask="\'alias\': \'ip\'" data-mask value="' +
+                '<td class="col-sm-5"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_address" placeholder="IP 地址或者域名" value="' +
                 upstream.address + '"></div></td>'
             tb +=
                 '<td class="col-sm-3"><div><input type="text" onblur="check_form(this)" class="form-control" name="upstream_port" placeholder="服务端口" data-inputmask="\'mask\':\'[9]{1,5}\'" data-mask value="' +
