@@ -410,7 +410,11 @@
                             </td>
                             {% if server.protocol and server.ssl %}
                             <td>
+                                {% if server.status %}
                                 <button class="btn btn-xs" title="{{ server.pk }}" name="proxy_protocol_https" onclick="get_cert_info('{{ server.pk }}', true)">HTTPS</button>
+                                {% else %}
+                                <button class="btn btn-primary btn-xs" title="{{ server.pk }}" disabled>HTTPS</button>
+                                {% endif %}
                             </td>
                             {% elif server.protocol and not server.ssl %}
                             <td>
