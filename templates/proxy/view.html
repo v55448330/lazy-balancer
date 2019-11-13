@@ -685,7 +685,7 @@
             $('#check_proxy_to_domain_toggle').attr('checked', false)
             $('#check_upstream_ip_hash').attr('checked', false)
             $('#check_upstream_http_check').attr('checked', false)
-            $("#check_proxy_backend_protocol").prop('checked', false);
+            $("#check_upstream_backend_protocol").prop('checked', false);
             $('#check_ssl_status').prop('checked', false)
             $('#input_upstream_max_fails').val('')
             $('#input_upstream_fail_timeout').val('')
@@ -765,7 +765,7 @@
                         }
                         editor.setValue(p.context.proxy.custom_config)
                         if (p.context.proxy.backend_protocol == "https") {
-                            $('#check_proxy_backend_protocol').prop('checked', true)
+                            $('#check_upstream_backend_protocol').prop('checked', true)
                         }
                         $('#input_upstream_max_fails').val(p.context.proxy.max_fails)
                         $('#input_upstream_fail_timeout').val(p.context.proxy.fail_timeout)
@@ -981,8 +981,8 @@
         if (confirm("确认要保存这样的配置？")) {
             var base_config = $('#form_base_config').serializeObject()
             var upstream_config = $('#form_upstram_config').serializeObject()
-            if ($('#check_proxy_backend_protocol').prop('checked')) {
-                base_config['proxy_backend_protocol'] = "on"
+            if ($('#check_upstream_backend_protocol').prop('checked')) {
+                base_config['upstream_backend_protocol'] = "on"
             }
             var ssl_config = $('#form_ssl_config').serializeObject()
             var custom_config = editor.getValue()

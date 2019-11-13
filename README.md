@@ -11,7 +11,7 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
-## 更新（2019-11-06）
+## 更新（2019-11-12）
 * 新增 TCP 负载均衡支持
 * 新增配置同步功能
 * 支持后端服务器为 HTTPS 协议，当后端为 HTTPS 协议时，HTTP 健康检测将使用发送 SSL Hello 包的方式
@@ -20,6 +20,7 @@
 * 增加 Docker 支持
 * 去除原 iptables 防火墙管理功能
 * 协议为 HTTP/HTTPS 时，允许用户自定义 Server 级别 Nginx 配置
+* 当协议为 HTTPS 时，可以预览证书信息，及获取证书过期状态
 * 修复其他 Bug
 
 ## 更新
@@ -49,7 +50,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.0.8beta>
+docker build -t <lazy-balancer>:<v1.1.0beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
@@ -58,7 +59,7 @@ docker build -t <lazy-balancer>:<v1.0.8beta>
 docker run -d --restart=always --net=host --name=lazy_balancer \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.0.8beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.1.0beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```
