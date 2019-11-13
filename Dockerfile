@@ -29,6 +29,7 @@ RUN set -x \
                 alpine-sdk \
                 findutils \
                 python-dev \
+                libffi-dev \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz \
     && tar zxf luajit.tar.gz -C ${tempDir} \
