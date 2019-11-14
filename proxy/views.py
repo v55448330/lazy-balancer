@@ -22,7 +22,7 @@ import os
 def view(request):
     filter = request.GET.get('filter',"")
     if filter:
-        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter)|Q(config_id__contains=filter))
+        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter)|Q(config_id__contains=filter)|Q(listen__contains=filter))
     else:
         p_config = proxy_config.objects.all()
 
@@ -167,7 +167,7 @@ def proxy_logs(request):
 def save(request):
     try:
         post = json.loads(request.body)
-        print(str(post))
+        # print(str(post))
         # content = {"flag":"Debug","context":"Debug"}
         # return HttpResponse(json.dumps(content))
         if not len(main_config.objects.all()):
@@ -282,9 +282,15 @@ def save(request):
                 else:
                     ssl_http2 = False
 
+                if post['ssl_config'].has_key('ssl_redirect_https'):
+                    ssl_redirect_https = True
+                else:
+                    ssl_redirect_https = False
+
                 if cert_body and key_body:
                     proxy['ssl'] = True
                     proxy['ssl_http2'] = ssl_http2
+                    proxy['ssl_redirect_https'] = ssl_redirect_https
                     proxy['ssl_cert'] = cert_body
                     proxy['ssl_cert_path'] = cert_path
                     proxy['ssl_key'] = key_body

@@ -26,6 +26,7 @@ class proxy_config(models.Model):
 
     ssl = models.BooleanField(default=False)
     ssl_http2 = models.BooleanField(default=False)
+    ssl_redirect_https = models.BooleanField(default=False)
     ssl_cert = models.TextField(null=True)
     ssl_cert_path = models.CharField(max_length=128,null=True)
     ssl_key = models.TextField(null=True)

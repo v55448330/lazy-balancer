@@ -1,7 +1,7 @@
 FROM alpine:3.10
 
 ENV TENGINE_VERSION 2.3.2
-ENV LAZYBALANCER_VERSION v1.1.4beta
+ENV LAZYBALANCER_VERSION v1.1.5beta
 ENV LUAJIT_VERSION v2.1-20190626
 
 RUN set -x \
@@ -89,6 +89,7 @@ RUN set -x \
     && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ && rm -rf /etc/supervisor/conf.d/supervisor_balancer.conf \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
+    && cp -f resource/nginx/default.* /etc/nginx/ \
     && rm -rf */migrations/00*.py \
     && pip install -r requirements.txt \
     && apk del .build-deps \

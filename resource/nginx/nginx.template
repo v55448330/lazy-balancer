@@ -79,18 +79,15 @@ http {
     #req_status_zone_add_indicator server $limit;
 
     server {
-        listen 80 default;
+        listen 80;
         server_name 127.0.0.1;
-
-        location / {
-            return 444;
-        }
 
         location /up_status {
             check_status;
             allow 127.0.0.1;
             deny all;
         }
+
         location /req_status {
             req_status_show;
             #req_status_show_field req_total $limit;
@@ -98,6 +95,32 @@ http {
             deny all;
         }
     }
+
+    server {
+        listen 80 default;
+        server_name _;
+
+        location / {
+            return 444;
+        }
+    }
+
+    server {
+        listen 443 ssl default;
+        server_name _;
+        
+        ssl_certificate /etc/nginx/default.crt;
+        ssl_certificate_key /etc/nginx/default.key;
+
+        access_log off;
+        error_log off;
+
+        location / {
+            return 444;
+        }
+    }
+
+
 
     ##
     # HTTP Virtual Host Configs

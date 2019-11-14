@@ -32,6 +32,24 @@ upstream {{ proxy.config_id | lower }} {
 
 {%- if proxy.protocol %}
 {%- if proxy.ssl %}
+
+{%- if proxy.ssl_redirect_https %}
+# HTTP redirect
+server {
+	listen 80;
+
+	server_name {{ proxy.server_name }};
+
+	location / {
+        {%- if proxy.listen == 443 %}
+		return 301 https://{{ proxy.server_name }}$request_uri;
+        {%- else %}
+		return 301 https://{{ proxy.server_name }}:{{ proxy.listen }}$request_uri;
+        {%- endif %}
+	}
+}
+{%- endif %}
+
 server {
     {%- if proxy.ssl_http2 %}
     listen {{ proxy.listen }} ssl http2;
