@@ -200,33 +200,61 @@ def import_config(config):
         p_config = config['proxy_config']
         u_config = config['upstream_config']
         
+        config_count = 0
         if m_config.get('config', False):
-            if hashlib.sha1(m_config.get('config')).hexdigest() == m_config.get('sha1'):
-                main_config_qc.delete()
-                for obj in serializers.deserialize("json", m_config.get('config')):
-                    obj.save()
+            if hashlib.sha1(serializers.serialize('json', main_config_qc)).hexdigest() == m_config.get('sha1'):
+                logger.info('main config no change!')
             else:
-                return False
+                if hashlib.sha1(m_config.get('config')).hexdigest() == m_config.get('sha1'):
+                    logger.info('import main config started...')
+                    main_config_qc.delete()
+                    for obj in serializers.deserialize("json", m_config.get('config')):
+                        obj.save()
+                    logger.info('import main config finished!')
+                    config_count += 1
+                else:
+                    return False
 
         if s_config.get('config', False):
-            if hashlib.sha1(s_config.get('config')).hexdigest() == s_config.get('sha1'):
-                system_config_qc.delete()
-                for obj in serializers.deserialize("json", s_config.get('config')):
-                    obj.save()
+            if hashlib.sha1(serializers.serialize('json', system_config_qc)).hexdigest() == s_config.get('sha1'):
+                logger.info('system config no change!')
             else:
-                return False
+                if hashlib.sha1(s_config.get('config')).hexdigest() == s_config.get('sha1'):
+                    logger.info('import system config started...')
+                    system_config_qc.delete()
+                    for obj in serializers.deserialize("json", s_config.get('config')):
+                        obj.save()
+                    logger.info('import system config finished!')
+                    config_count += 1
+                else:
+                    return False
 
         if p_config.get('config', False) and u_config.get('config', False):
-            if hashlib.sha1(p_config.get('config')).hexdigest() == p_config.get('sha1') and hashlib.sha1(u_config.get('config')).hexdigest() == u_config.get('sha1'):
-                upstream_config_qc.delete()
-                for obj in serializers.deserialize("json", u_config.get('config')):
-                    obj.save()
-
-                proxy_config_qc.delete()
-                for obj in serializers.deserialize("json", p_config.get('config')):
-                    obj.save()
+            if hashlib.sha1(serializers.serialize('json', proxy_config_qc)).hexdigest() == p_config.get('sha1') and hashlib.sha1(serializers.serialize('json', upstream_config_qc)).hexdigest() == u_config.get('sha1'):
+                logger.info('proxy config and upstream config no change!')
             else:
-                return False
+                if hashlib.sha1(p_config.get('config')).hexdigest() == p_config.get('sha1') and hashlib.sha1(u_config.get('config')).hexdigest() == u_config.get('sha1'):
+                    logger.info('import upstream config started...')
+                    upstream_config_qc.delete()
+                    for obj in serializers.deserialize("json", u_config.get('config')):
+                        obj.save()
+                    logger.info('import upstream config finished!')
+
+                    logger.info('import proxy config started...')
+                    proxy_config_qc.delete()
+                    for obj in serializers.deserialize("json", p_config.get('config')):
+                        obj.save()
+                    logger.info('import proxy config finished!')
+
+                    config_count += 1
+                else:
+                    return False
+        
+        if config_count:
+            reload_config()
+            logger.info('config import finished.')
+        else:
+            logger.info('all config no change! config import finished.')
 
         return True
     except Exception, e:
@@ -306,7 +334,6 @@ def sync():
                 #print(r.json().get('context')) 
                 if import_config(r.json().get('context')):
                     requests.get(master_url + "/settings/sync/ack/", params={ "access_key": settings.config_sync_access_key, "status": 2 }, timeout=3)
-                    reload_config()
                     logger.info('task ' + master_url + ' sync finished')
                     sync_task.change_task_status(2)
                 else:

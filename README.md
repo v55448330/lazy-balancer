@@ -53,7 +53,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.1.5beta>
+docker build -t <lazy-balancer>:<v1.1.6beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
@@ -62,7 +62,7 @@ docker build -t <lazy-balancer>:<v1.1.5beta>
 docker run -d --restart=always --net=host --name=lazy_balancer \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.1.5beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.1.6beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```
