@@ -515,8 +515,10 @@
             cert_info = get_cert_info($(this)[0].title, false)
             if (cert_info.has_expired) {
                 $(this).addClass('btn-warning')
+                $(this)[0].title = '证书过期'
             } else {
                 $(this).addClass('btn-success')
+                $(this)[0].title = '证书正常'
             }
         })
 
@@ -529,9 +531,11 @@
                 }
             }
             if (down == 0) {
-                $(this).addClass('btn-primary')
+                $(this).addClass('btn-success')
+                $(this)[0].title = '后端节点正常'
             } else {
                 $(this).addClass('btn-warning')
+                $(this)[0].title = '后端节点异常'
             }
         })
     })
