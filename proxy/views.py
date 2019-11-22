@@ -183,12 +183,26 @@ def save(request):
         error_log = post['base_config']['proxy_error_log']
         description = post['base_config']['proxy_description']
 
-        to_domain = post['base_config'].get('proxy_to_domain', '') 
         if post['base_config'].has_key('proxy_to_domain_toggle'):
+            to_domain = post['base_config'].get('proxy_to_domain') 
             to_domain_toggle = True
             host = urlparse(to_domain).netloc
         else:
+            to_domain = ''
             to_domain_toggle = False
+            host = server_name.split(' ')[0]
+
+        if post['base_config'].has_key('upstream_backend_domain_toggle'):
+            bd = post['base_config'].get('upstream_backend_domain').lower()
+            if "http://" in bd or "https" in bd:
+                host = urlparse(bd).netloc
+            else:
+                host = urlparse(bd).path
+            backend_domain = host
+            upstream_backend_domain_toggle = True
+        else:
+            backend_domain = ''
+            upstream_backend_domain_toggle = False
             host = server_name.split(' ')[0]
 
         balancer_type = ""
@@ -267,6 +281,8 @@ def save(request):
                 'ssl_key_path' : "",
                 'custom_config' : "",
                 'backend_protocol' : backend_protocol,
+                'backend_domain_toggle' : upstream_backend_domain_toggle,
+                'backend_domain' : backend_domain,
                 'update_time' : time.time(),
                 'status' : False,
             }

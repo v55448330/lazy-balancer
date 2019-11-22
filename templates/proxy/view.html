@@ -323,6 +323,21 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 后端域名</label>
+                                    <div class="col-sm-6">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <input type="checkbox" data-enpassusermodified="yes"
+                                                    name="upstream_backend_domain_toggle" id="check_backend_domain_toggle"
+                                                    onchange="check_form(this)">
+                                            </span>
+                                            <input type="text" class="form-control" name="upstream_backend_domain"
+                                            id="input_upstream_backend_domain" placeholder="请输入域名，如 www.123.com">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="col-sm-2 control-label">* 重试次数</label>
                                     <div class="col-sm-6">
                                         <div class="input-group">
@@ -574,6 +589,14 @@
             }
             return
         }
+        if ($(input).attr('name') == 'upstream_backend_domain_toggle') {
+            if ($(input).prop('checked') == true) {
+                change_backend_domain(true)
+            } else {
+                change_backend_domain(false)
+            }
+            return
+        }
         var input_div = $(input.closest("div"))
         input_div.removeClass('has-error')
         input_div.removeClass('has-success')
@@ -581,6 +604,21 @@
             input_div.addClass('has-error')
         } else {
             input_div.addClass('has-success')
+        }
+    }
+
+    function change_backend_domain(type) {
+        if (type) {
+            if ($('#check_backend_domain_toggle').prop('checked')) {
+                $('#input_upstream_backend_domain').removeAttr('disabled')
+            } else {
+                $('#input_upstream_backend_domain').attr('disabled', 'disabled')
+                $('#input_upstream_backend_domain').val('')
+            }
+        } else {
+            $("#check_backend_domain_toggle").prop('checked', false)
+            $('#input_upstream_backend_domain').attr('disabled', 'disabled')
+            $('#input_upstream_backend_domain').val('')
         }
     }
 
@@ -605,6 +643,8 @@
             $("#check_proxy_gzip").attr('disabled', 'disabled')
             $('#check_upstream_backend_protocol').prop('checked', false)
             $('#check_upstream_backend_protocol').attr('disabled', 'disabled')
+            $("#check_backend_domain_toggle").attr('disabled', 'disabled');
+            change_backend_domain(false)
         } else {
             $('#input_proxy_to_domain').attr('disabled', 'disabled')
             $('#input_proxy_to_domain').val('')
@@ -616,7 +656,9 @@
             $('#check_upstream_backend_protocol').removeAttr('disabled')
             $("#input_upstream_fail_timeout").removeAttr('disabled')
             $("#input_upstream_max_fails").removeAttr('disabled')
+            $("#check_backend_domain_toggle").removeAttr('disabled');
             $("#input_proxy_to_domain").val('')
+            change_backend_domain(true)
         }
     }
 
@@ -655,7 +697,9 @@
             $("#check_ssl_status").removeAttr('disabled');
             $("#check_upstream_backend_protocol").removeAttr('disabled');
             $("#check_proxy_to_domain_toggle").removeAttr('disabled');
+            $("#check_backend_domain_toggle").removeAttr('disabled');
             $("#a_add_upstream").removeAttr('disabled');
+            change_backend_domain(true)
             editor.setReadOnly(false)
             //change_to_domain(true)
         } else {
@@ -674,8 +718,10 @@
             $("#check_upstream_backend_protocol").attr('disabled', 'disabled');
             $("#check_proxy_to_domain_toggle").prop('checked', false);
             $("#check_proxy_to_domain_toggle").attr('disabled', 'disabled');
+            $("#check_backend_domain_toggle").attr('disabled', 'disabled');
             editor.setValue('')
             editor.setReadOnly(true)
+            change_backend_domain(false)
             check_balancer_ssl()
             //change_to_domain(false)
         }
@@ -733,6 +779,7 @@
             $('#check_ssl_status').prop('checked', false)
             $('#input_upstream_max_fails').val('')
             $('#input_upstream_fail_timeout').val('')
+            $('#input_upstream_backend_domain').val('')
             $('#div_upstream_list').empty()
             $("[data-mask]").inputmask()
             check_balancer_ssl()
@@ -805,6 +852,11 @@
                         }
                         $('#input_upstream_max_fails').val(p.context.proxy.max_fails)
                         $('#input_upstream_fail_timeout').val(p.context.proxy.fail_timeout)
+                        console.log(p.context.proxy)
+                        if (p.context.proxy.backend_domain_toggle) {
+                            $('#check_backend_domain_toggle').prop('checked', true)
+                            $('#input_upstream_backend_domain').val(p.context.proxy.backend_domain)
+                        }
                         for (var f in p.context.upstream) {
                             edit_upstream(1, p.context.upstream[f])
                         }
