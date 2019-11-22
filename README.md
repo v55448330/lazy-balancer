@@ -11,7 +11,7 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
-## 更新（2019-11-14）
+## 更新（2019-11-22）
 * 新增 TCP 负载均衡支持
 * 新增配置同步功能
 * 支持后端服务器为 HTTPS 协议，当后端为 HTTPS 协议时，HTTP 健康检测将使用发送 SSL Hello 包的方式
@@ -21,9 +21,11 @@
 * 去除原 iptables 防火墙管理功能
 * 当协议为 HTTP/HTTPS 时，允许用户自定义 Server 级别 Nginx 配置
 * 当协议为 HTTP/HTTPS 时，可以在列表页预览后端节点状态
+* 当协议为 HTTP/HTTPS 时，允许用户自定义后端节点域名，当未定义时，转发用户输入的域名
 * 当协议为 HTTPS 时，可以在列表页预览证书过期状态，及获取证书信息
 * 允许后端节点为域名格式
 * 增加 HTTP/80，HTTPS/443 的默认规则，禁止直接 IP 访问（返回444），证书路径在 `/etc/nginx/default.*`，可自行更换
+* 新增允许非标准 HTTP Header 转发（如下划线_）
 * 修复其他 Bug
 
 ## 更新
@@ -53,7 +55,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.1.7beta>
+docker build -t <lazy-balancer>:<v1.1.8beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
@@ -62,7 +64,7 @@ docker build -t <lazy-balancer>:<v1.1.7beta>
 docker run -d --restart=always --net=host --name=lazy_balancer \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.1.7beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.1.8beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```
