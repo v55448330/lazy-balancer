@@ -81,7 +81,7 @@ def save(request):
                 context['error'] = "Error"
                 context['context'] = test_ret['output']
 
-            reload_config()
+            reload_config("main")
         else:
             context['flag'] = "Error"
             context['context'] = "ArgsError"

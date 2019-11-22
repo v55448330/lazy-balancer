@@ -23,8 +23,10 @@ import os
 if os.path.join(settings.BASE_DIR + '/db', 'db.sqlite3'):
     try:
         from nginx.views import reload_config
-        reload_config()
-        print("reload config ok")
+        reload_config("main")
+        print("reload main config ok")
+        reload_config("proxy")
+        print("reload proxy config ok")
     except:
         print("reload config error")
 

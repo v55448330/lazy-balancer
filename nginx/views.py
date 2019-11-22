@@ -57,31 +57,33 @@ def run_shell(cmd):
 def test_config():
     return run_shell('nginx -t')
 
-def reload_config():
-    config_nginx_path = "/etc/nginx/nginx.conf"
-    # config_default_path = "/etc/nginx/conf.d/default.conf"
-    # os.remove(config_nginx_path)
-    clean_dir("/etc/nginx/conf.d")
-    m_config = main_config.objects.all()[0].__dict__
+def reload_config(scope="main"):
+    if scope == "main":
+        config_nginx_path = "/etc/nginx/nginx.conf"
+        # config_default_path = "/etc/nginx/conf.d/default.conf"
+        # os.remove(config_nginx_path)
+        clean_dir("/etc/nginx/conf.d")
+        m_config = main_config.objects.all()[0].__dict__
 
-    write_config(config_nginx_path,build_main_config(m_config))
+        write_config(config_nginx_path,build_main_config(m_config))
 
-    proxy_port_list = []
-    proxy_config_list = proxy_config.objects.filter(status=True)
-    for p in proxy_config_list:
-        u_list = []
-        for u in p.upstream_list.all():
-            u_list.append(u.__dict__)
-        p_config = { 'proxy' : p.__dict__ , 'upstream' : u_list }
-        if p.protocol:
-            config_proxy_path = "/etc/nginx/conf.d/%s-http.conf" % p.config_id
-            proxy_port_list.append(p.listen)
-        else:
-            config_proxy_path = "/etc/nginx/conf.d/%s-tcp.conf" % p.config_id
-        if p.ssl:
-            write_config(p.ssl_cert_path,p.ssl_cert)
-            write_config(p.ssl_key_path,p.ssl_key)
-        write_config(config_proxy_path,build_proxy_config(p_config))
+    else scope == "proxy":
+        proxy_port_list = []
+        proxy_config_list = proxy_config.objects.filter(status=True)
+        for p in proxy_config_list:
+            u_list = []
+            for u in p.upstream_list.all():
+                u_list.append(u.__dict__)
+            p_config = { 'proxy' : p.__dict__ , 'upstream' : u_list }
+            if p.protocol:
+                config_proxy_path = "/etc/nginx/conf.d/%s-http.conf" % p.config_id
+                proxy_port_list.append(p.listen)
+            else:
+                config_proxy_path = "/etc/nginx/conf.d/%s-tcp.conf" % p.config_id
+            if p.ssl:
+                write_config(p.ssl_cert_path,p.ssl_cert)
+                write_config(p.ssl_key_path,p.ssl_key)
+            write_config(config_proxy_path,build_proxy_config(p_config))
 
     # write_config(config_default_path,build_default_config({'listen_list':list(set(proxy_port_list))}))
 

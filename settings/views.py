@@ -210,6 +210,7 @@ def import_config(config):
                     main_config_qc.delete()
                     for obj in serializers.deserialize("json", m_config.get('config')):
                         obj.save()
+                    reload_config("main")
                     logger.info('import main config finished!')
                     config_count += 1
                 else:
@@ -246,12 +247,12 @@ def import_config(config):
                         obj.save()
                     logger.info('import proxy config finished!')
 
+                    reload_config("proxy")
                     config_count += 1
                 else:
                     return False
         
         if config_count:
-            reload_config()
             logger.info('config import finished.')
         else:
             logger.info('all config no change! config import finished.')
@@ -277,7 +278,6 @@ def config(request, action):
         try:
             post = json.loads(request.body)
             if import_config(post):
-                reload_config()
                 content = { "flag":"Success" }
             else:
                 content = { "flag":"Error", "context": "config import error" }

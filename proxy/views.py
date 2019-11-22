@@ -89,7 +89,7 @@ def delete_proxy(request):
         post = json.loads(request.body)
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.delete()
-        reload_config()
+        reload_config("proxy")
         content = { "flag":"Success" }
     except Exception, e:
         content = { "flag":"Error","context":str(e) }
@@ -103,7 +103,7 @@ def change_status(request):
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.status = bool(int(post['status']))
         proxy.save()
-        reload_config()
+        reload_config("proxy")
         content = { "flag":"Success" }
     except Exception, e:
         content = { "flag":"Error","context":str(e) }
@@ -368,7 +368,7 @@ def save(request):
             else:
                 content = {"flag":"Error","context":test_ret['output']}
 
-            reload_config()
+            reload_config("proxy")
 
         else:
             content = {"flag":"Error","context":"ArgsError"}
