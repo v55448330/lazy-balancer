@@ -762,19 +762,6 @@
                         $('#input_proxy_access_log').val(p.context.proxy.access_log)
                         $('#input_proxy_error_log').val(p.context.proxy.error_log)
                         $('#input_proxy_description').text(p.context.proxy.description)
-                        if (p.context.proxy.protocol) {
-                            change_proxy_protocol('http')
-                        } else {
-                            change_proxy_protocol('tcp')
-                        }
-                        if (p.context.proxy.to_domain_toggle) {
-                            $('#check_proxy_to_domain_toggle').prop('checked', true)
-                            $('#input_proxy_to_domain').val(p.context.proxy.to_domain)
-                            change_to_domain(true)
-                        } else {
-                            $('#check_proxy_to_domain_toggle').prop('checked', false)
-                            change_to_domain(false)
-                        }
                         if (p.context.proxy.balancer_type == "ip_hash") {
                             $('#check_upstream_ip_hash').prop('checked', true)
                         } else {
@@ -820,6 +807,19 @@
                         $('#input_upstream_fail_timeout').val(p.context.proxy.fail_timeout)
                         for (var f in p.context.upstream) {
                             edit_upstream(1, p.context.upstream[f])
+                        }
+                        if (p.context.proxy.to_domain_toggle) {
+                            $('#check_proxy_to_domain_toggle').prop('checked', true)
+                            $('#input_proxy_to_domain').val(p.context.proxy.to_domain)
+                            change_to_domain(true)
+                        } else {
+                            $('#check_proxy_to_domain_toggle').prop('checked', false)
+                            change_to_domain(false)
+                        }
+                        if (p.context.proxy.protocol) {
+                            change_proxy_protocol('http')
+                        } else {
+                            change_proxy_protocol('tcp')
                         }
                         check_balancer_ssl()
                         $('#edit_balancer').modal('show')

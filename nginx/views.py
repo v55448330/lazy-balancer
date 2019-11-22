@@ -67,7 +67,7 @@ def reload_config(scope="main"):
 
         write_config(config_nginx_path,build_main_config(m_config))
 
-    else scope == "proxy":
+    elif scope == "proxy":
         proxy_port_list = []
         proxy_config_list = proxy_config.objects.filter(status=True)
         for p in proxy_config_list:
