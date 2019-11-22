@@ -60,6 +60,20 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-2 control-label">非标准 HTTP 头</label>
+                        <div class="col-sm-9">
+                            <div class="checkbox">
+                                <label>
+                                    {% if main_config.ignore_invalid_headers %}
+                                    <input type="checkbox" name="ignore_invalid_headers" checked> 允许转发
+                                    {% else %}
+                                    <input type="checkbox" name="ignore_invalid_headers"> 允许转发
+                                    {% endif %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-2 control-label">访问日志</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="access_log" id="input_access_log" placeholder="全局请求日志路径" value="{{ main_config.access_log }}">

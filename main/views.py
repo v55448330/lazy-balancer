@@ -34,7 +34,7 @@ def save(request):
     try:
         post = json.loads(request.body)
 
-        #print post
+        # print post
 
         if post.has_key('auto_worker_processes'):
             worker_processes = "0"
@@ -44,6 +44,10 @@ def save(request):
         worker_connections = post.get('worker_connections').replace('_','')
         keepalive_timeout = post.get('keepalive_timeout').replace('_','')
         client_max_body_size = post.get('client_max_body_size').replace('_','')
+        if post.has_key('ignore_invalid_headers'):
+            ignore_invalid_headers = True
+        else:
+            ignore_invalid_headers = False
         access_log = post.get('access_log')
         error_log = post.get('error_log')
 
@@ -63,6 +67,7 @@ def save(request):
                 'worker_connections' : int(worker_connections),
                 'keepalive_timeout' : int(keepalive_timeout),
                 'client_max_body_size' : int(client_max_body_size),
+                'ignore_invalid_headers' : ignore_invalid_headers,
                 'access_log' : access_log,
                 'error_log' : error_log,
                 'update_time' : time.time()
