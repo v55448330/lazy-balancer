@@ -67,6 +67,11 @@ def reload_config(scope="main"):
 
         write_config(config_nginx_path,build_main_config(m_config))
 
+        test_ret = test_config()
+        if test_ret['status'] != 0:
+            print(test_ret['output'])
+            return False
+
     elif scope == "proxy":
         proxy_port_list = []
         proxy_config_list = proxy_config.objects.filter(status=True)
@@ -85,9 +90,13 @@ def reload_config(scope="main"):
                 write_config(p.ssl_key_path,p.ssl_key)
             write_config(config_proxy_path,build_proxy_config(p_config))
 
-    # write_config(config_default_path,build_default_config({'listen_list':list(set(proxy_port_list))}))
+            test_ret = test_config()
+            if test_ret['status'] != 0:
+                print(test_ret['output'])
+                return False
 
-    return run_shell('nginx -s reload')
+    run_shell('nginx -s reload')
+    return True
 
 def get_sys_status():
     phymem = psutil.virtual_memory()

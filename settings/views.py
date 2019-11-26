@@ -194,6 +194,7 @@ def import_config(config):
         system_config_qc = system_settings.objects.all()
         proxy_config_qc = proxy_config.objects.all()
         upstream_config_qc = upstream_config.objects.all()
+        config_bak = get_config(2)
 
         m_config = config['main_config']
         s_config = config['system_config']
@@ -201,17 +202,22 @@ def import_config(config):
         u_config = config['upstream_config']
         
         config_count = 0
+        error_count = 0
         if m_config.get('config', False):
             if hashlib.sha1(serializers.serialize('json', main_config_qc)).hexdigest() == m_config.get('sha1'):
                 logger.info('main config no change!')
             else:
                 if hashlib.sha1(m_config.get('config')).hexdigest() == m_config.get('sha1'):
                     logger.info('import main config started...')
+                    main_config_bak = main_config_qc
                     main_config_qc.delete()
                     for obj in serializers.deserialize("json", m_config.get('config')):
                         obj.save()
-                    reload_config("main")
-                    logger.info('import main config finished!')
+                    if reload_config("main"):
+                        logger.info('import main config finished!')
+                    else:
+                        logger.info('import main config error!')
+                        error_count += 1
                     config_count += 1
                 else:
                     return False
@@ -228,7 +234,7 @@ def import_config(config):
                     logger.info('import system config finished!')
                     config_count += 1
                 else:
-                    return False
+                    error_count += 1
 
         if p_config.get('config', False) and u_config.get('config', False):
             if hashlib.sha1(serializers.serialize('json', proxy_config_qc)).hexdigest() == p_config.get('sha1') and hashlib.sha1(serializers.serialize('json', upstream_config_qc)).hexdigest() == u_config.get('sha1'):
@@ -245,12 +251,22 @@ def import_config(config):
                     proxy_config_qc.delete()
                     for obj in serializers.deserialize("json", p_config.get('config')):
                         obj.save()
-                    logger.info('import proxy config finished!')
 
-                    reload_config("proxy")
+                    if reload_config("proxy"):
+                        logger.info('import proxy config finished!')
+                    else:
+                        logger.info('import proxy config error!')
+                        error_count += 1
                     config_count += 1
                 else:
                     return False
+        if error_count:
+            logger.error('config import error! restore backup ...')
+            if import_config(config_bak):
+                logger.info('config import restore backup finished.') 
+            else:
+                logger.error('config import restore backup failed!') 
+            return False
         
         if config_count:
             logger.info('config import finished.')
@@ -280,7 +296,7 @@ def config(request, action):
             if import_config(post):
                 content = { "flag":"Success" }
             else:
-                content = { "flag":"Error", "context": "config import error" }
+                content = { "flag":"Error" }
         except Exception,e:
             content = { "flag": "Error", "context": str(e) }
     elif action == "sync_update_token":
