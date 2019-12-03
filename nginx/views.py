@@ -62,22 +62,22 @@ def reload_config(scope="main"):
         config_nginx_path = "/etc/nginx/nginx.conf"
         # config_default_path = "/etc/nginx/conf.d/default.conf"
         # os.remove(config_nginx_path)
-        clean_dir("/etc/nginx/conf.d")
         m_config = main_config.objects.all()[0].__dict__
-
         write_config(config_nginx_path,build_main_config(m_config))
 
         test_ret = test_config()
         if test_ret['status'] != 0:
             print(test_ret['output'])
             return False
+        run_shell('nginx -s reload')
 
     elif scope == "proxy":
+        clean_dir("/etc/nginx/conf.d")
         proxy_port_list = []
-        proxy_config_list = proxy_config.objects.filter(status=True)
+        proxy_config_list = proxy_config.objects.filter(status=True).iterator()
         for p in proxy_config_list:
             u_list = []
-            for u in p.upstream_list.all():
+            for u in p.upstream_list.all().iterator():
                 u_list.append(u.__dict__)
             p_config = { 'proxy' : p.__dict__ , 'upstream' : u_list }
             if p.protocol:
@@ -90,12 +90,12 @@ def reload_config(scope="main"):
                 write_config(p.ssl_key_path,p.ssl_key)
             write_config(config_proxy_path,build_proxy_config(p_config))
 
-            test_ret = test_config()
-            if test_ret['status'] != 0:
-                print(test_ret['output'])
-                return False
+        test_ret = test_config()
+        if test_ret['status'] != 0:
+            print(test_ret['output'])
+            return False
+        run_shell('nginx -s reload')
 
-    run_shell('nginx -s reload')
     return True
 
 def get_sys_status():

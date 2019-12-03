@@ -158,20 +158,6 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">* 域名代理</label>
-                                    <div class="col-sm-9">
-                                        <div class="input-group">
-                                            <span class="input-group-addon">
-                                                <input type="checkbox" data-enpassusermodified="yes"
-                                                    name="proxy_to_domain_toggle" id="check_proxy_to_domain_toggle"
-                                                    onchange="check_form(this)">
-                                            </span>
-                                            <input type="text" class="form-control" name="proxy_to_domain"
-                                                id="input_proxy_to_domain" placeholder="请输入完整域名，如 https://123.com">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
                                     <label class="col-sm-2 control-label">* GZip 压缩</label>
                                     <div class="col-sm-9">
                                         <div class="checkbox">
@@ -622,46 +608,6 @@
         }
     }
 
-    function change_to_domain(type) {
-        if (type) {
-            if ($('#check_proxy_to_domain_toggle').prop('checked')) {
-                $('#input_proxy_to_domain').removeAttr('disabled')
-            } else {
-                $('#input_proxy_to_domain').attr('disabled', 'disabled')
-                $('#input_proxy_to_domain').val('')
-            }
-            edit_upstream(0, null)
-            $('#a_add_upstream').removeAttr('onclick')
-            $('#a_add_upstream').attr('disabled', 'disabled')
-            $("#check_upstream_ip_hash").prop('checked', false)
-            $("#check_upstream_ip_hash").attr('disabled', 'disabled')
-            $("#check_upstream_http_check").prop('checked', false)
-            $("#check_upstream_http_check").attr('disabled', 'disabled')
-            $("#input_upstream_fail_timeout").attr('disabled', 'disabled')
-            $("#input_upstream_max_fails").attr('disabled', 'disabled')
-            $("#check_proxy_gzip").prop('checked', false)
-            $("#check_proxy_gzip").attr('disabled', 'disabled')
-            $('#check_upstream_backend_protocol').prop('checked', false)
-            $('#check_upstream_backend_protocol').attr('disabled', 'disabled')
-            $("#check_backend_domain_toggle").attr('disabled', 'disabled');
-            change_backend_domain(false)
-        } else {
-            $('#input_proxy_to_domain').attr('disabled', 'disabled')
-            $('#input_proxy_to_domain').val('')
-            $('#a_add_upstream').attr('onclick', 'edit_upstream(1,null)')
-            $('#a_add_upstream').removeAttr('disabled')
-            $("#check_upstream_ip_hash").removeAttr('disabled')
-            $("#check_upstream_http_check").removeAttr('disabled')
-            $("#check_proxy_gzip").removeAttr('disabled')
-            $('#check_upstream_backend_protocol').removeAttr('disabled')
-            $("#input_upstream_fail_timeout").removeAttr('disabled')
-            $("#input_upstream_max_fails").removeAttr('disabled')
-            $("#check_backend_domain_toggle").removeAttr('disabled');
-            $("#input_proxy_to_domain").val('')
-            change_backend_domain(true)
-        }
-    }
-
     function check_balancer_ssl() {
         if ($('#check_ssl_status')[0].checked) {
             $('#txt_ssl_cert_body').removeAttr('disabled')
@@ -701,7 +647,6 @@
             $("#a_add_upstream").removeAttr('disabled');
             change_backend_domain(true)
             editor.setReadOnly(false)
-            //change_to_domain(true)
         } else {
             $("#radio_protocol_tcp").prop('checked', true)
             $('#input_proxy_server_name').val('')
@@ -723,7 +668,6 @@
             editor.setReadOnly(true)
             change_backend_domain(false)
             check_balancer_ssl()
-            //change_to_domain(false)
         }
     }
 
@@ -772,7 +716,6 @@
             $('#input_proxy_server_name').val('')
             $('#input_proxy_access_log').val('')
             $('#input_proxy_error_log').val('')
-            $('#check_proxy_to_domain_toggle').attr('checked', false)
             $('#check_upstream_ip_hash').attr('checked', false)
             $('#check_upstream_http_check').attr('checked', false)
             $("#check_upstream_backend_protocol").prop('checked', false);
@@ -783,7 +726,6 @@
             $('#div_upstream_list').empty()
             $("[data-mask]").inputmask()
             check_balancer_ssl()
-            change_to_domain(false)
             change_proxy_protocol('http')
             editor.setValue('')
             $('#edit_balancer').modal('show')
@@ -852,21 +794,13 @@
                         }
                         $('#input_upstream_max_fails').val(p.context.proxy.max_fails)
                         $('#input_upstream_fail_timeout').val(p.context.proxy.fail_timeout)
-                        console.log(p.context.proxy)
+                        // console.log(p.context.proxy)
                         if (p.context.proxy.backend_domain_toggle) {
                             $('#check_backend_domain_toggle').prop('checked', true)
                             $('#input_upstream_backend_domain').val(p.context.proxy.backend_domain)
                         }
                         for (var f in p.context.upstream) {
                             edit_upstream(1, p.context.upstream[f])
-                        }
-                        if (p.context.proxy.to_domain_toggle) {
-                            $('#check_proxy_to_domain_toggle').prop('checked', true)
-                            $('#input_proxy_to_domain').val(p.context.proxy.to_domain)
-                            change_to_domain(true)
-                        } else {
-                            $('#check_proxy_to_domain_toggle').prop('checked', false)
-                            change_to_domain(false)
                         }
                         if (p.context.proxy.protocol) {
                             change_proxy_protocol('http')

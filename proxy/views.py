@@ -87,8 +87,8 @@ def query_proxy(request):
 def delete_proxy(request):
     try:
         post = json.loads(request.body)
-        proxy = proxy_config.objects.get(pk=post['pk'])
-        proxy.delete()
+        p = proxy_config.objects.filter(pk=post['pk'])
+        p.delete()
         reload_config("proxy")
         content = { "flag":"Success" }
     except Exception, e:
@@ -183,15 +183,6 @@ def save(request):
         error_log = post['base_config']['proxy_error_log']
         description = post['base_config']['proxy_description']
 
-        if post['base_config'].has_key('proxy_to_domain_toggle'):
-            to_domain = post['base_config'].get('proxy_to_domain') 
-            to_domain_toggle = True
-            host = urlparse(to_domain).netloc
-        else:
-            to_domain = ''
-            to_domain_toggle = False
-            host = server_name.split(' ')[0]
-
         if post['base_config'].has_key('upstream_backend_domain_toggle'):
             bd = post['base_config'].get('upstream_backend_domain').lower()
             if "http://" in bd or "https" in bd:
@@ -207,7 +198,7 @@ def save(request):
 
         balancer_type = ""
 
-        if proxy_name and listen and (len(post['upstream_list']) or to_domain_toggle) and proxy_protocol and not listen=="8000":
+        if proxy_name and listen and len(post['upstream_list']) and proxy_protocol and not listen=="8000":
             create_flag = False
             if config_id == "0":
                 config_id = str(uuid.uuid1())
@@ -268,8 +259,6 @@ def save(request):
                 'host' : host,
                 'access_log' : access_log,
                 'error_log' : error_log,
-                'to_domain_toggle' : to_domain_toggle,
-                'to_domain' : to_domain,
                 'balancer_type' : balancer_type,
                 'http_check' : http_check,
                 'gzip' : gzip,
@@ -342,19 +331,18 @@ def save(request):
 
             upstream_list = []
 
-            if not to_domain_toggle:
-                for upstream in post['upstream_list']:
-                    weight = upstream['upstream_weight']
+            for upstream in post['upstream_list']:
+                weight = upstream['upstream_weight']
 
-                    if not weight:
-                        weight = 10
+                if not weight:
+                    weight = 10
 
-                    upstream_list.append({
-                        'status' : True,
-                        'address' : upstream['upstream_address'],
-                        'port' : int(upstream['upstream_port']),
-                        'weight' : int(weight)
-                    })
+                upstream_list.append({
+                    'status' : True,
+                    'address' : upstream['upstream_address'],
+                    'port' : int(upstream['upstream_port']),
+                    'weight' : int(weight)
+                })
 
             p_config = { 'proxy' : proxy, 'upstream' : upstream_list }
 
