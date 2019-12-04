@@ -200,7 +200,7 @@ def import_config(config):
         s_config = config['system_config']
         p_config = config['proxy_config']
         u_config = config['upstream_config']
-        
+
         config_count = 0
         error_count = 0
         if m_config.get('config', False):
@@ -220,7 +220,8 @@ def import_config(config):
                         error_count += 1
                     config_count += 1
                 else:
-                    return False
+                    logger.error('main config hash check faild')
+                    error_count += 1
 
         if s_config.get('config', False):
             if hashlib.sha1(serializers.serialize('json', system_config_qc)).hexdigest() == s_config.get('sha1'):
@@ -234,6 +235,7 @@ def import_config(config):
                     logger.info('import system config finished!')
                     config_count += 1
                 else:
+                    logger.error('system config hash check faild')
                     error_count += 1
 
         if p_config.get('config', False) and u_config.get('config', False):
@@ -259,7 +261,9 @@ def import_config(config):
                         error_count += 1
                     config_count += 1
                 else:
-                    return False
+                    logger.error('proxy or upstream config hash check faild')
+                    error_count += 1
+
         if error_count:
             logger.error('config import error! restore backup ...')
             if import_config(config_bak):
