@@ -105,7 +105,10 @@ def get_sys_status():
     nginx_status = False
 
     try:
-        nginx_status = bool(len(map(int, check_output(["pidof", "nginx"]).split())))
+        nginx_pid_status = bool(len(map(int, check_output(["pidof", "nginx"]).split()))) 
+        nginx_conf_status = not bool(test_config()['status'])
+        if nginx_pid_status and nginx_conf_status:
+            nginx_status = True
     except CalledProcessError:
         nginx_status = False
 
