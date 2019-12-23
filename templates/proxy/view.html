@@ -536,12 +536,17 @@
         var upstream_status = proxy_status(0, 2)
         $(':button[name="proxy_upstream_status"]').each(function (){
             var down = 0
+            var up = 0
             for (s in upstream_status) {
-                if (upstream_status[s].upstream == $(this)[0].title && upstream_status[s].status == "down") {
-                    down++
-                }
+                if (upstream_status[s].upstream == $(this)[0].title) {
+                    if (upstream_status[s].status == "down"){
+                        down++
+                    } else {
+                        up++
+                    }
+                } 
             }
-            if (down == 0) {
+            if (down == 0 && up != 0) {
                 $(this).addClass('btn-success')
                 $(this)[0].title = '后端节点正常'
             } else {
@@ -1006,6 +1011,9 @@
                     if (p.flag == "Success") {
                         alert("变更成功!")
                         top.location = '/proxy/'
+                    } else if (p.flag == "Error" && p.context == "ConfigError") {
+                        alert('变更失败！配置错误，规则已禁用！')
+                        top.location = '/login/'
                     } else if (p.flag == "Error" && p.context == "AuthFailed") {
                         alert('认证失败！请重新登录！')
                         top.location = '/login/'

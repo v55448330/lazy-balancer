@@ -103,8 +103,13 @@ def change_status(request):
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.status = bool(int(post['status']))
         proxy.save()
-        reload_config("proxy")
-        content = { "flag":"Success" }
+        if reload_config("proxy"):
+            content = { "flag":"Success" }
+        else:
+            proxy.status = False
+            proxy.save()
+            reload_config("proxy")
+            content = { "flag":"Error","context":"ConfigError"}
     except Exception, e:
         content = { "flag":"Error","context":str(e) }
 
