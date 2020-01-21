@@ -1,4 +1,4 @@
-from urlparse import urlparse
+from urllib.parse import urlparse
 from OpenSSL import crypto
 from dateutil import parser
 from django.shortcuts import render, render_to_response
@@ -48,21 +48,18 @@ def view(request):
 @is_auth
 def check_http_status(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
         status = get_proxy_http_status()
-
-        if status.has_key('servers'):
-            status = status['servers']['server']
-        else:
-            status = []
 
         if post['pk'] == 0:
             content = { "flag":"Success","status":status}
         else:
             proxy = proxy_config.objects.get(pk=post['pk'])
-            content = { "flag":"Success","config_id":proxy.config_id,"status":status}
+            _status = proxy.get_upstream_status(status)
+
+            content = { "flag":"Success","config_id":proxy.config_id,"status":_status}
         
-    except Exception, e:
+    except Exception as e:
         content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
     pass
@@ -70,7 +67,7 @@ def check_http_status(request):
 @is_auth
 def query_proxy(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
         proxy = proxy_config.objects.get(config_id=post['config_id'])
         p = model_to_dict(proxy)
         del p['upstream_list']
@@ -78,7 +75,7 @@ def query_proxy(request):
         for ul in proxy.upstream_list.all():
             u.append(model_to_dict(ul))
         content = { "flag":"Success","context":{"proxy":p,"upstream":u}}
-    except Exception, e:
+    except Exception as e:
         content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
     pass
@@ -86,12 +83,12 @@ def query_proxy(request):
 @is_auth
 def delete_proxy(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
         p = proxy_config.objects.filter(pk=post['pk'])
         p.delete()
         reload_config("proxy")
         content = { "flag":"Success" }
-    except Exception, e:
+    except Exception as e:
         content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
     pass
@@ -99,7 +96,7 @@ def delete_proxy(request):
 @is_auth
 def change_status(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.status = bool(int(post['status']))
         proxy.save()
@@ -110,7 +107,7 @@ def change_status(request):
             proxy.save()
             reload_config("proxy")
             content = { "flag":"Error","context":"ConfigError"}
-    except Exception, e:
+    except Exception as e:
         content = { "flag":"Error","context":str(e) }
 
     return HttpResponse(json.dumps(content))
@@ -119,7 +116,7 @@ def change_status(request):
 @is_auth
 def proxy_logs(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
 
         curr_position = {"access":0,"error":0}
         curr_position['access'] = int(post['curr_position']['access'])
@@ -162,7 +159,7 @@ def proxy_logs(request):
             curr_position['error'] = 0
         
         content = { "flag":"Success" , "log_body":log_body , "curr_position":curr_position }
-    except Exception, e:
+    except Exception as e:
         content = { "flag":"Error","context":str(e) }
 
     return HttpResponse(json.dumps(content))
@@ -171,7 +168,7 @@ def proxy_logs(request):
 @is_auth
 def save(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
         # print(str(post))
         # content = {"flag":"Debug","context":"Debug"}
         # return HttpResponse(json.dumps(content))
@@ -188,7 +185,7 @@ def save(request):
         error_log = post['base_config']['proxy_error_log']
         description = post['base_config']['proxy_description']
 
-        if post['base_config'].has_key('upstream_backend_domain_toggle'):
+        if 'upstream_backend_domain_toggle' in post['base_config']:
             bd = post['base_config'].get('upstream_backend_domain').lower()
             if "http://" in bd or "https" in bd:
                 host = urlparse(bd).netloc
@@ -218,20 +215,20 @@ def save(request):
             if not error_log:
                 error_log = "/var/log/nginx/error-%s.log" % config_id
 
-            if post['base_config'].has_key('upstream_ip_hash'):
+            if 'upstream_ip_hash' in post['base_config']:
                 balancer_type = "ip_hash"
 
-            if post['base_config'].has_key('upstream_http_check'):
+            if 'upstream_http_check' in post['base_config']:
                 http_check = True
             else:
                 http_check = False
 
-            if post['base_config'].has_key('proxy_gzip'):
+            if 'proxy_gzip' in post['base_config']:
                 gzip = True
             else:
                 gzip = False
 
-            if post['base_config'].has_key('upstream_backend_protocol'):
+            if 'upstream_backend_protocol' in post['base_config']:
                 backend_protocol = "https"
             else:
                 backend_protocol = "http"
@@ -242,15 +239,17 @@ def save(request):
                 gzip = False
                 protocol = False # HTTP is True, TCP is False
                 backend_protocol = "tcp"
-                port_list = list(proxy_config.objects.values_list('listen', flat=True))
+                port_list = list(proxy_config.objects.values_list('listen', flat=True).iterator())
                 port_list.append(8000)
-                if listen in port_list:
-                    content = {"flag":"Error","context":"Port occupied"}
+                if config_id:
+                    port_list.remove(proxy_config.objects.get(config_id=config_id).listen)
+                if int(listen) in port_list:
+                    content = {"flag":"Error", "context":"PortOccupied"}
                     return HttpResponse(json.dumps(content))
                 config_path = "/etc/nginx/conf.d/%s-tcp.conf" % config_id
             else:
                 if not server_name:
-                    content = {"flag":"Error","context":"Server Name not Found"}
+                    content = {"flag":"Error", "context":"Server Name not Found"}
                     return HttpResponse(json.dumps(content))
                 protocol = True
                 config_path = "/etc/nginx/conf.d/%s-http.conf" % config_id
@@ -281,18 +280,18 @@ def save(request):
                 'status' : False,
             }
 
-            if post['ssl_config'].has_key('ssl_status'):
+            if 'ssl_status' in post['ssl_config']:
                 cert_path = "/etc/nginx/conf.d/%s.crt" % config_id
                 key_path = "/etc/nginx/conf.d/%s.key" % config_id
                 cert_body = post['ssl_config']['ssl_cert_body']
                 key_body = post['ssl_config']['ssl_key_body']
 
-                if post['ssl_config'].has_key('ssl_http2'):
+                if 'ssl_http2' in post['ssl_config']:
                     ssl_http2 = True
                 else:
                     ssl_http2 = False
 
-                if post['ssl_config'].has_key('ssl_redirect_https'):
+                if 'ssl_redirect_https' in post['ssl_config']:
                     ssl_redirect_https = True
                 else:
                     ssl_redirect_https = False
@@ -305,7 +304,7 @@ def save(request):
                     proxy['ssl_cert_path'] = cert_path
                     proxy['ssl_key'] = key_body
                     proxy['ssl_key_path'] = key_path
-                    if not post['ssl_config'].has_key('ssl_port'):
+                    if not 'ssl_port' in post['ssl_config']:
                         proxy['listen'] = 443
                     else:
                         port_list = list(proxy_config.objects.filter(protocol=True,ssl=False).values_list('listen', flat=True))
@@ -383,7 +382,7 @@ def save(request):
             content = {"flag":"Error","context":"ArgsError"}
             return HttpResponse(json.dumps(content))
 
-    except Exception, e:
+    except Exception as e:
         content = {"flag":"Error","context":str(e)}
 
     return HttpResponse(json.dumps(content))
@@ -392,21 +391,12 @@ def save(request):
 # @is_auth
 def get_cert_status(request):
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
         proxy = proxy_config.objects.get(pk=post['pk'])
-        cert_file_path = '/etc/nginx/conf.d/%s.crt' % proxy.config_id
-        # print(cert_file_path)
-        cert = crypto.load_certificate(crypto.FILETYPE_PEM, open(cert_file_path).read())
-        cert_issuer = cert.get_issuer()
-        cert_info = {
-            'subject': cert.get_subject().CN,
-            'issuer' : "%s/%s/%s" % (cert_issuer.C,cert_issuer.O,cert_issuer.CN),
-            'datetime_struct' : parser.parse(cert.get_notAfter().decode("UTF-8")).strftime('%Y-%m-%d %H:%M:%S'),
-            'has_expired' : cert.has_expired()
-        }
+        cert_info = proxy.get_cert_status()
 
         content = { "flag":"Success","config_id":proxy.config_id,"cert_info":cert_info}
-    except Exception, e:
+    except Exception as e:
         content = { "flag":"Error","context":str(e) }
     return HttpResponse(json.dumps(content))
     pass

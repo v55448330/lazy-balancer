@@ -3,13 +3,18 @@
 
 项目起源于好哥们需要一个 7 层负载均衡器，无奈商业负载均衡器成本高昂，操作复杂。又没有特别喜欢（好看，好用）的开源产品，作为一名大 Ops 怎么能没有办法？正好最近在看 Django 框架，尝试自己给 Nginx 画皮，项目诞生！非专业开发，代码凑合看吧。
 
-> * 项目基于 [Django](https://www.djangoproject.com/) + [AdminLTE](https://www.almsaeedstudio.com/) 构建，在 Ubuntu 14.04 上测试通过；为了保证良好的兼容性，请使用 Chrome 浏览器。
+> * 项目基于 [Django](https://www.djangoproject.com/) + [AdminLTE](https://www.almsaeedstudio.com/) 构建，在 Ubuntu 18.04 上测试通过；为了保证良好的兼容性，请使用 Chrome 浏览器。
 > * 为了后续扩展方便，请大家使用 [Tengine](http://tengine.taobao.org/) 替代 Nginx 服务
 
 ## 项目地址
 - GITHUB - https://github.com/v55448330/lazy-balancer
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
+
+## 更新（2020-01-21）
+* 从该版本开始，将尝试部分功能 API 化，更多 API 文档见 `/api/docs`
+* 尝试将 Python 更新至 Python3
+* 修复 TCP 模式下端口占用检测无效的问题
 
 ## 更新（2019-11-22）
 * 新增 TCP 负载均衡支持
@@ -55,7 +60,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.2.4beta>
+docker build -t <lazy-balancer>:<v1.3.0beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
@@ -64,12 +69,12 @@ docker build -t <lazy-balancer>:<v1.2.4beta>
 docker run -d --restart=always --net=host --name=lazy_balancer \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.2.4beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.3.0beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```
 docker exec lazy_balancer python manage.py makemigrations --noinput
-docker exec lazy_balancer python manage.py migrate
+docker exec lazy_balancer python manage.py migrate --run-syncdb
 ```
 ### 主机
 * 部署
@@ -79,11 +84,11 @@ docker exec lazy_balancer python manage.py migrate
 * 初始化数据库
 ```
 python manage.py makemigrations  
-python manage.py migrate  
+python manage.py migrate --run-syncdb 
 ```
 * 启动服务
 ```
-systemctl start supervisor
+supervisord -c /app/lazy_balancer/service/supervisord_docker.conf
 
 or
 

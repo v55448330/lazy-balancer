@@ -1074,6 +1074,8 @@
                         top.location = '/proxy/'
                     } else if (p.flag == "Error" && p.context == "ArgsError") {
                         alert('保存失败！配置项填写错误！')
+                    } else if (p.flag == "Error" && p.context == "PortOccupied") {
+                        alert('保存失败！端口被占用！')
                     } else if (p.flag == "Error" && p.context == "MainConfigNotFound") {
                         alert('保存失败！请先修改全局配置！')
                     } else if (p.flag == "Error" && p.context == "AuthFailed") {

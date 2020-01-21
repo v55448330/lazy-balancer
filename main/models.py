@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from django.db import models
 
 # Create your models here.
@@ -14,6 +12,13 @@ class main_config(models.Model):
     error_log = models.CharField(max_length=128,null=True)
     update_time = models.FloatField(null=False)
 
+    class Meta:
+       db_table = 't_main_config'
 
 
 
+
+
+
+
+# Create your models here.

@@ -2,9 +2,10 @@
 
 sudo apt-get update --fix-missing
 sudo apt-get install -y build-essential libssl-dev libpcre3 libpcre3-dev zlib1g-dev libxml2-dev libxslt1-dev libgd-dev libgeoip-dev libluajit-5.1
-sudo apt-get install -y supervisor python-dev python-pip 
+sudo apt-get install -y python3 python3-dev python3-pip 
 sudo apt-get -y purge nginx* nginx-*
 sudo apt-get -y autoremove
+sudo rm -rf /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python
 
 sudo mkdir -p /app/lazy_balancer/db
 sudo cp -r /vagrant/* /app/lazy_balancer
@@ -58,15 +59,17 @@ make && sudo make install
 sudo mkdir -p /etc/nginx/conf.d
 
 cd /app/lazy_balancer
-sudo systemctl enable supervisor
-sudo cp -rf service/conf.d/supervisor_balancer.conf /etc/supervisor/conf.d/
 sudo cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf
+sudo cp -f resource/nginx/default.* /etc/nginx/ 
 
-sudo pip install pip --upgrade
-sudo pip install -r requirements.txt --upgrade
+sudo pip3 install pip --upgrade
+sudo pip3 install -r requirements.txt --upgrade
 
 sudo rm -rf db/*
 sudo rm -rf */migrations/00*.py
 python manage.py makemigrations --noinput
-python manage.py migrate
-sudo systemctl restart supervisor 
+python manage.py migrate --run-syncdb
+
+sudo sed -i '/^exit 0/i supervisord -c /app/lazy_balancer/service/supervisord.conf' /etc/rc.local
+echo "alias supervisoctl='supervisorctl -c /app/lazy_balancer/service/supervisord.conf'" >> ~/.bashrc
+sudo supervisord -c /app/lazy_balancer/service/supervisord.conf

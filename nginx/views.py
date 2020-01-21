@@ -1,9 +1,9 @@
 from jinja2 import Environment, FileSystemLoader
 from subprocess import check_output, CalledProcessError
 from django.conf import settings
-from proxy.models import proxy_config,upstream_config
+from proxy.models import proxy_config, upstream_config
 from main.models import main_config
-import commands
+import subprocess
 import platform
 import os
 import psutil
@@ -47,7 +47,7 @@ def write_config(conf_path,conf_context):
     f.close()
 
 def run_shell(cmd):
-    (status,output) = commands.getstatusoutput(cmd)
+    (status,output) = subprocess.getstatusoutput(cmd)
     context = {
         'status':status,
         'output':output,
@@ -105,7 +105,7 @@ def get_sys_status():
     nginx_status = False
 
     try:
-        nginx_pid_status = bool(len(map(int, check_output(["pidof", "nginx"]).split()))) 
+        nginx_pid_status = bool(len(list(map(int, check_output(["pidof", "nginx"]).split()))))
         nginx_conf_status = not bool(test_config()['status'])
         if nginx_pid_status and nginx_conf_status:
             nginx_status = True
@@ -137,9 +137,9 @@ def get_sys_status():
     statusinfo = {
         'cpu_percent' : psutil.cpu_percent(),
         'mem_info' : {
-            'available' : phymem.available/1024/1024,
-            'used' : (phymem.used-phymem.cached)/1024/1024,
-            'total' : phymem.total/1024/1024
+            'available' : '%.2f' % (phymem.available/1024/1024),
+            'used' : '%.2f' % ((phymem.total-phymem.available)/1024/1024),
+            'total' : '%.2f' % (phymem.total/1024/1024)
         },
         'disk_info' : {
             'total' : round(disk.total/1024.0/1024.0/1024.0,2),
@@ -180,18 +180,31 @@ def get_sys_info():
     }
     return sysinfo
 
-def post_request(url,headers={}):
-    resp = requests.get(url,timeout=1,headers=headers)
+def post_request(url, headers={}):
+    try:
+        resp = requests.get(url, timeout=1, headers=headers)
+    except:
+        resp = None
     return resp
 
 def get_proxy_http_status():
     url = "http://127.0.0.1/up_status?format=json"
-    ret = post_request(url).json()
+    resp = post_request(url)
+    ret = []
+    if resp:
+        ret = post_request(url).json()
+    if 'servers' in ret:
+        ret = ret['servers']['server']
+    else:
+        ret = []
     return ret
 
 def get_req_status():
     url = "http://127.0.0.1/req_status"
-    req_status = post_request(url).text
+    resp = post_request(url)
+    req_status = ''
+    if resp:
+        req_status = resp.text
     ret = []
     for req in req_status.split('\n'):
         r = req.split(',')

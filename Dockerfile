@@ -1,8 +1,10 @@
-FROM alpine:3.10
+FROM python:3.8.1-alpine
 
 ENV TENGINE_VERSION 2.3.2
-ENV LAZYBALANCER_VERSION v1.2.4beta
+ENV LAZYBALANCER_VERSION v1.3.0beta
 ENV LUAJIT_VERSION v2.1-20190626
+
+COPY . /app/lazy_balancer
 
 RUN set -x \
     && addgroup -g 101 -S www-data \
@@ -10,7 +12,7 @@ RUN set -x \
     && apkArch="$(cat /etc/apk/arch)" \
     && tempDir="$(mktemp -d)" \
     && chown nobody:nobody ${tempDir} \
-    && apk add --no-cache python2 py2-pip supervisor pcre libxml2 libxslt libgd libgcc \
+    && apk add --no-cache pcre libxml2 libxslt libgd libgcc \
     && apk add --no-cache --virtual .build-deps \
                 tzdata \
                 gcc \
@@ -28,7 +30,7 @@ RUN set -x \
                 mercurial \
                 alpine-sdk \
                 findutils \
-                python-dev \
+                python3-dev \
                 libffi-dev \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz \
@@ -81,24 +83,23 @@ RUN set -x \
             --with-http_geoip_module=dynamic \
             --with-stream \
     && make && make install \
-    && mkdir -p /app/lazy_balancer \
-    && curl -fsSL https://github.com/v55448330/lazy-balancer/archive/${LAZYBALANCER_VERSION}.tar.gz -o lazybalancer.tar.gz \
-    && tar zxf lazybalancer.tar.gz --strip-components=1 -C /app/lazy_balancer \
     && mkdir -p /app/lazy_balancer/db \
     && chown -R www-data:www-data /app \
-    && cd /app/lazy_balancer && mkdir -p /etc/supervisor /var/log/supervisor && cp -rf service/* /etc/supervisor/ && rm -rf /etc/supervisor/conf.d/supervisor_balancer.conf \
+    && cd /app/lazy_balancer \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && cp -f resource/nginx/default.* /etc/nginx/ \
     && rm -rf */migrations/00*.py \
-    && pip install -r requirements.txt \
+    && rm -rf db/* \
+    && pip3 install -r requirements.txt \
     && apk del .build-deps \
-    && rm -rf ${tempDir}
+    && rm -rf ${tempDir} \
+    && alias supervisoctl='supervisorctl -c /app/lazy_balancer/service/supervisord.conf'
 
 WORKDIR /app/lazy_balancer 
 
 EXPOSE 8000
 
-CMD [ "supervisord", "-c", "/etc/supervisor/supervisord_docker.conf" ]
+CMD [ "supervisord", "-c", "/app/lazy_balancer/service/supervisord_docker.conf" ]
 
 

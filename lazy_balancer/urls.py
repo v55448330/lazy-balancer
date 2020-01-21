@@ -17,18 +17,18 @@ from django.conf.urls import url, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView
 from django.conf import settings
-from .views import logout_view,login_view,create_superuser
+from .views import logout_view, login_view, create_superuser
 import os
 
-if os.path.join(settings.BASE_DIR + '/db', 'db.sqlite3'):
-    try:
-        from nginx.views import reload_config
-        reload_config("main")
-        print("reload main config ok")
-        reload_config("proxy")
-        print("reload proxy config ok")
-    except:
-        print("reload config error")
+if os.path.exists(settings.BASE_DIR + '/db/' + 'db.sqlite3'):
+   try:
+       from nginx.views import reload_config
+       reload_config("main")
+       print("reload main config ok")
+       reload_config("proxy")
+       print("reload proxy config ok")
+   except:
+       print("reload config error")
 
 urlpatterns = [
     url(r'^login/$', login_view),
@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^main/', include('main.urls')),
     url(r'^proxy/', include('proxy.urls')),
     url(r'^settings/', include('settings.urls')),
+    url(r'^api/', include('api.urls')),
     url(r'^$', RedirectView.as_view(url='/dashboard/')),
 ]
 urlpatterns += staticfiles_urlpatterns()

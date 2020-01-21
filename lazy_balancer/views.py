@@ -4,11 +4,13 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import logout,login
+from django.contrib.auth import logout, login
 from django.contrib.auth.forms import AuthenticationForm
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils import timezone
 import json
 
+@ensure_csrf_cookie
 def login_view(request):
     redirect_to = settings.LOGIN_REDIRECT_URL
 
@@ -21,7 +23,7 @@ def login_view(request):
             return HttpResponseRedirect(redirect_to)
 
     else:
-        if request.GET.has_key('next'):
+        if 'next' in request.GET:
             redirect_to = request.GET['next']
 
         if not bool(User.objects.all().count()):
@@ -35,7 +37,7 @@ def login_view(request):
         'next': redirect_to
     }
 
-    return render_to_response('login.html',context)
+    return render_to_response('login.html', context)
 
 def create_superuser(request):
     redirect_to = settings.LOGIN_REDIRECT_URL
@@ -45,11 +47,11 @@ def create_superuser(request):
 
     if request.method == "POST":
         try:
-            post = json.loads(request.body)
-            User.objects.create_superuser(post['username'],'admin@123.com',post['password'])
+            post = json.loads(request.body.decode('utf-8'))
+            User.objects.create_superuser(post['username'], 'admin@123.com', post['password'])
             context = {'flag':"Success",}
-        except Exception,e:
-            context = { "flag":"Error","context":str(e) }
+        except Exception as e:
+            context = {"flag":"Error", "context":str(e)}
 
         return HttpResponse(json.dumps(context))
 
@@ -62,7 +64,7 @@ def logout_view(request):
 
 def is_auth(view):
     def decorator(request, *args, **kwargs):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             context = {
                 'flag':"Error",
                 'context':"AuthFailed"

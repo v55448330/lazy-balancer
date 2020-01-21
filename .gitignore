@@ -7,3 +7,4 @@
 resource/nginx/tengine
 env
 migrations
+__pycache__

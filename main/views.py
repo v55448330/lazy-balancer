@@ -1,3 +1,4 @@
+# Create your views here.
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
@@ -32,11 +33,11 @@ def save(request):
         'context':""
     }
     try:
-        post = json.loads(request.body)
+        post = json.loads(request.body.decode('utf-8'))
 
         # print post
 
-        if post.has_key('auto_worker_processes'):
+        if 'auto_worker_processes' in post:
             worker_processes = "0"
         else:
             worker_processes = post.get('worker_processes').replace('_','')
@@ -44,7 +45,7 @@ def save(request):
         worker_connections = post.get('worker_connections').replace('_','')
         keepalive_timeout = post.get('keepalive_timeout').replace('_','')
         client_max_body_size = post.get('client_max_body_size').replace('_','')
-        if post.has_key('ignore_invalid_headers'):
+        if 'ignore_invalid_headers' in post:
             ignore_invalid_headers = True
         else:
             ignore_invalid_headers = False
@@ -90,7 +91,7 @@ def save(request):
         else:
             context['flag'] = "Error"
             context['context'] = "ArgsError"
-    except Exception, e:
+    except Exception as e:
         context['flag'] = "Error"
         context['context'] = str(e)
 

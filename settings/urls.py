@@ -20,6 +20,5 @@ from . import views
 urlpatterns = [
     url(r'^$', views.view),
     url(r'^admin/(?P<action>.*)/$', views.admin_password),
-    url(r'^sync/(?P<action>.*)/$', views.sync_config),
-    url(r'^config/(?P<action>.*)/$', views.config),
+    url(r'^save_sync/$', views.sync_config),
 ]
