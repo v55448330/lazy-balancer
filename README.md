@@ -113,6 +113,9 @@ http://[IP]:8000/
 ![image](readme_img/9.jpg)
 ![image](readme_img/10.jpg)
 ![image](readme_img/11.jpg)
+![image](readme_img/12.jpg)
+![image](readme_img/13.jpg)
+![image](readme_img/14.jpg)
 
 ## 授权
 本项目由 [小宝](http://www.ichegg.org) 维护，采用 [GPLv3](http://www.gnu.org/licenses/gpl-3.0.html) 开源协议。欢迎反馈！欢迎贡献代码！
