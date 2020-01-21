@@ -1,7 +1,7 @@
 FROM python:3.8.1-alpine
 
 ENV TENGINE_VERSION 2.3.2
-ENV LAZYBALANCER_VERSION v1.3.0beta
+ENV LAZYBALANCER_VERSION v1.3.1beta
 ENV LUAJIT_VERSION v2.1-20190626
 
 COPY . /app/lazy_balancer
@@ -10,7 +10,7 @@ RUN set -x \
     && addgroup -g 101 -S www-data \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G www-data -g www-data www-data \
     && apkArch="$(cat /etc/apk/arch)" \
-    && tempDir="$(mktemp -d)" \
+    && tempDir="$(mktemp -d)" && cd ${tempDir} \
     && chown nobody:nobody ${tempDir} \
     && apk add --no-cache pcre libxml2 libxslt libgd libgcc \
     && apk add --no-cache --virtual .build-deps \
@@ -84,17 +84,18 @@ RUN set -x \
             --with-stream \
     && make && make install \
     && mkdir -p /app/lazy_balancer/db \
-    && chown -R www-data:www-data /app \
     && cd /app/lazy_balancer \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && cp -f resource/nginx/default.* /etc/nginx/ \
     && rm -rf */migrations/00*.py \
     && rm -rf db/* \
-    && pip3 install -r requirements.txt \
+    && rm -rf env \
+    && pip3 --no-cache-dir install -r requirements.txt \
     && apk del .build-deps \
     && rm -rf ${tempDir} \
-    && alias supervisoctl='supervisorctl -c /app/lazy_balancer/service/supervisord.conf'
+    && chown -R www-data:www-data /app \
+    && alias supervisorctl='supervisorctl -c /app/lazy_balancer/service/supervisord.conf'
 
 WORKDIR /app/lazy_balancer 
 

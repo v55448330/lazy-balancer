@@ -7,11 +7,9 @@ coreschema==0.0.4
 cryptography==2.8
 Django==2.2.9
 django-apscheduler==0.3.0
-django-crontab==0.7.1
 django-filter==2.2.0
 djangorestframework==3.11.0
 drf-yasg==1.17.0
-gunicorn==20.0.4
 idna==2.8
 inflection==0.3.1
 itypes==1.1.0
