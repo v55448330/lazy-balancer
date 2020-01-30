@@ -121,17 +121,17 @@ def get_sys_status():
     conn_NONE = 0
 
     for conn in conns:
-        if conn.status is 'ESTABLISHED':
+        if conn.status == 'ESTABLISHED':
             conn_ESTABLISHED += 1
-        if conn.status is 'CLOSE_WAIT':
+        if conn.status == 'CLOSE_WAIT':
             conn_CLOSE_WAIT += 1
-        if conn.status is 'LISTEN':
+        if conn.status == 'LISTEN':
             conn_LISTEN += 1
-        if conn.status is 'TIME_WAIT':
+        if conn.status == 'TIME_WAIT':
             conn_TIME_WAIT += 1
-        if conn.status is 'FIN_WAIT1':
+        if conn.status == 'FIN_WAIT1':
             conn_FIN_WAIT1 += 1
-        if conn.status is 'FIN_WAIT2':
+        if conn.status == 'FIN_WAIT2':
             conn_FIN_WAIT2 += 1
 
     statusinfo = {
