@@ -1,5 +1,6 @@
 .zcache
 .vagrant
+.vscode
 *.DS_Store
 *.log
 *.sqlite3

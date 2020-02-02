@@ -1,7 +1,7 @@
 FROM python:3.8.1-alpine
 
 ENV TENGINE_VERSION 2.3.2
-ENV LAZYBALANCER_VERSION v1.3.1beta
+ENV LAZYBALANCER_VERSION v1.3.2beta
 ENV LUAJIT_VERSION v2.1-20190626
 
 COPY . /app/lazy_balancer
@@ -94,8 +94,10 @@ RUN set -x \
     && pip3 --no-cache-dir install -r requirements.txt \
     && apk del .build-deps \
     && rm -rf ${tempDir} \
+    && rm -rf /usr/local/lib/python3.8/config-3.8-x86_64-linux-gnu/ \
     && chown -R www-data:www-data /app \
-    && alias supervisorctl='supervisorctl -c /app/lazy_balancer/service/supervisord.conf'
+    && echo -e '#!/bin/ash\nsupervisorctl -c /app/lazy_balancer/service/supervisord.conf' > /usr/bin/sc \
+    && chmod +x /usr/bin/sc
 
 WORKDIR /app/lazy_balancer 
 
