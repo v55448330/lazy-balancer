@@ -241,8 +241,6 @@ def save(request):
                 backend_protocol = "tcp"
                 port_list = list(proxy_config.objects.values_list('listen', flat=True).iterator())
                 port_list.append(8000)
-                if config_id:
-                    port_list.remove(proxy_config.objects.get(config_id=config_id).listen)
                 if int(listen) in port_list:
                     content = {"flag":"Error", "context":"PortOccupied"}
                     return HttpResponse(json.dumps(content))
