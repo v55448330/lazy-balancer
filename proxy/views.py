@@ -202,9 +202,14 @@ def save(request):
 
         if proxy_name and listen and len(post['upstream_list']) and proxy_protocol and not listen=="8000":
             create_flag = False
+            p_config = proxy_config.objects.filter(config_id=config_id)
             if config_id == "0":
                 config_id = str(uuid.uuid1())
                 create_flag = True
+            else:
+                if not p_config:
+                    content = {"flag":"Error", "context":"config id not found"}
+                    return HttpResponse(json.dumps(content))
 
             # config_nginx_path = "/etc/nginx/nginx.conf"
             # config_path = "/etc/nginx/conf.d/%s.conf" % config_id
@@ -241,6 +246,8 @@ def save(request):
                 backend_protocol = "tcp"
                 port_list = list(proxy_config.objects.values_list('listen', flat=True).iterator())
                 port_list.append(8000)
+                if p_config[0].listen == int(listen):
+                    port_list.remove(p_config[0].listen)
                 if int(listen) in port_list:
                     content = {"flag":"Error", "context":"PortOccupied"}
                     return HttpResponse(json.dumps(content))
