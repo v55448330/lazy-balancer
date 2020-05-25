@@ -197,7 +197,7 @@ def save(request):
             backend_domain = ''
             upstream_backend_domain_toggle = False
             host = server_name.split(' ')[0]
-
+        
         balancer_type = ""
 
         if proxy_name and listen and len(post['upstream_list']) and proxy_protocol and not listen=="8000":
@@ -228,10 +228,12 @@ def save(request):
             else:
                 http_check = False
 
+
             if 'proxy_gzip' in post['base_config']:
                 gzip = True
             else:
                 gzip = False
+
 
             if 'upstream_backend_protocol' in post['base_config']:
                 backend_protocol = "https"
@@ -246,13 +248,19 @@ def save(request):
                 backend_protocol = "tcp"
                 port_list = list(proxy_config.objects.values_list('listen', flat=True).iterator())
                 port_list.append(8000)
-                if p_config[0].listen == int(listen):
-                    port_list.remove(p_config[0].listen)
+
+                if len(p_config):
+                    if p_config[0].listen == int(listen):
+                        port_list.remove(p_config[0].listen)
                 if int(listen) in port_list:
                     content = {"flag":"Error", "context":"PortOccupied"}
                     return HttpResponse(json.dumps(content))
                 config_path = "/etc/nginx/conf.d/%s-tcp.conf" % config_id
             else:
+                port_list = list(proxy_config.objects.filter(protocol=False).values_list('listen', flat=True).iterator())
+                if int(listen) in port_list:
+                    content = {"flag":"Error", "context":"PortOccupied"}
+                    return HttpResponse(json.dumps(content))
                 if not server_name:
                     content = {"flag":"Error", "context":"Server Name not Found"}
                     return HttpResponse(json.dumps(content))
@@ -311,12 +319,11 @@ def save(request):
                     proxy['ssl_key_path'] = key_path
                     if not 'ssl_port' in post['ssl_config']:
                         proxy['listen'] = 443
-                    else:
-                        port_list = list(proxy_config.objects.filter(protocol=True,ssl=False).values_list('listen', flat=True))
-                        port_list.append(8000)
-                        if proxy['listen'] in port_list:
-                            content = {"flag":"Error","context":"Port occupied"}
-                            return HttpResponse(json.dumps(content))
+                    #    port_list = list(proxy_config.objects.filter(protocol=True,ssl=False).values_list('listen', flat=True))
+                    #    port_list.append(8000)
+                    #    if proxy['listen'] in port_list:
+                    #        content = {"flag":"Error","context":"Port occupied"}
+                    #        return HttpResponse(json.dumps(content))
                     write_config(cert_path,cert_body)
                     write_config(key_path,key_body)
             else:
