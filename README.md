@@ -11,6 +11,10 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
+## 更新（2021-06-16）
+* IPv6 监听支持
+* 更新 Tengine 至 2.3.3
+
 ## 更新（2020-01-21）
 * 从该版本开始，将尝试部分功能 API 化，更多 API 文档见 `/api/docs`
 * 尝试将 Python 更新至 Python3
@@ -60,7 +64,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.3.5beta>
+docker build -t <lazy-balancer>:<v1.3.6beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
@@ -69,7 +73,7 @@ docker build -t <lazy-balancer>:<v1.3.5beta>
 docker run -d --restart=always --net=host --name=lazy_balancer \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.3.5beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.3.6beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```

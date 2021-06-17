@@ -228,12 +228,15 @@ def save(request):
             else:
                 http_check = False
 
-
             if 'proxy_gzip' in post['base_config']:
                 gzip = True
             else:
                 gzip = False
 
+            if 'proxy_ipv6' in post['base_config']:
+                ipv6 = True
+            else:
+                ipv6 = False
 
             if 'upstream_backend_protocol' in post['base_config']:
                 backend_protocol = "https"
@@ -272,6 +275,7 @@ def save(request):
                 'proxy_name' : proxy_name,
                 'protocol': protocol,
                 'listen' : int(listen),
+                'ipv6' : ipv6,
                 'server_name' : server_name,
                 'host' : host,
                 'access_log' : access_log,

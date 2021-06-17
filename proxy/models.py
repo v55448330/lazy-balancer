@@ -18,6 +18,7 @@ class proxy_config(models.Model):
     proxy_name = models.CharField(max_length=128,null=True)
     protocol = models.BooleanField(default=False,null=False)
     listen = models.IntegerField(null=False)
+    ipv6 = models.BooleanField(default=False,null=False)
     server_name = models.CharField(max_length=128,null=True)
     access_log = models.CharField(max_length=128,null=True)
     error_log = models.CharField(max_length=128,null=True)

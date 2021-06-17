@@ -37,6 +37,9 @@ upstream {{ proxy.config_id | lower }} {
 # HTTP redirect
 server {
 	listen 80;
+	{%- if proxy.ipv6 %}
+	listen [::]:80;
+	{%- endif %}
 
 	server_name {{ proxy.server_name }};
 
@@ -53,8 +56,14 @@ server {
 server {
     {%- if proxy.ssl_http2 %}
     listen {{ proxy.listen }} ssl http2;
+    {%- if proxy.ipv6 %}
+    listen [::]:{{ proxy.listen }} ssl http2;
+    {%- endif %}
     {%- else %}
     listen {{ proxy.listen }} ssl;
+    {%- if proxy.ipv6 %}
+    listen [::]:{{ proxy.listen }} ssl;
+    {%- endif %}
     {%- endif %}
     server_name {{ proxy.server_name }};
 
@@ -83,6 +92,9 @@ server {
 
 server {
     listen {{ proxy.listen }};
+    {%- if proxy.ipv6 %}
+    listen [::]:{{ proxy.listen }};
+    {%- endif %}
     server_name {{ proxy.server_name }};
 
     {%- if proxy.error_log %}

@@ -137,6 +137,17 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
+                                    <label class="col-sm-2 control-label">IPv6 支持</label>
+                                    <div class="col-sm-2">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="proxy_ipv6" id="check_proxy_ipv6"
+                                                    onchange=""> 启用
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
                                     <label class="col-sm-2 control-label">* 访问域名</label>
                                     <div class="col-sm-9" id="div_server_name">
                                         <input type="text" class="form-control" name="proxy_server_name"
@@ -153,8 +164,7 @@
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">* 错误日志</label>
                                     <div class="col-sm-9">
-                                        <input type="text" class="form-control" name="proxy_error_log"
-                                            id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
+                                        <input type="text" class="form-control" name="proxy_error_log" id="input_proxy_error_log" placeholder="此负载均衡错误日志路径">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -721,6 +731,8 @@
             $('#input_proxy_server_name').val('')
             $('#input_proxy_access_log').val('')
             $('#input_proxy_error_log').val('')
+            $('#check_proxy_ipv6').attr('checked', false)
+            $('#check_proxy_gzip').attr('checked', false)
             $('#check_upstream_ip_hash').attr('checked', false)
             $('#check_upstream_http_check').attr('checked', false)
             $("#check_upstream_backend_protocol").prop('checked', false);
@@ -752,6 +764,11 @@
                         $('#div_upstream_list').empty()
                         $('#input_proxy_proxy_name').val(p.context.proxy.proxy_name)
                         $('#input_proxy_listen').val(p.context.proxy.listen)
+                        if (p.context.proxy.ipv6) {
+                            $('#check_proxy_ipv6').prop('checked', true)
+                        } else {
+                            $('#check_proxy_ipv6').prop('checked', false)
+			}
                         $('#input_proxy_server_name').val(p.context.proxy.server_name)
                         $('#input_proxy_access_log').val(p.context.proxy.access_log)
                         $('#input_proxy_error_log').val(p.context.proxy.error_log)

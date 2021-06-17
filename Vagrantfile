@@ -20,7 +20,7 @@ vms = [
 
 Vagrant.configure(2) do |config|
 
-  config.vm.box = "https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64-vagrant.box"
+  config.vm.box = "generic/ubuntu1804"
 
   vms.each do |opts|
       config.vm.define opts[:name] do |config|
@@ -30,6 +30,7 @@ Vagrant.configure(2) do |config|
             vb.cpus = opts[:cpu]
           end
         config.vm.network :private_network, ip: opts[:eth1]
+        config.vm.synced_folder ".", "/app/lazy_balancer"
 
       end
   end
