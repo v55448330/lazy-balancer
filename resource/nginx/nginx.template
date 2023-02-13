@@ -23,7 +23,7 @@ http {
     ##
     # Basic Settings
     ##
-
+    check_shm_size 20m;
 	charset utf-8;
     sendfile on;
     tcp_nopush on;
