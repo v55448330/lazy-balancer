@@ -8,7 +8,7 @@ cryptography==2.8
 Django==2.2.9
 django-apscheduler==0.3.0
 django-filter==2.2.0
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 drf-yasg==1.17.0
 idna==2.8
 inflection==0.3.1
