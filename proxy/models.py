@@ -39,6 +39,7 @@ class proxy_config(models.Model):
 
     backend_protocol = models.CharField(max_length=64,null=True)
     backend_domain_toggle = models.BooleanField(default=False)
+    backend_dynamic_domain = models.BooleanField(default=False)
     backend_domain = models.CharField(max_length=128,null=True)
     host = models.CharField(max_length=64,null=True)
     status = models.BooleanField(default=False)

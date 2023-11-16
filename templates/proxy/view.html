@@ -317,7 +317,17 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">* 后端动态解析</label>
+                                    <div class="col-sm-9">
+                                        <div class="checkbox">
+                                            <label>
+                                                <input type="checkbox" name="backend_dynamic_domain" id="check_backend_dynamic_domain">
+                                                启用后端动态域名解析
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label class="col-sm-2 control-label">* 后端域名</label>
                                     <div class="col-sm-6">
@@ -387,7 +397,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" onclick="save_balancer()">保存</button>
+                <button type="button" class="btn btn-primary" id="btn_save_balancer" onclick="save_balancer()">保存</button>
             </div>
         </div>
     </div>
@@ -398,8 +408,13 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <button type="button" class="btn btn-primary pull-left" onclick="edit_balancer(1)">创建负载均衡器</button>
-                <div class="input-group pull-right" style="width: 300px;">
+                <div>
+                    <button type="button" class="btn btn-primary pull-left" onclick="edit_balancer(1)">创建负载均衡器</button>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-primary pull-left" id="btn_gen_config" onclick="gen_config()">重新应用配置</button>
+                </div>
+                <div class="col-md-10 input-group pull-right" style="width: 300px;">
                     <input type="text" name="proxy_filter" id="input_proxy_filter" class="form-control pull-right"
                         placeholder="请输入名称/域名/配置ID/端口" onkeydown='if(event.keyCode==13){proxy_filter()}'>
                     <div class="input-group-btn">
@@ -659,6 +674,7 @@
             $("#check_upstream_backend_protocol").removeAttr('disabled');
             $("#check_proxy_to_domain_toggle").removeAttr('disabled');
             $("#check_backend_domain_toggle").removeAttr('disabled');
+            $("#check_backend_dynamic_domain").removeAttr('disabled');
             $("#a_add_upstream").removeAttr('disabled');
             change_backend_domain(true)
             editor.setReadOnly(false)
@@ -679,6 +695,8 @@
             $("#check_proxy_to_domain_toggle").prop('checked', false);
             $("#check_proxy_to_domain_toggle").attr('disabled', 'disabled');
             $("#check_backend_domain_toggle").attr('disabled', 'disabled');
+            $("#check_backend_dynamic_domain").prop('checked', false);
+            $("#check_backend_dynamic_domain").attr('disabled', 'disabled');
             editor.setValue('')
             editor.setReadOnly(true)
             change_backend_domain(false)
@@ -735,13 +753,15 @@
             $('#check_proxy_gzip').attr('checked', false)
             $('#check_upstream_ip_hash').attr('checked', false)
             $('#check_upstream_http_check').attr('checked', false)
-            $("#check_upstream_backend_protocol").prop('checked', false);
+            $('#check_upstream_backend_protocol').prop('checked', false);
             $('#check_ssl_status').prop('checked', false)
+            $('#check_backend_dynamic_domain').prop('checked', false)
+            $('#check_backend_domain_toggle').prop('checked', false)
             $('#input_upstream_max_fails').val('')
             $('#input_upstream_fail_timeout').val('')
             $('#input_upstream_backend_domain').val('')
             $('#div_upstream_list').empty()
-            $("[data-mask]").inputmask()
+            $('[data-mask]').inputmask()
             check_balancer_ssl()
             change_proxy_protocol('http')
             editor.setValue('')
@@ -821,6 +841,9 @@
                             $('#check_backend_domain_toggle').prop('checked', true)
                             $('#input_upstream_backend_domain').val(p.context.proxy.backend_domain)
                         }
+                        if (p.context.proxy.backend_dynamic_domain) {
+                            $('#check_backend_dynamic_domain').prop('checked', true)
+                        }
                         for (var f in p.context.upstream) {
                             edit_upstream(1, p.context.upstream[f])
                         }
@@ -848,7 +871,11 @@
     function delete_proxy(pk, name) {
         if (confirm("确认删除负载均衡[" + name + "]？")) {
             var post = {
-                pk: pk
+                pk: pk,
+                gen_conf: false
+            }
+            if (confirm("删除后是否重新应用配置？默认不应用！")) {
+                post.gen_config = true
             }
             jQuery.ajax({
                 type: 'post',
@@ -1013,11 +1040,43 @@
         }
     }
 
+    function gen_config() {
+        if (confirm("该操作将重新生成并应用所有配置，请确认配置及备份正确，是否继续？")) {
+            $("#btn_gen_config").prop('disabled', true)
+            $("#btn_gen_config").text('正在处理...')
+            jQuery.ajax({
+                type: 'post',
+                url: '/proxy/gen_config/',
+                data: JSON.stringify({}),
+                dataType: 'json',
+                success: function (p) {
+                    $("#btn_gen_config").text('重新应用配置')
+                    $("#btn_gen_config").prop('disabled', false)
+                    if (p.flag == "Success") {
+                        alert("配置应用成功!")
+                        top.location = '/proxy/'
+                    } else if (p.flag == "Error") {
+                        alert("配置应用失败！请手动检查配置！")
+                    }
+                },
+                error: function (e) {
+                    $("#btn_gen_config").text('重新应用配置')
+                    $("#btn_gen_config").prop('disabled', false)
+                    alert("请求失败！")
+                }
+            })
+        }
+    }
+
     function change_status(pk, status) {
         if (confirm("确认要变更状态？")) {
             var post = {
                 pk: pk,
-                status: status
+                status: status,
+                gen_conf: false
+            }
+            if (confirm("变更状态后是否重新应用配置？默认不应用！")) {
+                post.gen_config = true
             }
             jQuery.ajax({
                 type: 'post',
@@ -1062,6 +1121,8 @@
 
     function save_balancer() {
         if (confirm("确认要保存这样的配置？")) {
+            $("#btn_save_balancer").prop('disabled', true)
+            $("#btn_save_balancer").text('处理中...')
             var base_config = $('#form_base_config').serializeObject()
             var upstream_config = $('#form_upstram_config').serializeObject()
             if ($('#check_upstream_backend_protocol').prop('checked')) {
@@ -1086,6 +1147,8 @@
                 data: JSON.stringify(post),
                 dataType: 'json',
                 success: function (p) {
+                    $("#btn_save_balancer").prop('disabled', false)
+                    $("#btn_save_balancer").text('保存')
                     if (p.flag == "Success") {
                         alert("保存成功!")
                         top.location = '/proxy/'
@@ -1103,9 +1166,12 @@
                     }
                 },
                 error: function (e) {
+                    $("#btn_save_balancer").prop('disabled', false)
+                    $("#btn_save_balancer").text('保存')
                     alert('请求失败!')
                 }
             })
+
         }
 
     }

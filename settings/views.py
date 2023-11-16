@@ -171,13 +171,21 @@ def get_config(scope=0):
         print(str(e))
         return None
     
-def import_config(config):
+def import_config(config, restore=0):
     try:
         main_config_qc = main_config.objects.all()
         system_config_qc = system_settings.objects.all()
         proxy_config_qc = proxy_config.objects.all()
         upstream_config_qc = upstream_config.objects.all()
-        config_bak = get_config(2)
+        if restore:
+            clean_dir("/etc/nginx/conf.d")
+            main_config_qc.delete()
+            system_config_qc.delete()
+            proxy_config_qc.delete()
+            upstream_config_qc.delete()
+        else:
+            logger.info('get backup config...')
+            config_bak = get_config(2)
 
         m_config = config['main_config']
         s_config = config['system_config']
@@ -196,7 +204,7 @@ def import_config(config):
                     main_config_qc.delete()
                     for obj in serializers.deserialize("json", m_config.get('config')):
                         obj.save()
-                    if reload_config("main"):
+                    if reload_config("main", 1):
                         logger.info('import main config finished!')
                     else:
                         logger.info('import main config error!')
@@ -237,7 +245,7 @@ def import_config(config):
                     for obj in serializers.deserialize("json", p_config.get('config')):
                         obj.save()
 
-                    if reload_config("proxy"):
+                    if reload_config("proxy", 1):
                         logger.info('import proxy config finished!')
                     else:
                         logger.info('import proxy config error!')
@@ -249,7 +257,7 @@ def import_config(config):
 
         if error_count:
             logger.error('config import error! restore backup ...')
-            if import_config(config_bak):
+            if import_config(config_bak, 1):
                 logger.info('config import restore backup finished.') 
             else:
                 logger.error('config import restore backup failed!') 

@@ -132,6 +132,7 @@ http {
 
     include /etc/nginx/conf.d/*-http.conf;
 
+    lua_package_path '/usr/local/lib/lua/?.lua;;';
 }
 
 ##

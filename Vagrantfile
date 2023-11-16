@@ -10,12 +10,12 @@ vms = [
         :mem => "2048",
         :cpu => "1"
     },
-    {
-        :name => "balancer2",
-        :eth1 => "192.168.100.102",
-        :mem => "2048",
-        :cpu => "1"
-    }
+    #{
+    #    :name => "balancer2",
+    #    :eth1 => "192.168.100.102",
+    #    :mem => "2048",
+    #    :cpu => "1"
+    #}
 ]
 
 Vagrant.configure(2) do |config|

@@ -176,7 +176,7 @@
             <div class="box-footer">
                 <button type="button" class="btn btn-primary" onclick="save_config_sync()">保存同步配置</button>
                 <button type="button" class="btn btn-primary" onclick="config_backup(1)">备份</button>
-                <button type="button" class="btn btn-primary" onclick="import_config.click()">还原</button>
+                <button type="button" class="btn btn-primary" id="btn_import_config" onclick="import_config.click()">还原</button>
                 <input type="file" style="display:none" name="import_config" id="import_config"
                     onchange="config_backup(0)" />
             </div>
@@ -306,6 +306,8 @@
                 }
             } else {
                 if (confirm("此操作会将负载均衡器所有配置通过您提供的配置文件覆盖，是否继续？")) {
+                    $("#btn_import_config").prop('disabled', true)
+                    $("#btn_import_config").text('处理中...')
                     var reader = new FileReader()
                     reader.readAsText($('#import_config')[0].files[0])
                     reader.onload = function (e) {
@@ -316,7 +318,8 @@
                             contentType: 'application/json;charset=utf-8',
                             dataType: 'json',
                             success: function (p) {
-                                console.log(p)
+                                $("#btn_import_config").prop('disabled', false)
+                                $("#btn_import_config").text('还原')
                                 if (p.flag == "Success") {
                                     alert("还原完成！")
                                     top.location = '/settings/'
@@ -330,6 +333,8 @@
                             },
                             error: function (e) {
                                 $('#import_config').val('')
+                                $("#btn_import_config").prop('disabled', false)
+                                $("#btn_import_config").text('还原')
                                 alert('请求失败!')
                             }
                         })

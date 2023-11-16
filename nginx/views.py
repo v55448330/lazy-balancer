@@ -57,8 +57,14 @@ def run_shell(cmd):
 def test_config():
     return run_shell('nginx -t')
 
-def reload_config(scope="main"):
+def reload_config(scope="main", force=0):
     if scope == "main":
+        if not force:
+            test_ret = test_config()
+            if test_ret['status'] != 0:
+                print(test_ret['output'])
+                return False
+
         config_nginx_path = "/etc/nginx/nginx.conf"
         # config_default_path = "/etc/nginx/conf.d/default.conf"
         # os.remove(config_nginx_path)
@@ -72,6 +78,12 @@ def reload_config(scope="main"):
         run_shell('nginx -s reload')
 
     elif scope == "proxy":
+        if not force:
+            test_ret = test_config()
+            if test_ret['status'] != 0:
+                print(test_ret['output'])
+                return False
+
         clean_dir("/etc/nginx/conf.d")
         proxy_port_list = []
         proxy_config_list = proxy_config.objects.filter(status=True).iterator()
@@ -103,12 +115,14 @@ def get_sys_status():
     disk = psutil.disk_usage('/')
     conns = psutil.net_connections()
     nginx_status = False
+    nginx_config_status = False
 
     try:
         nginx_pid_status = bool(len(list(map(int, check_output(["pidof", "nginx"]).split()))))
-        nginx_conf_status = not bool(test_config()['status'])
-        if nginx_pid_status and nginx_conf_status:
+        if nginx_pid_status:
             nginx_status = True
+
+        nginx_config_status = not bool(test_config()['status'])
     except CalledProcessError:
         nginx_status = False
 
@@ -154,7 +168,8 @@ def get_sys_status():
             'fin_wait' : conn_FIN_WAIT1 + conn_FIN_WAIT2,
             'none' : len(conns) - conn_ESTABLISHED - conn_LISTEN - conn_TIME_WAIT - conn_CLOSE_WAIT - conn_FIN_WAIT1 - conn_FIN_WAIT2
         },
-        'nginx_status' : nginx_status
+        'nginx_status' : nginx_status,
+        'nginx_config_status' : nginx_config_status
     }
 
     return statusinfo

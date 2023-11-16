@@ -22,10 +22,12 @@ import os
 
 if os.path.exists(settings.BASE_DIR + '/db/' + 'db.sqlite3'):
    try:
-       from nginx.views import reload_config
-       reload_config("main")
+       from nginx.views import reload_config, clean_dir 
+       clean_dir("/etc/nginx/conf.d")
+       print("clean old config ok")
+       reload_config("main", 1)
        print("reload main config ok")
-       reload_config("proxy")
+       reload_config("proxy", 1)
        print("reload proxy config ok")
    except:
        print("reload config error")

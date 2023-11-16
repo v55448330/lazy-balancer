@@ -82,5 +82,6 @@ http {
     ##
 
     include /etc/nginx/conf.d/*.conf;
+    lua_package_path '/usr/local/lib/lua/?.lua;;';
 
 }

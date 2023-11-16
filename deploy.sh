@@ -10,16 +10,21 @@ sudo rm -rf /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python
 sudo mkdir -p /app/lazy_balancer/db
 #sudo cp -r /vagrant/* /app/lazy_balancer
 sudo chown -R 1000.1000 /app
-curl -fsSL https://github.com/openresty/luajit2/archive/v2.1-20190626.tar.gz -o /tmp/luajit.tar.gz 
-tar zxf /tmp/luajit.tar.gz -C /tmp && cd /tmp/luajit2-2.1-20190626
+curl -fsSL https://github.com/openresty/luajit2/archive/v2.1-20231006.tar.gz -o /tmp/luajit.tar.gz 
+tar zxf /tmp/luajit.tar.gz -C /tmp && cd /tmp/luajit2-2.1-20231006
 make && make install
 export LUAJIT_INC=/usr/local/include/luajit-2.1
 export LUAJIT_LIB=/usr/local/lib
-ln -sf luajit /usr/local/bin/luajit
 echo "/usr/local/lib" >> /etc/ld.so.conf
 ldconfig
-curl -fsSL https://github.com/alibaba/tengine/archive/2.3.3.tar.gz -o /tmp/tengine.tar.gz
-tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-2.3.3
+curl -fsSL https://github.com/openresty/lua-resty-core/archive/refs/tags/v0.1.27.tar.gz -o /tmp/lua-resty-core.tar.gz
+tar -zxf /tmp/lua-resty-core.tar.gz -C /tmp && cd /tmp/lua-resty-core-0.1.27
+make install
+curl -fsSL https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v0.13.tar.gz -o /tmp/lua-resty-lrucache.tar.gz
+tar -zxf /tmp/lua-resty-lrucache.tar.gz -C /tmp && cd /tmp/lua-resty-lrucache-0.13
+make install
+curl -fsSL https://github.com/alibaba/tengine/archive/3.1.0.tar.gz -o /tmp/tengine.tar.gz
+tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-3.1.0
 ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin \
       --error-log-path=/var/log/nginx/error.log --conf-path=/etc/nginx/nginx.conf --pid-path=/run/nginx.pid \
       --with-http_secure_link_module \

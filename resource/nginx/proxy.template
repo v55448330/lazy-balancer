@@ -4,6 +4,9 @@ upstream {{ proxy.config_id | lower }} {
     {%- if proxy.balancer_type == "ip_hash" %}
     hash $remote_addr consistent;
     {%- endif %}
+    {%- if proxy.backend_dynamic_domain %}
+    dynamic_resolve fallback=stale fail_timeout=30s;
+    {%- endif %}
     {%- for server in upstream %}
     {%- if proxy.protocol %}
     server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
@@ -132,6 +135,10 @@ server {
         proxy_set_header Upgrade			$http_upgrade;
         proxy_set_header Connection 		"upgrade";
         {%- if proxy.backend_domain_toggle %}
+        {%- if proxy.ssl %}
+        proxy_ssl_server_name on;
+        proxy_ssl_name {{ proxy.backend_domain }};
+        {%- endif %}
         proxy_set_header Host				"{{ proxy.backend_domain }}"; 
         proxy_set_header X-Forwarded-Host	"{{ proxy.backend_domain }}"; 
         {%- else %}
@@ -167,7 +174,7 @@ server {
 server {
     listen {{ proxy.listen }};
     proxy_connect_timeout 5s;
-    proxy_timeout 30s;
+    proxy_timeout 1800s;
     proxy_pass {{ proxy.config_id | lower }};
     {%- if proxy.access_log %}
     access_log {{ proxy.access_log }} proxy;

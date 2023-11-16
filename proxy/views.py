@@ -86,10 +86,25 @@ def delete_proxy(request):
         post = json.loads(request.body.decode('utf-8'))
         p = proxy_config.objects.filter(pk=post['pk'])
         p.delete()
-        reload_config("proxy")
+        if post.get('gen_config', False):
+            reload_config("proxy")
         content = { "flag":"Success" }
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
+    return HttpResponse(json.dumps(content))
+    pass
+
+@is_auth
+def gen_config(request):
+    try:
+        if request.method == 'POST':
+            if reload_config("proxy", 1):
+                content = { "flag":"Success" }
+            else:
+                content = { "flag":"Error" }
+    except Exception as e:
+        content = { "flag":"Error","context":str(e) }
+
     return HttpResponse(json.dumps(content))
     pass
 
@@ -100,13 +115,16 @@ def change_status(request):
         proxy = proxy_config.objects.get(pk=post['pk'])
         proxy.status = bool(int(post['status']))
         proxy.save()
-        if reload_config("proxy"):
-            content = { "flag":"Success" }
+        if post.get('gen_config', False):
+            if reload_config("proxy"):
+                content = { "flag":"Success" }
+            else:
+                proxy.status = False
+                proxy.save()
+                reload_config("proxy")
+                content = { "flag":"Error","context":"ConfigError"}
         else:
-            proxy.status = False
-            proxy.save()
-            reload_config("proxy")
-            content = { "flag":"Error","context":"ConfigError"}
+            content = { "flag":"Success" }
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
 
@@ -197,6 +215,11 @@ def save(request):
             backend_domain = ''
             upstream_backend_domain_toggle = False
             host = server_name.split(' ')[0]
+
+        if 'backend_dynamic_domain' in post['base_config']:
+            backend_dynamic_domain = True
+        else:
+            backend_dynamic_domain = False
         
         balancer_type = ""
 
@@ -261,6 +284,7 @@ def save(request):
                 config_path = "/etc/nginx/conf.d/%s-tcp.conf" % config_id
             else:
                 port_list = list(proxy_config.objects.filter(protocol=False).values_list('listen', flat=True).iterator())
+                print(port_list)
                 if int(listen) in port_list:
                     content = {"flag":"Error", "context":"PortOccupied"}
                     return HttpResponse(json.dumps(content))
@@ -292,6 +316,7 @@ def save(request):
                 'custom_config' : "",
                 'backend_protocol' : backend_protocol,
                 'backend_domain_toggle' : upstream_backend_domain_toggle,
+                'backend_dynamic_domain' : backend_dynamic_domain,
                 'backend_domain' : backend_domain,
                 'update_time' : time.time(),
                 'status' : False,
