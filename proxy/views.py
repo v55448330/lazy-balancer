@@ -116,6 +116,21 @@ def gen_config(request):
     pass
 
 @is_auth
+def load_config(request):
+    try:
+        if request.method == 'POST':
+            ret = reload_config("", 0, 1)
+            if not ret:
+                content = { "flag":"Success" }
+            else:
+                content = { "flag":"Error", "context": str(ret) }
+    except Exception as e:
+        content = { "flag":"Error","context":str(e) }
+
+    return HttpResponse(json.dumps(content))
+    pass
+
+@is_auth
 def change_status(request):
     try:
         post = json.loads(request.body.decode('utf-8'))

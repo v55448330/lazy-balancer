@@ -1065,7 +1065,31 @@
                     alert("请求失败！")
                 }
             })
-        }
+        } else if (confirm("是否重新载入配置？")) {
+            $("#btn_gen_config").prop('disabled', true)
+            $("#btn_gen_config").text('正在处理...')
+            jQuery.ajax({
+                type: 'post',
+                url: '/proxy/load_config/',
+                data: JSON.stringify({}),
+                dataType: 'json',
+                success: function (p) {
+                    $("#btn_gen_config").text('重新应用配置')
+                    $("#btn_gen_config").prop('disabled', false)
+                    if (p.flag == "Success") {
+                        alert("配置重载成功!")
+                        top.location = '/proxy/'
+                    } else if (p.flag == "Error") {
+                        alert("配置重载失败！" + p.context)
+                    }
+                },
+                error: function (e) {
+                    $("#btn_gen_config").text('重新应用配置')
+                    $("#btn_gen_config").prop('disabled', false)
+                    alert("请求失败！")
+                }
+            })
+        };
     }
 
     function change_status(pk, status) {

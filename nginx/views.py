@@ -57,7 +57,19 @@ def run_shell(cmd):
 def test_config():
     return run_shell('nginx -t')
 
-def reload_config(scope="main", force=0):
+def reload_config(scope="main", force=0, skip_gen=0):
+    if skip_gen:
+        test_ret = test_config()
+        if test_ret['status'] != 0:
+            print(test_ret['output'])
+            return(str(test_ret['output']))
+        else:
+            reload_ret = run_shell('nginx -s reload')
+            if reload_ret['status'] != 0:
+                print(reload_ret['output'])
+                return(str(reload_ret['output']))
+        return ""
+
     if scope == "main":
         if not force:
             test_ret = test_config()
