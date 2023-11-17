@@ -1041,7 +1041,7 @@
     }
 
     function gen_config() {
-        if (confirm("该操作将重新生成并应用所有配置，请确认配置及备份正确，是否继续？")) {
+        if (confirm("该操作将重新生成并应用所有配置，请确认配置及备份正确， 如仅需重载配置，请选择取消，是否继续？")) {
             $("#btn_gen_config").prop('disabled', true)
             $("#btn_gen_config").text('正在处理...')
             jQuery.ajax({
