@@ -874,7 +874,7 @@
                 pk: pk,
                 gen_conf: false
             }
-            if (confirm("删除后是否重新应用配置？默认不应用！")) {
+            if (confirm("删除后是否重新应用配置？取消则只修改数据库，如需生效请重启或手动应用配置！")) {
                 post.gen_config = true
             }
             jQuery.ajax({
@@ -1041,7 +1041,7 @@
     }
 
     function gen_config() {
-        if (confirm("该操作将重新生成并应用所有配置，请确认配置及备份正确， 如仅需重载配置，请选择取消，是否继续？")) {
+        if (confirm("该操作将重新生成并应用所有配置，请确认配置及备份正确，如仅需重载配置，请选择取消，是否继续？")) {
             $("#btn_gen_config").prop('disabled', true)
             $("#btn_gen_config").text('正在处理...')
             jQuery.ajax({
@@ -1099,7 +1099,7 @@
                 status: status,
                 gen_conf: false
             }
-            if (confirm("变更状态后是否重新应用配置？默认不应用！")) {
+            if (confirm("变更状态后是否重新应用配置？取消则只修改数据库，如需生效请重启或手动应用配置！")) {
                 post.gen_config = true
             }
             jQuery.ajax({
