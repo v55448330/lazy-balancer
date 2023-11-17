@@ -9,6 +9,7 @@ class system_settings(models.Model):
     config_sync_master_url = models.CharField(max_length=64, null=True)
     config_sync_interval = models.IntegerField(null=False, default=60)
     config_sync_scope = models.IntegerField(null=True)
+    num_per_page = models.IntegerField(null=False, default=10)
 
     class Meta:
        db_table = 't_settings'
@@ -19,6 +20,11 @@ class system_settings(models.Model):
         else:
             self.access_key = str(uuid.uuid4())
         self.save()
+
+    def update_num_per_page(self, num_per_page):
+        self.num_per_page = num_per_page
+        self.save()
+
 
 class sync_status(models.Model):
     update_time = models.DateTimeField(null=True)

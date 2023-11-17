@@ -26,7 +26,10 @@ def view(request):
     else:
         p_config = proxy_config.objects.all()
 
+    s_config = system_settings.objects.all()[0]
     NUM_PER_PAGE = 10
+    if s_config:
+        NUM_PER_PAGE = s_config.num_per_page
     paginator = Paginator(p_config, NUM_PER_PAGE)
     page = request.GET.get('page')
 

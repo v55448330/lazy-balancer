@@ -46,6 +46,32 @@ def view(request):
     return render_to_response('settings/view.html', {'user': user, 'settings': _system_settings[0], 'sync_status': _sync_status})
 
 @is_auth
+def save_other_settings(request):
+    if request.method == 'POST':
+        try:
+            post = json.loads(request.body.decode('utf-8'))
+            if (post):
+                s_config = system_settings.objects.all()[0]
+                if "num_per_page" in post:
+                    num_per_page = post['num_per_page']
+                    if num_per_page.isdigit():
+                        num_per_page = int(num_per_page)
+                        if num_per_page >= 10 and num_per_page <= 100:
+                            s_config.update_num_per_page(num_per_page)
+                            content = {"flag": "Success"}
+                            return HttpResponse(json.dumps(content))
+
+                content = {"flag": "Error", "context": "InputFormatError"}
+            else:
+                content = {"flag": "Error", "context": "InputFormatError"}
+        except Exception as e:
+            content = {"flag": "Error", "context": str(e)}
+    else:
+        content = {"flag": "Error", "context": "method is denied"}
+
+    return HttpResponse(json.dumps(content))
+
+@is_auth
 def sync_config(request):
     try:
         post = json.loads(request.body.decode('utf-8'))

@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^$', views.view),
     url(r'^admin/(?P<action>.*)/$', views.admin_password),
     url(r'^save_sync/$', views.sync_config),
+    url(r'^save_other_settings/$', views.save_other_settings),
 ]
