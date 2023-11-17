@@ -12,7 +12,7 @@
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
 ## 更新（2023-11-16）
-* 更新 Python 到 3.12
+* 更新 Python 到 3.9
 * 更新 Tengine 到 3.1.0
 * 更新 LuaJIT 到 20231006
 * 更新 Alpine 到 3.18.4
