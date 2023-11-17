@@ -1,4 +1,4 @@
-FROM python:3.13-alpine
+FROM python:3.9-alpine
 
 ENV TENGINE_VERSION 3.1.0
 ENV LAZYBALANCER_VERSION v1.3.7beta
@@ -7,8 +7,8 @@ ENV LUAJIT_VERSION v2.1-20231006
 COPY . /app/lazy_balancer
 
 RUN set -x \
-    && addgroup -g 101 -S www-data \
-    && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G www-data -g www-data www-data \
+    #&& addgroup -g 101 -S www-data \
+    && adduser -S -D -H -u 82 -h /var/cache/nginx -s /sbin/nologin -G www-data -g www-data www-data \
     && apkArch="$(cat /etc/apk/arch)" \
     && tempDir="$(mktemp -d)" && cd ${tempDir} \
     && chown nobody:nobody ${tempDir} \
@@ -17,7 +17,10 @@ RUN set -x \
                 tzdata \
                 gcc \
                 libc-dev \
+                musl-dev \
+                build-base \
                 make \
+                cargo \
                 openssl-dev \
                 pcre-dev \
                 zlib-dev \
@@ -33,6 +36,7 @@ RUN set -x \
                 python3-dev \
                 libffi-dev \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && python3 -m pip install --upgrade pip \
     && curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz \
     && tar zxf luajit.tar.gz -C ${tempDir} \
     && cd ${tempDir}/luajit2-${LUAJIT_VERSION#v} \
@@ -41,10 +45,10 @@ RUN set -x \
     && export LUAJIT_LIB=/usr/local/lib \
     && ln -sf luajit /usr/local/bin/luajit \
     && curl -fsSL https://github.com/openresty/lua-resty-core/archive/refs/tags/v0.1.27.tar.gz -o lua-resty-core.tar.gz \
-    && tar -zxf lua-resty-core.tar.gz -C ${tempDir} && cd /$(tempDir)/lua-resty-core-0.1.27 \
+    && tar -zxf lua-resty-core.tar.gz -C ${tempDir} && cd ${tempDir}/lua-resty-core-0.1.27 \
     && make install \
     && curl -fsSL https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v0.13.tar.gz -o lua-resty-lrucache.tar.gz \
-    && tar -zxf lua-resty-lrucache.tar.gz -C /${tempDir} && cd /${tempDir}/lua-resty-lrucache-0.13 \
+    && tar -zxf lua-resty-lrucache.tar.gz -C /${tempDir} && cd ${tempDir}/lua-resty-lrucache-0.13 \
     && make install \
     && curl -fsSL https://github.com/alibaba/tengine/archive/${TENGINE_VERSION}.tar.gz -o tengine.tar.gz \
     && tar zxf tengine.tar.gz -C ${tempDir} \

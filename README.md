@@ -12,9 +12,11 @@
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
 ## 更新（2023-11-16）
-* 更新 Python 到 3.13
+* 更新 Python 到 3.12
 * 更新 Tengine 到 3.1.0
 * 更新 LuaJIT 到 20231006
+* 更新 Alpine 到 3.18.4
+* 更新 部分 Python 依项
 * 优化 在所有保存配置操作前均执行 nginx -t 验证已存在配置，如果异常将不会执行配置渲染及后续操作
 * 优化 状态页面拆分配置和进程状态，现在配置异常不会影响 Nginx 状态，将会独立显示 “配置异常” 状态
 * 优化 服务启动流程，服务启动时将重新生成并应用配置文件，防止错误配置导致的启动失败
@@ -81,7 +83,7 @@
 ### 容器
 * 编译镜像
 ```
-docker build -t <lazy-balancer>:<v1.3.6beta>
+docker build -t <lazy-balancer>:<v1.3.7beta>
 ```
 > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
 
@@ -90,7 +92,7 @@ docker build -t <lazy-balancer>:<v1.3.6beta>
 docker run -d --restart=always --net=host --name=lazy_balancer \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.3.6beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.3.7beta> or v55448330/lazy-balancer:latest
 ```
 * 初始化数据库
 ```
