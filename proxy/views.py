@@ -438,14 +438,14 @@ def save(request):
                 content = {"flag":"Success"}
             else:
                 content = {"flag":"Error","context":test_ret['output']}
-
-            reload_config("proxy")
+                reload_config("proxy", 1)
 
         else:
             content = {"flag":"Error","context":"ArgsError"}
             return HttpResponse(json.dumps(content))
 
     except Exception as e:
+        reload_config("proxy", 1)
         content = {"flag":"Error","context":str(e)}
 
     return HttpResponse(json.dumps(content))
