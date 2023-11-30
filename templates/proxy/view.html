@@ -547,6 +547,8 @@
         editor.setShowPrintMargin(false);
         editor.setValue('')
 
+        $("#input_proxy_filter").val($(location).attr('href').split('filter=')[1].split('&')[0])
+
         $(':button[name="proxy_protocol_https"]').each(function (){
             cert_info = get_cert_info($(this)[0].title, false)
             if (cert_info.has_expired) {
@@ -1113,7 +1115,7 @@
                         top.location = '/proxy/'
                     } else if (p.flag == "Error" && p.context == "ConfigError") {
                         alert('变更失败！配置错误，规则已禁用！')
-                        top.location = '/login/'
+                        top.location = '/proxy/'
                     } else if (p.flag == "Error" && p.context == "AuthFailed") {
                         alert('认证失败！请重新登录！')
                         top.location = '/login/'
