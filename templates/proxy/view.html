@@ -547,7 +547,11 @@
         editor.setShowPrintMargin(false);
         editor.setValue('')
 
-        $("#input_proxy_filter").val($(location).attr('href').split('filter=')[1].split('&')[0])
+        var url = $(location).attr('href')
+
+        if (url.indexOf('filter=') != -1 ) {
+            $("#input_proxy_filter").val($(location).attr('href').split('filter=')[1].split('&')[0])
+        }
 
         $(':button[name="proxy_protocol_https"]').each(function (){
             cert_info = get_cert_info($(this)[0].title, false)
