@@ -1080,7 +1080,7 @@
                         alert("配置重载成功!")
                         top.location = '/proxy/'
                     } else if (p.flag == "Error") {
-                        alert("配置重载失败！" + p.context)
+                        alert("配置重载失败！请检查配置文件或日志！")
                     }
                 },
                 error: function (e) {

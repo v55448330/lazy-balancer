@@ -8,6 +8,9 @@ import platform
 import os
 import psutil
 import requests
+import logging
+
+logger = logging.getLogger('django')
 
 def clean_dir(dir_path):
     filelist=[]
@@ -61,20 +64,20 @@ def reload_config(scope="main", force=0, skip_gen=0):
     if skip_gen:
         test_ret = test_config()
         if test_ret['status'] != 0:
-            print(test_ret['output'])
-            return(str(test_ret['output']))
+            logger.error(test_ret['output'])
+            return False
         else:
             reload_ret = run_shell('nginx -s reload')
             if reload_ret['status'] != 0:
-                print(reload_ret['output'])
-                return(str(reload_ret['output']))
-        return ""
+                logger.error(reload_ret['output'])
+                return False
+        return True
 
     if scope == "main":
         if not force:
             test_ret = test_config()
             if test_ret['status'] != 0:
-                print(test_ret['output'])
+                logger.error(test_ret['output'])
                 return False
 
         config_nginx_path = "/etc/nginx/nginx.conf"
@@ -85,7 +88,7 @@ def reload_config(scope="main", force=0, skip_gen=0):
 
         test_ret = test_config()
         if test_ret['status'] != 0:
-            print(test_ret['output'])
+            logger.error(test_ret['output'])
             return False
         run_shell('nginx -s reload')
 
@@ -93,7 +96,7 @@ def reload_config(scope="main", force=0, skip_gen=0):
         if not force:
             test_ret = test_config()
             if test_ret['status'] != 0:
-                print(test_ret['output'])
+                logger.error(test_ret['output'])
                 return False
 
         clean_dir("/etc/nginx/conf.d")
@@ -116,7 +119,7 @@ def reload_config(scope="main", force=0, skip_gen=0):
 
         test_ret = test_config()
         if test_ret['status'] != 0:
-            print(test_ret['output'])
+            logger.error(test_ret['output'])
             return False
         run_shell('nginx -s reload')
 

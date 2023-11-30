@@ -119,11 +119,10 @@ def gen_config(request):
 def load_config(request):
     try:
         if request.method == 'POST':
-            ret = reload_config("", 0, 1)
-            if not ret:
+            if reload_config("", 0, 1):
                 content = { "flag":"Success" }
             else:
-                content = { "flag":"Error", "context": str(ret) }
+                content = { "flag":"Error" }
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
 
