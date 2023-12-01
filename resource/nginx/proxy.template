@@ -4,12 +4,9 @@ upstream {{ proxy.config_id | lower }} {
     {%- if proxy.balancer_type == "ip_hash" %}
     hash $remote_addr consistent;
     {%- endif %}
-    {%- if proxy.backend_dynamic_domain %}
-    dynamic_resolve fallback=stale fail_timeout=30s;
-    {%- endif %}
     {%- for server in upstream %}
-    {%- if proxy.protocol %}
-    server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
+    {%- if proxy.backend_dynamic_domain %}
+    jdomain {{ server.address }} port={{ server.port }} interval=60 max_ips=1;
     {%- else %}
     server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ proxy.max_fails }} fail_timeout={{ proxy.fail_timeout }}s;
     {%- endif %}

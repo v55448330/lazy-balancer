@@ -50,6 +50,8 @@ RUN set -x \
     && curl -fsSL https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v0.13.tar.gz -o lua-resty-lrucache.tar.gz \
     && tar -zxf lua-resty-lrucache.tar.gz -C /${tempDir} && cd ${tempDir}/lua-resty-lrucache-0.13 \
     && make install \
+    && curl -fsSL https://github.com/nicholaschiasson/ngx_upstream_jdomain/archive/refs/tags/1.4.0.tar.gz -o ${tempDir}/ngx_upstream_jdomain.tar.gz \
+    && tar -zxf ${tempDir}/ngx_upstream_jdomain.tar.gz -C ${tempDir} \
     && curl -fsSL https://github.com/alibaba/tengine/archive/${TENGINE_VERSION}.tar.gz -o tengine.tar.gz \
     && tar zxf tengine.tar.gz -C ${tempDir} \
     && cd ${tempDir}/tengine-${TENGINE_VERSION} \
@@ -79,9 +81,7 @@ RUN set -x \
             --with-http_v2_module \
             --add-module=./modules/ngx_http_upstream_check_module \
             --add-module=./modules/ngx_http_upstream_session_sticky_module \
-            --add-module=./modules/ngx_http_upstream_dynamic_module \
             --add-module=./modules/ngx_http_upstream_consistent_hash_module \
-            --add-module=./modules/ngx_http_upstream_dyups_module \
             --add-module=./modules/ngx_http_user_agent_module \
             --add-module=./modules/ngx_http_proxy_connect_module \
             --add-module=./modules/ngx_http_concat_module \
@@ -90,6 +90,7 @@ RUN set -x \
             --add-module=./modules/ngx_http_slice_module \
             --add-module=./modules/ngx_http_lua_module \
             --add-module=./modules/ngx_http_reqstat_module \
+            --add-module=${tempDir}/ngx_upstream_jdomain-1.4.0 \
             --with-http_geoip_module=dynamic \
             --with-stream \
     && make && make install \

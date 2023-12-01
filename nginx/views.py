@@ -21,6 +21,11 @@ def clean_dir(dir_path):
             os.remove(filepath)
     return True
 
+def clean_file(file_path):
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+    return True
+
 def load_template(template):
     env = Environment(
         loader=FileSystemLoader(
@@ -35,6 +40,9 @@ def build_main_config(config):
     return template.render(config)
 
 def build_proxy_config(config):
+    config_id = config.get('proxy').get('config_id')
+    clean_file("/etc/nginx/conf.d/" + config_id + "-http.conf")
+    clean_file("/etc/nginx/conf.d/" + config_id + "-tcp.conf")
     template = load_template('proxy.template')
 
     return template.render(config)

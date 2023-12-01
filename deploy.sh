@@ -23,6 +23,8 @@ make install
 curl -fsSL https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v0.13.tar.gz -o /tmp/lua-resty-lrucache.tar.gz
 tar -zxf /tmp/lua-resty-lrucache.tar.gz -C /tmp && cd /tmp/lua-resty-lrucache-0.13
 make install
+curl -fsSL https://github.com/nicholaschiasson/ngx_upstream_jdomain/archive/refs/tags/1.4.0.tar.gz -o /tmp/ngx_upstream_jdomain.tar.gz
+tar -zxf /tmp/ngx_upstream_jdomain.tar.gz -C /tmp
 curl -fsSL https://github.com/alibaba/tengine/archive/3.1.0.tar.gz -o /tmp/tengine.tar.gz
 tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-3.1.0
 ./configure --user=www-data --group=www-data --prefix=/etc/nginx --sbin-path=/usr/sbin \
@@ -49,9 +51,7 @@ tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-3.1.0
       --with-http_v2_module \
       --add-module=./modules/ngx_http_upstream_check_module \
       --add-module=./modules/ngx_http_upstream_session_sticky_module \
-      --add-module=./modules/ngx_http_upstream_dynamic_module \
       --add-module=./modules/ngx_http_upstream_consistent_hash_module \
-      --add-module=./modules/ngx_http_upstream_dyups_module \
       --add-module=./modules/ngx_http_user_agent_module \
       --add-module=./modules/ngx_http_proxy_connect_module \
       --add-module=./modules/ngx_http_concat_module \
@@ -60,6 +60,7 @@ tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-3.1.0
       --add-module=./modules/ngx_http_slice_module \
       --add-module=./modules/ngx_http_lua_module \
       --add-module=./modules/ngx_http_reqstat_module \
+      --add-module=/tmp/ngx_upstream_jdomain-1.4.0 \
       --with-http_geoip_module=dynamic \
       --with-stream
 make && sudo make install

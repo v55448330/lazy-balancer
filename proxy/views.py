@@ -434,6 +434,7 @@ def save(request):
                     obj_p_config.save()
                     pass
 
+                reload_config("proxy", 0, 1)
                 content = {"flag":"Success"}
             else:
                 content = {"flag":"Error","context":test_ret['output']}
