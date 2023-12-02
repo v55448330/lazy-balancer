@@ -6,9 +6,9 @@ upstream {{ proxy.config_id | lower }} {
     {%- endif %}
     {%- for server in upstream %}
     {%- if proxy.backend_dynamic_domain %}
-    jdomain {{ server.address }} port={{ server.port }} interval=60 max_ips=1;
+    jdomain {{ server.address }} port={{ server.port }} interval=60;
     {%- else %}
-    server {{ server.address }}:{{ server.port }} weight={{ server.weight }} max_fails={{ proxy.max_fails }} fail_timeout={{ proxy.fail_timeout }}s;
+    server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
     {%- endif %}
     {%- endfor %}
     {%- if proxy.protocol %}

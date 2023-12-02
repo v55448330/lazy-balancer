@@ -923,7 +923,7 @@
 
                         for (var f in p.status) {
                             var server = p.status[f]
-                            if (server.upstream == p.config_id) {
+                            if (server.upstream == p.config_id && server.name != "NGX_UPSTREAM_JDOMAIN_BUFFER") {
                                 tb = '<tr>'
                                 tb += '<td>' + server.index + '</td>'
                                 tb += '<td>' + server.name + '</td>'

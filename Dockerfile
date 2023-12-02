@@ -79,6 +79,7 @@ RUN set -x \
             --with-http_auth_request_module \
             --with-http_addition_module \
             --with-http_v2_module \
+            #--add-module=./modules/ngx_http_upstream_dynamic_module \
             --add-module=./modules/ngx_http_upstream_check_module \
             --add-module=./modules/ngx_http_upstream_session_sticky_module \
             --add-module=./modules/ngx_http_upstream_consistent_hash_module \
