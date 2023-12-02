@@ -22,9 +22,9 @@ import os
 def view(request):
     filter = request.GET.get('filter',"")
     if filter:
-        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter)|Q(config_id__contains=filter)|Q(listen__contains=filter))
+        p_config = proxy_config.objects.filter(Q(proxy_name__contains=filter)|Q(server_name__contains=filter)|Q(config_id__contains=filter)|Q(listen__contains=filter)).order_by('id')
     else:
-        p_config = proxy_config.objects.all()
+        p_config = proxy_config.objects.all().order_by('id')
 
     if system_settings.objects.all():
         s_config = system_settings.objects.all()[0]

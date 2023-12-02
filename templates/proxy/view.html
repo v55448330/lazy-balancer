@@ -578,9 +578,14 @@
                 } 
             }
             if (down == 0 && up != 0) {
+                $(this).removeAttr('disabled')
                 $(this).addClass('btn-success')
-                $(this)[0].title = '后端节点正常'
+            } else if (down + up == 0) {
+                $(this).addClass('btn-primary')
+                $(this).attr('disabled', 'disabled')
+                $(this)[0].title = '规则禁用'
             } else {
+                $(this).removeAttr('disabled')
                 $(this).addClass('btn-warning')
                 $(this)[0].title = '后端节点异常'
             }
@@ -923,7 +928,7 @@
 
                         for (var f in p.status) {
                             var server = p.status[f]
-                            if (server.upstream == p.config_id && server.name != "NGX_UPSTREAM_JDOMAIN_BUFFER") {
+                            if (server.upstream == p.config_id) {
                                 tb = '<tr>'
                                 tb += '<td>' + server.index + '</td>'
                                 tb += '<td>' + server.name + '</td>'
