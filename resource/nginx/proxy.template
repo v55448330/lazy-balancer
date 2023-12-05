@@ -6,7 +6,7 @@ upstream {{ proxy.config_id | lower }} {
     {%- endif %}
     {%- for server in upstream %}
     {%- if proxy.backend_dynamic_domain %}
-    jdomain {{ server.address }} port={{ server.port }} interval=60;
+    jdomain {{ server.address }}:{{ server.port }} interval=60;
     {%- else %}
     server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
     {%- endif %}
