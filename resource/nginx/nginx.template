@@ -7,6 +7,7 @@ worker_processes auto;
 {%- else %}
 worker_processes {{ worker_processes }};
 {%- endif %}
+worker_cpu_affinity auto;
 pid /run/nginx.pid;
 daemon off;
 
