@@ -53,10 +53,10 @@ def view(request):
     pass
 
 @is_auth
-def check_http_status(request):
+def check_upstream_status(request):
     try:
         post = json.loads(request.body.decode('utf-8'))
-        status = get_proxy_http_status()
+        status = get_proxy_upstream_status()
 
         if post['pk'] == 0:
             content = { "flag":"Success","status":status}

@@ -27,9 +27,10 @@
 * 新增 “重新应用配置” 功能，可以手动重新渲染或重载 Nginx 配置，默认重新渲染，选择取消后可选择仅重载配置
 * 新增 stream 模块中 proxy_timeout 1800s 固定配置项
 * 新增 check_shm_size 32M 固定配置项
-* 新增 HTTP 类型规则后端节点域名动态检测 [ngx_upstream_jdomain](https://github.com/nicholaschiasson/ngx_upstream_jdomain) 实现，防止 upstream 域名 IP 变动，仅支持 HTTP 协议
 * 新增 规则列表分页长度配置，默认 10 条，可配置 10-100 条分页
 * 新增 测试支持 ARM 架构，pull 镜像可以使用 `--platform linux/arm64` 参数
+* 新增 HTTP 类型规则后端节点域名动态检测 [ngx_upstream_jdomain](https://github.com/nicholaschiasson/ngx_upstream_jdomain) 实现，防止 upstream 域名 IP 变动，仅支持 HTTP 协议
+* 新增 更换主动健康检测模块 [ngx_healthcheck_module](https://github.com/zhouchangxun/ngx_healthcheck_module)，以解决动态域名模块兼容性问题，并增加 TCP 规则的后端节点检测功能
 * 修复 在 SSL 状态下打开后端域名开关不生效的问题
 * 修复 部分情况下配置错误导入失败无法回滚的 Bug，优化了导入逻辑，略微提升了导入速度
 * 修复 其他交互 Bug

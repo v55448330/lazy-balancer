@@ -6,7 +6,7 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="proxy_status_title">节点 HTTP 服务状态</h4><small
+                <h4 class="modal-title" id="proxy_status_title">后端节点状态</h4><small
                     id="proxy_status_mtitle"></small>
             </div>
             <div class="modal-body">
@@ -477,13 +477,9 @@
                                 <button type="button" title="{{ server.config_id }}" name="proxy_upstream_status" class="btn btn-xs"
                                     onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
                             </td>
-                            {% elif server.protocol and not server.http_check and not server.to_domain_toggle %}
+                            {% elif not server.http_check and not server.to_domain_toggle %}
                             <td>
                                 <button type="button" title="{{ server.config_id }}" name="proxy_upstream_status" class="btn btn-xs" onclick="proxy_status('{{ server.pk }}',0)">TCP</button>
-                            </td>
-                            {% elif not server.protocol %}
-                            <td>
-                                <button type="button" class="btn btn-primary btn-xs" disabled>TCP</button>
                             </td>
                             {% else %}
                             <td>
@@ -918,7 +914,7 @@
         if (getdata == 1) {
             jQuery.ajax({
                 type: 'post',
-                url: '/proxy/checkhttp/',
+                url: '/proxy/upstream_health/',
                 data: JSON.stringify(post),
                 dataType: "json",
                 success: function (p) {
@@ -962,7 +958,7 @@
             var upstream_status;
             jQuery.ajax({
                 type: 'post',
-                url: '/proxy/checkhttp/',
+                url: '/proxy/upstream_health/',
                 data: JSON.stringify(post),
                 async: false,
                 dataType: "json",

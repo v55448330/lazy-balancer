@@ -11,7 +11,7 @@ from proxy.models import proxy_config
 from settings.models import system_settings, sync_status
 from settings.views import save_sync, get_config, import_config
 from django_filters import rest_framework as filters
-from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_http_status
+from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_upstream_status
 from datetime import datetime
 import logging
 
@@ -74,7 +74,7 @@ class ProxySetView(viewsets.ReadOnlyModelViewSet):
         > 参数同 `/proxy/` API
         """
         config_id = request.query_params.get('config_id')
-        upstream_status = get_proxy_http_status()
+        upstream_status = get_proxy_upstream_status()
         if config_id:
             p = proxy_config.objects.filter(config_id=config_id).filter(protocol=True)
             if p:

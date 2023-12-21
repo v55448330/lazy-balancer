@@ -6,12 +6,11 @@ upstream {{ proxy.config_id | lower }} {
     {%- endif %}
     {%- for server in upstream %}
     {%- if proxy.backend_dynamic_domain %}
-    jdomain {{ server.address }}:{{ server.port }} interval=60;
+    jdomain {{ server.address }} port={{ server.port }} ipver=4;
     {%- else %}
     server {{ server.address }}:{{ server.port }} weight={{ server.weight }};
     {%- endif %}
     {%- endfor %}
-    {%- if proxy.protocol %}
     {%- if proxy.http_check %}
     {%- if proxy.backend_protocol == 'https' %}
     check interval=3000 rise=2 fall={{ proxy.max_fails }} timeout={{ proxy.fail_timeout * 1000 }} type=ssl_hello;
@@ -25,7 +24,6 @@ upstream {{ proxy.config_id | lower }} {
     {%- else %}
     check interval=3000 rise=2 fall={{ proxy.max_fails }} timeout={{ proxy.fail_timeout * 1000 }} type=tcp;
     check_keepalive_requests 100;
-    {%- endif %}
     {%- endif %}
 }
 {%- endif %}

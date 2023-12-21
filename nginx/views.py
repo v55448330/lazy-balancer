@@ -225,19 +225,20 @@ def post_request(url, headers={}):
         resp = None
     return resp
 
-def get_proxy_http_status():
+def get_proxy_upstream_status():
     url = "http://127.0.0.1/up_status?format=json"
     resp = post_request(url)
     _ret = []
     if resp:
         ret = post_request(url).json()
         if 'servers' in ret:
-            server = ret['servers']['server'] 
-            if server:
-                _ret = [ d for d in server if d.get('name') != "NGX_UPSTREAM_JDOMAIN_BUFFER" ]
+            http_server = ret['servers']['http'] 
+            stream_server = ret['servers']['stream'] 
+            if stream_server or http_server:
+                _ret = [ d for d in http_server if d.get('name') != "NGX_UPSTREAM_JDOMAIN_BUFFER" ] + stream_server
         else:
             _ret = []
-
+        
     return _ret
 
 def get_req_status():

@@ -65,7 +65,7 @@ http {
         }
 
         location /up_status {
-            check_status;
+            healthcheck_status json;
             allow 127.0.0.1;
             deny all;
         }
