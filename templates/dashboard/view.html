@@ -333,9 +333,13 @@ function get_status_info() {
                 } else {
                     for (var f in p.context.reqstatus) {
                         var req = p.context.reqstatus[f]
+                        var inBytes = req.inBytes / 1048576 
+                        var outBytes = req.outBytes / 1048576 
+                        if (inBytes > 1024) { inBytes = "<strong>" + (inBytes / 1024).toFixed(2) + " GB</strong>" } else { inBytes = inBytes.toFixed(2) + " MB" }                            
+                        if (outBytes > 1024) { outBytes = "<strong>" + (outBytes / 1024).toFixed(2) + " GB</strong>" } else { outBytes = outBytes.toFixed(2) + " MB" } 
                         var req_td = "<tr>"
                         req_td += "<td>" + req.zone + "</td><td>" + req.connectCounter + "</td>"
-                        req_td += "<td><small>in</small> " + (req.inBytes / 1024 / 1024).toFixed(2) + " MB / <small>out</small> " + (req.outBytes / 1024 / 1024).toFixed(2) + " MB</td>"
+                        req_td += "<td><small>in</small> " + inBytes + " / <small>out</small> " + outBytes + " </td>"
                         req_td += "<td>" + req.responses['1xx'] + "</td><td>" + req.responses['2xx'] + "</td><td>" + req.responses['3xx']  + "</td><td>" + req.responses['4xx']  + "</td><td>" + req.responses['5xx'] + "</td></tr>"
                         $('#tb_request_count_body').append(req_td)
                     }
