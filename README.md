@@ -150,17 +150,17 @@ http://[IP]:8000/
 
 ## 演示
 ![image](readme_img/1.jpg)
-![image](readme_img/2.jpg)
+![image](readme_img/2.png)
 ![image](readme_img/3.jpg)
-![image](readme_img/4.jpg)
+![image](readme_img/4.png)
 ![image](readme_img/5.jpg)
 ![image](readme_img/6.jpg)
 ![image](readme_img/7.jpg)
-![image](readme_img/8.jpg)
-![image](readme_img/9.jpg)
+![image](readme_img/8.png)
+![image](readme_img/9.png)
 ![image](readme_img/10.jpg)
 ![image](readme_img/11.jpg)
-![image](readme_img/12.jpg)
+![image](readme_img/12.png)
 ![image](readme_img/13.jpg)
 ![image](readme_img/14.jpg)
 
