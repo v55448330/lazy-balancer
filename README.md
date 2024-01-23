@@ -13,7 +13,7 @@
 
 ## 更新（2024-01-23）
 * 新增 [nginx-module-vts](https://github.com/vozlt/nginx-module-vts) 模块，实现更完善的流量监测能力
-  * 新增 Dashboard 中增加 TCP 流量监测功能
+  * 新增 Dashboard 页面中 TCP 流量监测功能
   * 新增 Prometheus 格式流量监测接口
     > 该服务会占用 `9191/tcp` 端口
     > 可以在系统设置中打开 `公开指标接口` 功能，以实现外部监控，该功能可能造成隐私泄露等安全风险，建议使用 Telegraf 等方案从本地收集数据
