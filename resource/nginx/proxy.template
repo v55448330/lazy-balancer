@@ -1,6 +1,9 @@
 
 {%- if not proxy.to_domain_toggle %}
 upstream {{ proxy.config_id | lower }} {
+    {%- if proxy.backend_dynamic_domain %}
+    dynamic_resolve fallback=stale fail_timeout=30s;
+    {%- else %}
     {%- if proxy.balancer_type == "ip_hash" %}
     consistent_hash $remote_addr;
     #consistent_hash $request_uri;
@@ -9,8 +12,6 @@ upstream {{ proxy.config_id | lower }} {
     vnswrr;
     {%- endif %}
     {%- endif %}
-    {%- if proxy.backend_dynamic_domain %}
-    dynamic_resolve fallback=stale fail_timeout=30s;
     {%- endif %}
     {%- for server in upstream %}
     server {{ server.address }}:{{ server.port }} weight={{ server.weight }};

@@ -18,11 +18,11 @@
     > 该服务会占用 `9191/tcp` 端口
     > 可以在系统设置中打开 `公开指标接口` 功能，以实现外部监控，该功能可能造成隐私泄露等安全风险，建议使用 Telegraf 等方案从本地收集数据
     > 
-    > 上游服务器健康状态（HTTP/TCP）`<BASE_URL>/up_status?format=[prometheus|json|html]`
+    > 上游服务器健康状态（HTTP/TCP）`<BASE_URL>:9191/up_status?format=[prometheus|json|html]`
     >
-    > 流量统计（HTTP）`<BASE_URL>/req_status_http/format/[prometheus|json|html]/`
+    > 流量统计（HTTP）`<BASE_URL>:9191/req_status_http/format/[prometheus|json|html]/`
     >
-    > 流量统计（TCP）`<BASE_URL>/req_status_tcp/format/[prometheus|json|html]/`
+    > 流量统计（TCP）`<BASE_URL>:9191/req_status_tcp/format/[prometheus|json|html]/`
 * 优化 因插件功能冲突，动态域名解析功能，由原 [ngx_upstream_jdomain](https://github.com/nicholaschiasson/ngx_upstream_jdomain) 模块更换为 Tengine 自带 [ngx_http_upstream_dynamic](https://tengine.taobao.org/document_cn/http_upstream_dynamic_cn.html) 模块
   > 因 `ngx_http_upstream_dynamic` 模块和主动健康检测模块及负载均衡算法实现冲突，开启动态域名解析功能后，需要由 DNS 实现负载均衡及健康检测
 * 优化 暂时精简 LuaJIT 环境
