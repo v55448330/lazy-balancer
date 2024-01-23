@@ -83,9 +83,9 @@ http {
     # Status Settings
     ##
 
-    geoip_country /usr/share/GeoIP/GeoIP.dat;
+    #geoip_country /usr/share/GeoIP/GeoIP.dat;
     vhost_traffic_status_zone shared:vhost_traffic_status:128m;
-    vhost_traffic_status_filter_by_set_key $geoip_country_code country::*;
+    #vhost_traffic_status_filter_by_set_key $geoip_country_code country::*;
 
     stream_server_traffic_status_zone;
     
@@ -165,9 +165,9 @@ http {
 
 stream {
 
-    geoip_country /usr/share/GeoIP/GeoIP.dat;
+    #geoip_country /usr/share/GeoIP/GeoIP.dat;
     server_traffic_status_zone;
-    server_traffic_status_filter_by_set_key $geoip_country_code country::*;
+    #server_traffic_status_filter_by_set_key $geoip_country_code country::*;
 
     log_format proxy '$remote_addr [$time_local] '
         '$protocol $status $bytes_sent $bytes_received '
