@@ -1,12 +1,13 @@
 ##
-# Config ID : {{ config_id }}
+# Config ID : {{ main.config_id }}
 ##
 user www-data;
-{%- if worker_processes == 0 %}
+{%- if main.worker_processes == 0 %}
 worker_processes auto;
 {%- else %}
-worker_processes {{ worker_processes }};
+worker_processes {{ main.worker_processes }};
 {%- endif %}
+worker_rlimit_nofile 100000;
 worker_cpu_affinity auto;
 pid /run/nginx.pid;
 daemon off;
@@ -15,7 +16,7 @@ events {
     use epoll;
     # multi_accept off;
     # reuse_port on;
-    worker_connections {{ worker_connections }};
+    worker_connections {{ main.worker_connections }};
     multi_accept on;
 }
 
@@ -34,11 +35,11 @@ http {
     server_info off;
     server_tag off;
 
-    keepalive_timeout {{ keepalive_timeout }};
+    keepalive_timeout {{ main.keepalive_timeout }};
     types_hash_max_size 2048;
     server_names_hash_bucket_size 512;
-    client_max_body_size {{ client_max_body_size }}m;
-    {%- if ignore_invalid_headers %}
+    client_max_body_size {{ main.client_max_body_size }}m;
+    {%- if main.ignore_invalid_headers %}
     underscores_in_headers  on;
     ignore_invalid_headers  on;
     {%- endif %}
@@ -53,8 +54,8 @@ http {
     # access_log /dev/stdout;
     # error_log /dev/stdout;
 
-    access_log {{ access_log }};
-    error_log {{ error_log }};
+    access_log {{ main.access_log }};
+    error_log {{ main.error_log }};
 
     ##
     # SSL
@@ -82,25 +83,47 @@ http {
     # Status Settings
     ##
 
-    req_status_zone server "$host,$server_addr:$server_port" 32M;
-    #req_status_zone_add_indicator server $limit;
+    geoip_country /usr/share/GeoIP/GeoIP.dat;
+    vhost_traffic_status_zone shared:vhost_traffic_status:128m;
+    vhost_traffic_status_filter_by_set_key $geoip_country_code country::*;
+
+    stream_server_traffic_status_zone;
+    
 
     server {
-        listen 80;
+        listen 9191;
         server_name 127.0.0.1;
+
+        location / {
+            return 444;
+        }
 
         location /up_status {
             healthcheck_status json;
+            {%- if not system.public_metric %}
             allow 127.0.0.1;
             deny all;
+            {%- endif %}
         }
 
-        location /req_status {
-            req_status_show;
-            #req_status_show_field req_total $limit;
+        location /req_status_http {
+            vhost_traffic_status_display;
+            vhost_traffic_status_display_format json;
+            {%- if not system.public_metric %}
             allow 127.0.0.1;
             deny all;
+            {%- endif %}
         }
+
+        location /req_status_tcp {
+            stream_server_traffic_status_display;
+            stream_server_traffic_status_display_format json;
+            {%- if not system.public_metric %}
+            allow 127.0.0.1;
+            deny all;
+            {%- endif %}
+        }
+
     }
 
     server {
@@ -134,8 +157,6 @@ http {
     ##
 
     include /etc/nginx/conf.d/*-http.conf;
-
-    lua_package_path '/usr/local/lib/lua/?.lua;;';
 }
 
 ##
@@ -143,6 +164,11 @@ http {
 ##
 
 stream {
+
+    geoip_country /usr/share/GeoIP/GeoIP.dat;
+    server_traffic_status_zone;
+    server_traffic_status_filter_by_set_key $geoip_country_code country::*;
+
     log_format proxy '$remote_addr [$time_local] '
         '$protocol $status $bytes_sent $bytes_received '
         '$session_time "$upstream_addr" '

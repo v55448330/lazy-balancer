@@ -3,6 +3,7 @@ from subprocess import check_output, CalledProcessError
 from django.conf import settings
 from proxy.models import proxy_config, upstream_config
 from main.models import main_config
+from settings.models import system_settings
 import subprocess
 import platform
 import os
@@ -92,7 +93,8 @@ def reload_config(scope="main", force=0, skip_gen=0):
         # config_default_path = "/etc/nginx/conf.d/default.conf"
         # os.remove(config_nginx_path)
         m_config = main_config.objects.all()[0].__dict__
-        write_config(config_nginx_path,build_main_config(m_config))
+        s_config = system_settings.objects.all()[0].__dict__
+        write_config(config_nginx_path,build_main_config({"main": m_config, "system": s_config}))
 
         test_ret = test_config()
         if test_ret['status'] != 0:
@@ -225,8 +227,24 @@ def post_request(url, headers={}):
         resp = None
     return resp
 
+def delete_vts_zone():
+    _ret = True
+    try:
+        url_http = 'http://127.0.0.1:9191/req_status_http/control?cmd=delete&group=*'
+        resp = post_request(url_http)
+        if not resp.json().get('processingReturn', False):
+            _ret = False
+
+        url_tcp = 'http://127.0.0.1:9191/req_status_tcp/control?cmd=delete&group=*'
+        resp = post_request(url_tcp)
+        if not resp.json().get('processingReturn', False):
+            _ret = False
+    except:
+        _ret = False
+    return _ret
+
 def get_proxy_upstream_status():
-    url = "http://127.0.0.1/up_status?format=json"
+    url = "http://127.0.0.1:9191/up_status?format=json"
     resp = post_request(url)
     _ret = []
     if resp:
@@ -242,14 +260,45 @@ def get_proxy_upstream_status():
     return _ret
 
 def get_req_status():
-    url = "http://127.0.0.1/req_status"
-    resp = post_request(url)
-    req_status = ''
-    if resp:
-        req_status = resp.text
     ret = []
-    for req in req_status.split('\n'):
-        r = req.split(',')
-        if r[0] != "":
-            ret.append(r)
+    try:
+        ## Req Status for HTTP
+        url = "http://127.0.0.1:9191/req_status_http/format/json"
+        resp = post_request(url).json()
+        if resp:
+            req_http = resp.get('serverZones',{})
+            for zone, req in req_http.items():
+                if zone != "*" and zone != "127.0.0.1" and zone != "_":
+                    server_zone = { 
+                        'zone': 'HTTP:' + zone,
+                        'connectCounter': req.get('requestCounter', 0),
+                        'inBytes': req.get('inBytes', 0),
+                        'outBytes': req.get('outBytes', 0),
+                        'responses': req.get('responses', {})
+                    }
+                    ret.append(server_zone)
+
+        ## Req Status for TCP
+        url = "http://127.0.0.1:9191/req_status_tcp/format/json"
+        resp = post_request(url).json()
+        if resp:
+            req_tcp = resp.get('streamServerZones',{})
+            for zone, req in req_tcp.items():
+                if zone != "*" and zone != "127.0.0.1" and zone != "_":
+                    server_zone = { 
+                        'zone': zone, 
+                        'connectCounter': req.get('connectCounter', 0),
+                        'inBytes': req.get('inBytes', 0),
+                        'outBytes': req.get('outBytes', 0),
+                        'responses': req.get('responses', {})
+                        
+                    }
+                    ret.append(server_zone)
+        
+        if ret:
+            ret = sorted(ret, key=lambda item: item['connectCounter'], reverse=True)
+                
+    except Exception as e:
+        logger.error(str(e))
+
     return ret

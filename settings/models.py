@@ -10,6 +10,7 @@ class system_settings(models.Model):
     config_sync_interval = models.IntegerField(null=False, default=60)
     config_sync_scope = models.IntegerField(null=True)
     num_per_page = models.IntegerField(null=False, default=10)
+    public_metric = models.BooleanField(null=False, default=False)
 
     class Meta:
        db_table = 't_settings'
@@ -23,6 +24,10 @@ class system_settings(models.Model):
 
     def update_num_per_page(self, num_per_page):
         self.num_per_page = num_per_page
+        self.save()
+
+    def update_public_metric(self, public_metric):
+        self.public_metric = public_metric
         self.save()
 
 

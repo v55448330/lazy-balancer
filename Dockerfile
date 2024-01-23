@@ -1,8 +1,7 @@
 FROM python:3.9-alpine
 
 ENV TENGINE_VERSION 3.1.0
-ENV LAZYBALANCER_VERSION v1.3.7beta
-ENV LUAJIT_VERSION v2.1-20231006
+ENV LAZYBALANCER_VERSION v1.3.8beta
 
 COPY . /app/lazy_balancer
 
@@ -12,7 +11,6 @@ RUN set -x \
     && apkArch="$(cat /etc/apk/arch)" \
     && tempDir="$(mktemp -d)" && cd ${tempDir} \
     && chown nobody:nobody ${tempDir} \
-    && apk add --no-cache pcre libxml2 libxslt libgd libgcc \
     && apk add --no-cache --virtual .build-deps \
                 git \
                 tzdata \
@@ -36,27 +34,20 @@ RUN set -x \
                 findutils \
                 python3-dev \
                 libffi-dev \
+                libgcc \
+                jemalloc-dev \
+                libgd \
+                libxslt \
+                libxml2 \
+                pcre \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && python3 -m pip install --upgrade pip \
-    && curl -fsSL https://github.com/openresty/luajit2/archive/${LUAJIT_VERSION}.tar.gz -o luajit.tar.gz \
-    && tar zxf luajit.tar.gz -C ${tempDir} \
-    && cd ${tempDir}/luajit2-${LUAJIT_VERSION#v} \
-    && make && make install \
-    && export LUAJIT_INC=/usr/local/include/luajit-2.1 \
-    && export LUAJIT_LIB=/usr/local/lib \
-    && ln -sf luajit /usr/local/bin/luajit \
-    && curl -fsSL https://github.com/openresty/lua-resty-core/archive/refs/tags/v0.1.27.tar.gz -o lua-resty-core.tar.gz \
-    && tar -zxf lua-resty-core.tar.gz -C ${tempDir} && cd ${tempDir}/lua-resty-core-0.1.27 \
-    && make install \
-    && curl -fsSL https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v0.13.tar.gz -o lua-resty-lrucache.tar.gz \
-    && tar -zxf lua-resty-lrucache.tar.gz -C /${tempDir} && cd ${tempDir}/lua-resty-lrucache-0.13 \
-    && make install \
-    && curl -fsSL https://github.com/nicholaschiasson/ngx_upstream_jdomain/archive/refs/tags/1.4.0.tar.gz -o ${tempDir}/ngx_upstream_jdomain.tar.gz \
-    && tar -zxf ${tempDir}/ngx_upstream_jdomain.tar.gz -C ${tempDir} \
+    && curl -fsSL https://github.com/alibaba/tengine/archive/${TENGINE_VERSION}.tar.gz -o /tmp/tengine.tar.gz \
     && git clone https://github.com/zhouchangxun/ngx_healthcheck_module.git ${tempDir}/ngx_healthcheck_module \
-    && curl -fsSL https://github.com/alibaba/tengine/archive/${TENGINE_VERSION}.tar.gz -o tengine.tar.gz \
-    && tar zxf tengine.tar.gz -C ${tempDir} \
-    && cd ${tempDir}/tengine-${TENGINE_VERSION} \
+    && git clone https://github.com/vozlt/nginx-module-vts.git ${tempDir}/nginx-module-vts \
+    && git clone https://github.com/vozlt/nginx-module-sts.git ${tempDir}/nginx-module-sts \
+    && git clone https://github.com/vozlt/nginx-module-stream-sts.git ${tempDir}/nginx-module-stream-sts \
+    && tar -zxf /tmp/tengine.tar.gz -C /tmp && cd /tmp/tengine-${TENGINE_VERSION} \
     && patch -p1 < ${tempDir}/ngx_healthcheck_module/nginx_healthcheck_for_tengine_2.3+.patch \
     && ./configure --user=www-data --group=www-data \
             --prefix=/etc/nginx --sbin-path=/usr/sbin \
@@ -68,7 +59,6 @@ RUN set -x \
             --with-threads \
             --with-http_ssl_module \
             --with-http_sub_module \
-            --with-http_stub_status_module \
             --with-http_gunzip_module \
             --with-http_gzip_static_module \
             --with-http_realip_module \
@@ -82,20 +72,17 @@ RUN set -x \
             --with-http_auth_request_module \
             --with-http_addition_module \
             --with-http_v2_module \
-            --add-module=./modules/ngx_http_upstream_session_sticky_module \
-            --add-module=./modules/ngx_http_upstream_consistent_hash_module \
-            --add-module=./modules/ngx_http_user_agent_module \
-            --add-module=./modules/ngx_http_proxy_connect_module \
-            --add-module=./modules/ngx_http_concat_module \
-            --add-module=./modules/ngx_http_footer_filter_module \
-            --add-module=./modules/ngx_http_sysguard_module \
-            --add-module=./modules/ngx_http_slice_module \
-            --add-module=./modules/ngx_http_lua_module \
-            --add-module=./modules/ngx_http_reqstat_module \
-            --add-module=${tempDir}/ngx_upstream_jdomain-1.4.0 \
-            --add-module=${tempDir}/ngx_healthcheck_module \
-            --with-http_geoip_module=dynamic \
+            --with-http_geoip_module \
+            --with-stream_geoip_module \
             --with-stream \
+            --with-jemalloc \
+            --add-module=./modules/ngx_http_upstream_vnswrr_module \
+            --add-module=./modules/ngx_http_upstream_dynamic_module \
+            --add-module=./modules/ngx_http_upstream_consistent_hash_module \
+            --add-module=${tempDir}/nginx-module-vts \
+            --add-module=${tempDir}/nginx-module-sts \
+            --add-module=${tempDir}/nginx-module-stream-sts \
+            --add-module=${tempDir}/ngx_healthcheck_module \
     && make && make install \
     && mkdir -p /app/lazy_balancer/db \
     && cd /app/lazy_balancer \
@@ -106,9 +93,18 @@ RUN set -x \
     && rm -rf db/* \
     && rm -rf env \
     && pip3 --no-cache-dir install -r requirements.txt \
+    && runDeps="$( \
+        scanelf --needed --nobanner /usr/sbin/nginx \
+            | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+            | sort -u \
+            | xargs -r apk info --installed \
+            | sort -u \
+    )" \
+    && apk add --no-cache --virtual .nginx-rundeps ${runDeps} \
+    && apk add --no-cache gettext \
     && apk del .build-deps \
     && rm -rf ${tempDir} \
-    && rm -rf /usr/local/lib/python3.8/config-3.8-x86_64-linux-gnu/ \
+    && rm -rf /usr/local/lib/python3.9/config-3.9-x86_64-linux-gnu/ \
     && chown -R www-data:www-data /app \
     && echo -e '#!/bin/ash\nsupervisorctl -c /app/lazy_balancer/service/supervisord.conf' > /usr/bin/sc \
     && chmod +x /usr/bin/sc
@@ -118,5 +114,3 @@ WORKDIR /app/lazy_balancer
 EXPOSE 8000
 
 CMD [ "supervisord", "-c", "/app/lazy_balancer/service/supervisord_docker.conf" ]
-
-

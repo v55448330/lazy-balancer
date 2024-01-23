@@ -106,6 +106,7 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">请求统计</h3>
+                <button type="button" class="btn btn-primary btn-sm pull-right" onclick="reset_req_status()">重置统计缓存</button>
             </div>
             <div class="box-body">
                 <div class="col-sm-12">
@@ -113,9 +114,9 @@
                         <thead>
                             <tr role="row">
                                 <th class="sorting" rowspan="1" colspan="1">站点</th>
-                                <th class="sorting" rowspan="1" colspan="1">已处理流量(MB)</th>
-                                <th class="sorting" rowspan="1" colspan="1">已处理连接</th>
-                                <th class="sorting" rowspan="1" colspan="1">已处理请求</th>
+                                <th class="sorting" rowspan="1" colspan="1">总连接数</th>
+                                <th class="sorting" rowspan="1" colspan="1">流量统计</th>
+                                <th class="sorting" rowspan="1" colspan="1">HTTP 1xx</th>
                                 <th class="sorting" rowspan="1" colspan="1">HTTP 2xx</th>
                                 <th class="sorting" rowspan="1" colspan="1">HTTP 3xx</th>
                                 <th class="sorting" rowspan="1" colspan="1">HTTP 4xx</th>
@@ -270,6 +271,27 @@ function add_data(_init, _conn_total, _conn_establish, _conn_timewait) {
     connection_chart.setOption(_option)
 }
 
+function reset_req_status() {
+    if (confirm("确认要清空流量统计缓存？")) {
+        jQuery.ajax({
+            type: 'get',
+            url: '/dashboard/resetreq/',
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    alert('流量缓存已清空！')
+                    top.location = '/dashboard/'
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('操作失败！')
+                }
+            }
+        })
+    }
+}
+
 function get_status_info() {
     jQuery.ajax({
         type: 'post',
@@ -312,9 +334,9 @@ function get_status_info() {
                     for (var f in p.context.reqstatus) {
                         var req = p.context.reqstatus[f]
                         var req_td = "<tr>"
-                        req_td += "<td>" + req.req_url + " / " + req.req_ip + "</td><td><small>in</small> " + (req.bytes_in / 1024 / 1024).toFixed(4) + " / <small>out</small> " + (req.bytes_out / 1024 / 1024).toFixed(4) + "</td>"
-                        req_td += "<td>" + req.conn_total + "</td><td>" + req.req_total + "</td><td>" + req.http_2xx + "</td>"
-                        req_td += "<td>" + req.http_3xx + "</td><td>" + req.http_4xx + "</td><td>" + req.http_5xx + "</td></tr>"
+                        req_td += "<td>" + req.zone + "</td><td>" + req.connectCounter + "</td>"
+                        req_td += "<td><small>in</small> " + (req.inBytes / 1024 / 1024).toFixed(2) + " MB / <small>out</small> " + (req.outBytes / 1024 / 1024).toFixed(2) + " MB</td>"
+                        req_td += "<td>" + req.responses['1xx'] + "</td><td>" + req.responses['2xx'] + "</td><td>" + req.responses['3xx']  + "</td><td>" + req.responses['4xx']  + "</td><td>" + req.responses['5xx'] + "</td></tr>"
                         $('#tb_request_count_body').append(req_td)
                     }
                 }

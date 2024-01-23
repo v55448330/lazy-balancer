@@ -52,16 +52,27 @@ def save_other_settings(request):
             post = json.loads(request.body.decode('utf-8'))
             if (post):
                 s_config = system_settings.objects.all()[0]
+                content = {"flag": "Error"}
                 if "num_per_page" in post:
                     num_per_page = post['num_per_page']
                     if num_per_page.isdigit():
                         num_per_page = int(num_per_page)
                         if num_per_page >= 10 and num_per_page <= 100:
                             s_config.update_num_per_page(num_per_page)
-                            content = {"flag": "Success"}
-                            return HttpResponse(json.dumps(content))
+                else:
+                    content = {"flag": "Error", "context": "InputFormatError"}
+                    return HttpResponse(json.dumps(content))
 
-                content = {"flag": "Error", "context": "InputFormatError"}
+                if "public_metric" in post:
+                    s_config.update_public_metric(True)
+                    reload_config("main", 1)
+                else:
+                    s_config.update_public_metric(False)
+                    reload_config("main", 1)
+
+                content = {"flag": "Success"}
+                return HttpResponse(json.dumps(content))
+
             else:
                 content = {"flag": "Error", "context": "InputFormatError"}
         except Exception as e:

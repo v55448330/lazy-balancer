@@ -113,23 +113,8 @@ def GetReqStatus(request):
     """
     if request.method == 'GET':
         req_status = get_req_status()
-        r_stat = []
-        for r in req_status:
-            rs = {
-                'req_url' : r[0],
-                'req_ip' : r[1],
-                'bytes_in' : r[2],
-                'bytes_out' : r[3],
-                'conn_total' : r[4],
-                'req_total' : r[5],
-                'http_2xx' : r[6],
-                'http_3xx' : r[7],
-                'http_4xx' : r[8],
-                'http_5xx' : r[9]
-            }
-            r_stat.append(rs)
         data = {
-            'sys_req': r_stat
+            'sys_req': req_status
         }
         return Response(data, status=status.HTTP_200_OK)
 

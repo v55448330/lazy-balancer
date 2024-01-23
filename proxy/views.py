@@ -244,7 +244,7 @@ def save(request):
         
         balancer_type = ""
 
-        if proxy_name and listen and len(post['upstream_list']) and proxy_protocol and not listen=="8000":
+        if proxy_name and listen and len(post['upstream_list']) and proxy_protocol and not listen=="8000" and not listen=="9191":
             create_flag = False
             p_config = proxy_config.objects.filter(config_id=config_id)
             if config_id == "0":
@@ -295,6 +295,7 @@ def save(request):
                 backend_protocol = "tcp"
                 port_list = list(proxy_config.objects.values_list('listen', flat=True).iterator())
                 port_list.append(8000)
+                port_list.append(9191)
 
                 if len(p_config):
                     if p_config[0].listen == int(listen):

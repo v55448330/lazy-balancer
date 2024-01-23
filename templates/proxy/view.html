@@ -287,7 +287,7 @@
                         <div class="tab-pane" id="tab_proxy_config">
                             <form class="form-horizontal" id="form_upstram_config">
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">* IP_HASH</label>
+                                    <label class="col-sm-2 control-label">* 一致性 HASH</label>
                                     <div class="col-sm-9">
                                         <div class="checkbox">
                                             <label>
@@ -318,11 +318,11 @@
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label class="col-sm-2 control-label">* 后端动态解析</label>
+                                    <label class="col-sm-2 control-label">* 域名动态解析</label>
                                     <div class="col-sm-9">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="backend_dynamic_domain" id="check_backend_dynamic_domain">
+                                                <input type="checkbox" name="backend_dynamic_domain" id="check_backend_dynamic_domain" onchange="check_form(this)">
                                                 启用后端动态域名解析
                                             </label>
                                         </div>
@@ -472,18 +472,18 @@
                                 <button type="button" class="btn btn-danger btn-xs"
                                     onclick="change_status('{{ server.pk }}',1)">禁用</button>
                             </td>
-                            {% endif %} {% if server.protocol and server.http_check and not server.to_domain_toggle %}
+                            {% endif %} {% if server.protocol and server.http_check and not server.to_domain_toggle and not server.backend_dynamic_domain %}
                             <td>
                                 <button type="button" title="{{ server.config_id }}" name="proxy_upstream_status" class="btn btn-xs"
                                     onclick="proxy_status('{{ server.pk }}',0)">HTTP</button>
                             </td>
-                            {% elif not server.http_check and not server.to_domain_toggle %}
+                            {% elif not server.http_check and not server.to_domain_toggle and not server.backend_dynamic_domain  %}
                             <td>
                                 <button type="button" title="{{ server.config_id }}" name="proxy_upstream_status" class="btn btn-xs" onclick="proxy_status('{{ server.pk }}',0)">TCP</button>
                             </td>
                             {% else %}
                             <td>
-                                <button type="button" class="btn btn-primary btn-xs" disabled>None</button>
+                                <button type="button" class="btn btn-primary btn-xs" disabled>NONE</button>
                             </td>
                             {% endif %}
                             <td>{{ server.update_time | timestamp_to_date }}</td>
@@ -603,15 +603,17 @@
             }
             return
         }
-        if ($(input).attr('name') == 'proxy_to_domain_toggle') {
+
+        if ($(input).attr('name') == 'backend_dynamic_domain') {
             if ($(input).prop('checked') == true) {
-                alert('您选择了启用直接域名代理，该方式将禁用后端节点配置功能，直接将流量转发至您指定的域名。')
-                change_to_domain(true)
-            } else {
-                change_to_domain(false)
+                alert(
+                    '您启用了后端域名动态解析功能，该功能会禁用健康检测及一致性 Hash 等功能，需要自行使用 DNS 实现健康检测。')
             }
+            change_ip_hash()
+            change_http_check()
             return
         }
+ 
         if ($(input).attr('name') == 'upstream_backend_domain_toggle') {
             if ($(input).prop('checked') == true) {
                 change_backend_domain(true)
@@ -627,6 +629,24 @@
             input_div.addClass('has-error')
         } else {
             input_div.addClass('has-success')
+        }
+    }
+
+    function change_http_check() {
+        if( $("#check_backend_dynamic_domain").prop('checked')) {
+            $("#check_upstream_http_check").prop('checked', false)
+            $("#check_upstream_http_check").attr('disabled', 'disabled')
+        } else {
+            $("#check_upstream_http_check").removeAttr('disabled')
+        }
+    }
+
+    function change_ip_hash() {
+        if( $("#check_backend_dynamic_domain").prop('checked')) {
+            $("#check_upstream_ip_hash").prop('checked', false)
+            $("#check_upstream_ip_hash").attr('disabled', 'disabled')
+        } else {
+            $("#check_upstream_ip_hash").removeAttr('disabled')
         }
     }
 
@@ -679,7 +699,6 @@
             $("#check_proxy_gzip").removeAttr('disabled');
             $("#check_ssl_status").removeAttr('disabled');
             $("#check_upstream_backend_protocol").removeAttr('disabled');
-            $("#check_proxy_to_domain_toggle").removeAttr('disabled');
             $("#check_backend_domain_toggle").removeAttr('disabled');
             $("#check_backend_dynamic_domain").removeAttr('disabled');
             $("#a_add_upstream").removeAttr('disabled');
@@ -699,8 +718,6 @@
             $("#check_ssl_status").attr('disabled', 'disabled');
             $("#check_upstream_backend_protocol").prop('checked', false);
             $("#check_upstream_backend_protocol").attr('disabled', 'disabled');
-            $("#check_proxy_to_domain_toggle").prop('checked', false);
-            $("#check_proxy_to_domain_toggle").attr('disabled', 'disabled');
             $("#check_backend_domain_toggle").attr('disabled', 'disabled');
             $("#check_backend_dynamic_domain").prop('checked', false);
             $("#check_backend_dynamic_domain").attr('disabled', 'disabled');
@@ -860,6 +877,8 @@
                             change_proxy_protocol('tcp')
                         }
                         check_balancer_ssl()
+                        change_ip_hash()
+                        change_http_check()
                         $('#edit_balancer').modal('show')
                     } else if (p.flag == "Error" && p.context == "AuthFailed") {
                         alert('认证失败！请重新登录！')

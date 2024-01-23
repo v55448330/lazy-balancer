@@ -11,6 +11,21 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
+## 更新（2024-01-23）
+* 新增 [nginx-module-vts](https://github.com/vozlt/nginx-module-vts) 模块，实现更完善的流量监测能力
+  * 新增 Dashboard 中增加 TCP 流量监测功能
+  * 新增 Prometheus 格式流量监测接口
+    > 该服务会占用 `9191/tcp` 端口
+    > 可以在系统设置中打开 `公开指标接口` 功能，以实现外部监控，该功能可能造成隐私泄露等安全风险，建议使用 Telegraf 等方案从本地收集数据
+    > 上游服务器健康状态（HTTP/TCP）`<BASE_URL>/up_status?format=[prometheus|json|html]`
+    > 流量统计（HTTP）`<BASE_URL>/req_status_http/format/[prometheus|json|html]/`
+    > 流量统计（TCP）`<BASE_URL>/req_status_tcp/format/[prometheus|json|html]/`
+* 优化 因插件功能冲突，动态域名解析功能，由原 [ngx_upstream_jdomain](https://github.com/nicholaschiasson/ngx_upstream_jdomain) 模块更换为 Tengine 自带 [ngx_http_upstream_dynamic](https://tengine.taobao.org/document_cn/http_upstream_dynamic_cn.html) 模块
+  > 因 `ngx_http_upstream_dynamic` 模块和主动健康检测模块及负载均衡算法实现冲突，开启动态域名解析功能后，需要由 DNS 实现负载均衡及健康检测
+* 优化 暂时精简 LuaJIT 环境
+* 优化 引入 [jemalloc](https://jemalloc.net/) 进行内存管理优化
+* 优化 默认使用 [VNSWRR](https://tengine.taobao.org/document_cn/ngx_http_upstream_vnswrr_module_cn.html) 算法替代 NGINX 负载均衡算法
+
 ## 更新（2023-12-03）
 * 更新 Python 到 3.9
 * 更新 Tengine 到 3.1.0

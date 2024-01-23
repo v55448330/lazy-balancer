@@ -187,7 +187,7 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h4 class="box-title">其他配置<small></small></h4>
+                <h4 class="box-title">其它配置<small></small></h4>
             </div>
             <div class="box-body">
                 <form class="form-horizontal" id="form_other_settings">
@@ -201,6 +201,20 @@
                                 </div>
                                 <div class="input-group-addon">
                                     <span><b>条</b></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">指标接口</label>
+                        <div class="col-sm-4">
+                            <div class="input-group">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="public_metric" 
+                                            id="check_public_metric">
+                                        允许公开访问
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -326,7 +340,7 @@
                                 alert('认证失败！请重新登录！')
                                 top.location = '/login/'
                             } else {
-                                alert('修改错误！其他错误：' + p.context)
+                                alert('修改错误！其它错误：' + p.context)
                             }
                         },
                         error: function (e) {
@@ -375,11 +389,15 @@
             }
         }
         function save_settings() {
+            var post_data = $('#form_other_settings').serializeObject()
+            if ("public_metric" in post_data) {
+                alert("开放指标接口有可能导致潜在的隐私泄露或安全风险，请谨慎操作！")
+            }
             if (confirm("确认保存这样的配置？")) {
                 jQuery.ajax({
                     type: 'post',
                     url: '/settings/save_other_settings/',
-                    data: JSON.stringify($('#form_other_settings').serializeObject()),
+                    data: JSON.stringify(post_data),
                     dataType: 'json',
                     success: function (p) {
                         if (p.flag == "Success") {
@@ -391,7 +409,7 @@
                             alert('认证失败！请重新登录！')
                             top.location = '/login/'
                         } else {
-                            alert('修改错误！其他错误：' + p.context)
+                            alert('修改错误！其它错误：' + p.context)
                         }
                     },
                     error: function (e) {
@@ -413,7 +431,7 @@
                                 alert("重置成功！请重新创建管理员账号！")
                                 top.location = '/logout/'
                             } else {
-                                alert('重置失败！其他错误：' + p.context)
+                                alert('重置失败！其它错误：' + p.context)
                             }
                         },
                         error: function (e) {
@@ -439,7 +457,7 @@
                                     alert('认证失败！请重新登录！')
                                     top.location = '/login/'
                                 } else {
-                                    alert('修改错误！其他错误：' + p.context)
+                                    alert('修改错误！其它错误：' + p.context)
                                 }
                             },
                             error: function (e) {
@@ -475,8 +493,9 @@
         {% if settings.num_per_page %}
         $('#input_num_per_page').val("{{ settings.num_per_page }}")
         {% endif %}
-
-
+        {% if settings.public_metric %}
+        $('#check_public_metric').prop("checked",true);
+        {% endif %}
 
     </script>
     {% endblock %}

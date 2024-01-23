@@ -19,26 +19,20 @@ def view(request):
 @is_auth
 def get_status_info(request):
     req_status = get_req_status()
-    r_stat = []
-    for r in req_status:
-        rs = {
-            'req_url' : r[0],
-            'req_ip' : r[1],
-            'bytes_in' : r[2],
-            'bytes_out' : r[3],
-            'conn_total' : r[4],
-            'req_total' : r[5],
-            'http_2xx' : r[6],
-            'http_3xx' : r[7],
-            'http_4xx' : r[8],
-            'http_5xx' : r[9]
-        }
-        r_stat.append(rs)
     context = {
         'flag':"Success",
         'context':{
             "sysstatus" : get_sys_status(),
-            "reqstatus" : r_stat
+            "reqstatus" : req_status
         }
     }
+    return HttpResponse(json.dumps(context))
+
+@is_auth
+def reset_req_status(request):
+    resp = delete_vts_zone()
+    if resp: 
+        context = {'flag':"Success"}
+    else:
+        context = {'flag':"Error"}
     return HttpResponse(json.dumps(context))

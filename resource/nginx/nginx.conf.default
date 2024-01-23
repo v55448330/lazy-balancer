@@ -53,11 +53,11 @@ http {
     # Status Settings
     ##
 
-    req_status_zone server "$host,$server_addr:$server_port" 32M;
-    #req_status_zone_add_indicator server $limit;
+    vhost_traffic_status_zone;
+    stream_server_traffic_status_zone;
 
     server {
-        listen 80 default;
+        listen 80;
         server_name 127.0.0.1;
 
         location / {
@@ -69,19 +69,46 @@ http {
             allow 127.0.0.1;
             deny all;
         }
-        location /req_status {
-            req_status_show;
-            #req_status_show_field req_total $limit;
+
+        location /req_status_http {
+            vhost_traffic_status_display;
+            vhost_traffic_status_display_format json;
             allow 127.0.0.1;
             deny all;
         }
+
+        location /req_status_tcp {
+            stream_server_traffic_status_display;
+            stream_server_traffic_status_display_format json;
+            allow 127.0.0.1;
+            deny all;
+        }
+
     }
+
 
     ##
     # Virtual Host Configs
     ##
 
     include /etc/nginx/conf.d/*.conf;
-    lua_package_path '/usr/local/lib/lua/?.lua;;';
 
+}
+
+##
+# TCP Virtual Host Configs
+##
+
+stream {
+
+    geoip_country /usr/share/GeoIP/GeoIP.dat;
+    server_traffic_status_zone;
+    server_traffic_status_filter_by_set_key $geoip_country_code country::*;
+
+    log_format proxy '$remote_addr [$time_local] '
+        '$protocol $status $bytes_sent $bytes_received '
+        '$session_time "$upstream_addr" '
+        '"$upstream_bytes_sent" "$upstream_bytes_received" "$upstream_connect_time"';
+
+    include /etc/nginx/conf.d/*-tcp.conf;
 }

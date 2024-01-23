@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from lazy_balancer.views import is_auth
 from main.models import main_config
+from settings.models import system_settings
 from nginx.views import *
 import json
 import uuid
@@ -73,8 +74,10 @@ def save(request):
                 'error_log' : error_log,
                 'update_time' : time.time()
             }
+
+            s_config = system_settings.objects.all()[0].__dict__
             #print m_config
-            config_context = build_main_config(m_config)
+            config_context = build_main_config({"main":m_config, "system": s_config})
             write_config(config_path,config_context)
 
             test_ret = test_config()
