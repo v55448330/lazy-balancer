@@ -208,13 +208,26 @@ def get_sys_info():
             if nic != "lo":
                 nic_info.append({'nic':nic,'address':addrs[0].address})
     uname = platform.uname()
+    uptime = 0
+    try:
+        url = "http://127.0.0.1:9191/req_status_http/format/json"
+        resp = post_request(url).json()
+        if resp:
+            load_msec = resp.get('loadMsec', 0)
+            now_msec = resp.get('nowMsec', 0)
+            if load_msec and now_msec:
+                uptime = now_msec - load_msec
+    except Exception as e:
+        logger.error(str(e))
+        
     sysinfo = {
         'nic' : nic_info,
         'platform' : {
             'node' : uname[1],
             'system' : uname[0],
             'release' : uname[2],
-            'processor' : uname[4]
+            'processor' : uname[4],
+            'uptime': uptime
         },
         'nginx' : run_shell('nginx -v')['output'].replace('\nnginx version: ','(').split(':')[1].strip() + ")"
     }

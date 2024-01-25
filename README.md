@@ -13,6 +13,8 @@
 
 ## 更新（2024-01-23）
 * 新增 [nginx-module-vts](https://github.com/vozlt/nginx-module-vts) 模块，实现更完善的流量监测能力
+  * 新增 Dashboard 页面 Nginx 启动时间显示
+    > API 中同步增加字段，单位为 ms，可以自行转换
   * 新增 Dashboard 页面中 TCP 流量监测功能
   * 新增 Dashboard 页面中流量统计 MB/GB 单位自适应显示，单位超过 GB 会加粗显示
   * 新增 Prometheus 格式流量监测接口
