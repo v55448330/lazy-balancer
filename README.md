@@ -12,6 +12,7 @@
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
 ## 更新（2024-01-23）
+* 新增 Dashboard 页面 5 秒自动刷新所有数据
 * 新增 [nginx-module-vts](https://github.com/vozlt/nginx-module-vts) 模块，实现更完善的流量监测能力
   * 新增 Dashboard 页面 Nginx 启动时间显示
     > API 中同步增加字段，单位为 ms，可以自行转换

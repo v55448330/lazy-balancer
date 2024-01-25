@@ -12,25 +12,23 @@
                         <tbody>
                             <tr>
                                 <td class="pull-right"><strong>Nginx 版本</strong></td>
-                                <td>{{ sysinfo.nginx }} <span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span></td>
+                                <td><span id="sp_info_nginx"></span> <span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span></td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>主机名</strong></td>
-                                <td>{{ sysinfo.platform.node }}</td>
+                                <td><span id="sp_info_node"></span></td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>操作系统</strong></td>
-                                <td>{{ sysinfo.platform.system }} {{ sysinfo.platform.release }}</td>
+                                <td><span id="sp_info_system"></span> <span id="sp_info_release"></span></td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>系统架构</strong></td>
-                                <td>{{ sysinfo.platform.processor }} </td>
+                                <td><spam id="sp_info_processor"></span></td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>网络信息</strong></td>
-                                <td>
-                                    {% for nic in sysinfo.nic %}
-                                    <small>{{ nic.nic }}</small> {{ nic.address }} {% endfor %}
+                                <td id="td_info_nic">
                                 </td>
                             </tr>
                         </tbody>
@@ -292,8 +290,8 @@ function reset_req_status() {
     }
 }
 
-function get_uptime() {
-    var uptime_ms = {{ sysinfo.platform.uptime }};
+function get_uptime(uptime_ms) {
+    var uptime_ms = uptime_ms;
     if (uptime_ms != 0 ) {
         var seconds = Math.floor(uptime_ms/ 1000);
         var minutes = Math.floor(seconds / 60);
@@ -342,6 +340,17 @@ function get_status_info() {
                     $('#sp_nginx_status').text('已停止')
                 }
 
+                get_uptime(p.context.sysinfo.platform.uptime)
+
+                $('#sp_info_nginx').text(p.context.sysinfo.nginx)
+                $('#sp_info_node').text(p.context.sysinfo.platform.node)
+                $('#sp_info_system').text(p.context.sysinfo.platform.system)
+                $('#sp_info_release').text(p.context.sysinfo.platform.release)
+                $('#sp_info_processor').text(p.context.sysinfo.platform.processor)
+                $('#td_info_nic').empty()
+                for (var f in p.context.sysinfo.nic) {
+                    $('#td_info_nic').append("<small>" + p.context.sysinfo.nic[f].nic + "</small> " + p.context.sysinfo.nic[f].address + " ")
+                }
 
                 if (!p.context.sysstatus.nginx_config_status) {
                     $('#sp_nginx_config_status').removeClass()
@@ -394,7 +403,6 @@ for (var i = 1; i <= 12; i++) {
     add_data(true, 0, 0, 0);
 }
 get_status_info()
-get_uptime()
-window.setInterval(get_status_info, 10000);
+window.setInterval(get_status_info, 5000);
 </script>
 {% endblock %}

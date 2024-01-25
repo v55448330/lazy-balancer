@@ -9,12 +9,11 @@ import time
 
 @login_required(login_url="/login/")
 def view(request):
-    sysinfo = get_sys_info()
     user = {
         'name':request.user,
         'date':time.time()
     }
-    return render_to_response('dashboard/view.html',{'sysinfo' : sysinfo, 'user' : user})
+    return render_to_response('dashboard/view.html',{'user' : user})
 
 @is_auth
 def get_status_info(request):
@@ -23,7 +22,8 @@ def get_status_info(request):
         'flag':"Success",
         'context':{
             "sysstatus" : get_sys_status(),
-            "reqstatus" : req_status
+            "reqstatus" : get_req_status(),
+            "sysinfo": get_sys_info() 
         }
     }
     return HttpResponse(json.dumps(context))
