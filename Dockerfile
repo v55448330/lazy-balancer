@@ -11,7 +11,7 @@ RUN set -x \
     && apkArch="$(cat /etc/apk/arch)" \
     && tempDir="$(mktemp -d)" && cd ${tempDir} \
     && chown nobody:nobody ${tempDir} \
-    && apk add --no-cache --virtual .build-deps \
+    && apk add --no-cache --virtual .build-deps curl \
                 git \
                 tzdata \
                 gcc \
