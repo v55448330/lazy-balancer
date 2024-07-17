@@ -66,7 +66,8 @@ sudo cp -f resource/nginx/default.* /etc/nginx/
 sudo pip3 install pip --upgrade
 sudo pip3 install -r requirements.txt --upgrade
 
-sudo cp -v db/db.sqlite3.init db/db.sqlite3
+sudo mkdir -p db
+sudo cp -v db.sqlite3.init db/db.sqlite3
 sudo rm -rf */migrations/00*.py
 
 #sudo sed -i '/^exit 0/i supervisord -c /app/lazy_balancer/service/supervisord.conf' /etc/rc.local

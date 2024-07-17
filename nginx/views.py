@@ -284,7 +284,6 @@ def nginx_control(action):
         if action == "start":
             _ret = server.supervisor.startProcess('nginx')
         elif action == "stop":
-            logger.info(action + "test")
             _ret = server.supervisor.stopProcess('nginx')
         
     except Exception as e:

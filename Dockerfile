@@ -85,7 +85,7 @@ RUN set -x \
             --add-module=${tempDir}/ngx_healthcheck_module \
     && make && make install \
     && cd /app/lazy_balancer \
-    && cp -v db/db.sqlite3.init db/db.sqlite3.db \
+    && cp -v db/db.sqlite3.init db/db.sqlite3 \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && cp -f resource/nginx/default.* /etc/nginx/ \
@@ -112,4 +112,4 @@ WORKDIR /app/lazy_balancer
 
 EXPOSE 8000
 
-CMD [ "supervisord", "-c", "/app/lazy_balancer/service/supervisord_docker.conf" ]
+CMD [ "/bin/ash", "-c", "/app/lazy_balancer/entrypoint.sh" ]
