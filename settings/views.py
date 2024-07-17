@@ -125,6 +125,7 @@ def save_sync(config):
                 s_config.config_sync_access_key = config.get('config_sync_access_key') 
                 s_config.config_sync_interval = sync_interval
                 s_config.config_sync_scope = bool(config.get('config_sync_scope', ''))
+                s_config.config_sync_faild = bool(config.get('config_sync_faild', False))
                 scheduler.add_job(sync, 'interval', seconds=sync_interval, name='sync', id='sync', replace_existing=True)
             else:
                 return False
@@ -356,6 +357,9 @@ def sync():
                 requests.post(master_url + "/api/settings/sync_ack/", params={"access_key": settings.config_sync_access_key}, data=json.dumps({"status": 3}), headers={'Content-Type': 'application/json'}, timeout=3)
                 logger.error('task ' + master_url + ' sync failed, get config error.')
                 sync_task.change_task_status(3)
+                if settings.config_sync_faild:
+                    nginx_control('stop') 
+                    logger.error('task ' + master_url + ' sync failed, service stoped.')
 
         except Exception as e:
             requests.post(master_url + "/api/settings/sync_ack/", params={"access_key": settings.config_sync_access_key}, data=json.dumps({"status": 3}), headers={'Content-Type': 'application/json'}, timeout=3)
@@ -363,6 +367,10 @@ def sync():
             sync_task = sync_status.objects.get(address=master_url)
             if sync_task:
                 sync_task.change_task_status(3)
+            
+            if settings.config_sync_faild:
+                nginx_control('stop')
+                logger.error('task ' + master_url + ' sync failed, service stoped.')
     else:
         logger.info('syncing configuration disabled.')
         DjangoJobStore().remove_all_jobs()

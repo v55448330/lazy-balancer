@@ -12,7 +12,7 @@
                         <tbody>
                             <tr>
                                 <td class="pull-right"><strong>Nginx 版本</strong></td>
-                                <td><span id="sp_info_nginx"></span> <span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span></td>
+                                <td><span id="sp_info_nginx"></span> <span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span> <button type="button" class="btn btn-xs btn-default" id="btn_nginx_control"></button></td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>主机名</strong></td>
@@ -323,6 +323,32 @@ function get_uptime(uptime_ms) {
     }
 }
 
+function nginx_control(action) {
+    if (action == 'start') { action_description = '启动' } else if ( action == 'stop' ) { action_description = '关闭' } else {return}
+    if (confirm("确认要" + action_description + "负载均衡器？")) {
+        $('#btn_nginx_control').text('正在' + action_description)
+        $('#btn_nginx_control').attr('disabled', true)
+        jQuery.ajax({
+            type: 'post',
+            url: '/dashboard/service/',
+            data: JSON.stringify({"action": action}),
+            dataType: 'json',
+            success: function(p) {
+                if (p.flag == "Success") {
+                    alert('操作成功！')
+                    top.location = '/dashboard/'
+                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                    alert('认证失败！请重新登录！')
+                    top.location = '/login/'
+                } else {
+                    alert('操作失败！')
+                    $('#btn_nginx_control').attr('disabled', false)
+                }
+            }
+        })
+    }
+}
+
 function get_status_info() {
     jQuery.ajax({
         type: 'post',
@@ -330,14 +356,19 @@ function get_status_info() {
         dataType: 'json',
         success: function(p) {
             if (p.flag == "Success") {
+                $('#btn_nginx_control').off('click')
                 if (p.context.sysstatus.nginx_status) {
                     $('#sp_nginx_status').removeClass()
                     $('#sp_nginx_status').addClass('label label-success')
                     $('#sp_nginx_status').text('运行中')
+                    $('#btn_nginx_control').text('关闭服务')
+                    $('#btn_nginx_control').click(function () {nginx_control('stop')})
                 } else {
                     $('#sp_nginx_status').removeClass()
                     $('#sp_nginx_status').addClass('label label-danger')
                     $('#sp_nginx_status').text('已停止')
+                    $('#btn_nginx_control').text('启动服务')
+                    $('#btn_nginx_control').click(function () {nginx_control('start')})
                 }
 
                 get_uptime(p.context.sysinfo.platform.uptime)

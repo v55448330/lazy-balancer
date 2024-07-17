@@ -138,6 +138,12 @@
                                         仅同步负载均衡配置
                                     </label>
                                 </div>
+                                <div class="checkbox">
+                                    <label class="col-sm-8">
+                                        <input type="checkbox" name="config_sync_faild" id="check_sync_faild">
+                                        同步失败停止服务
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -485,6 +491,9 @@
         $('#input_config_sync_interval_slave').val("{{ settings.config_sync_interval }}")
         {% if settings.config_sync_scope == 1 %}
         $('#check_sync_scope').prop("checked",true);
+        {% endif %}
+        {% if settings.config_sync_faild %}
+        $('#check_sync_faild').prop("checked",true);
         {% endif %}
         $('#radio_sync_slave').click() 
         {% else %}

@@ -164,7 +164,7 @@ def Config(request):
 
             if test_config()['status'] != 0:
                 content = {"flag":"Error", "context": "Master nginx config is bad"}
-                return Response(content, status.HTTP_200_OK)
+                return Response(content, status=status.HTTP_400_BAD_REQUEST)
             
             config = get_config(scope)
             if config:

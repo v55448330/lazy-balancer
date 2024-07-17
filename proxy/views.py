@@ -295,6 +295,7 @@ def save(request):
                 backend_protocol = "tcp"
                 port_list = list(proxy_config.objects.values_list('listen', flat=True).iterator())
                 port_list.append(8000)
+                port_list.append(9001)
                 port_list.append(9191)
 
                 if len(p_config):

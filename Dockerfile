@@ -84,13 +84,12 @@ RUN set -x \
             --add-module=${tempDir}/nginx-module-stream-sts \
             --add-module=${tempDir}/ngx_healthcheck_module \
     && make && make install \
-    && mkdir -p /app/lazy_balancer/db \
     && cd /app/lazy_balancer \
+    && cp -v db/db.sqlite3.init db/db.sqlite3.db \
     && mkdir -p /etc/nginx/conf.d \
     && cp -f resource/nginx/nginx.conf.default /etc/nginx/nginx.conf \
     && cp -f resource/nginx/default.* /etc/nginx/ \
     && rm -rf */migrations/00*.py \
-    && rm -rf db/* \
     && rm -rf env \
     && pip3 --no-cache-dir install -r requirements.txt \
     && runDeps="$( \

@@ -9,6 +9,7 @@ class system_settings(models.Model):
     config_sync_master_url = models.CharField(max_length=64, null=True)
     config_sync_interval = models.IntegerField(null=False, default=60)
     config_sync_scope = models.IntegerField(null=True)
+    config_sync_faild = models.BooleanField(null=False, default=False)
     num_per_page = models.IntegerField(null=False, default=10)
     public_metric = models.BooleanField(null=False, default=False)
 

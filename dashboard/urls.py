@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^$', views.view),
     url(r'^getinfo/$', views.get_status_info),
     url(r'^resetreq/$', views.reset_req_status),
+    url(r'^service/$', views.service),
     #url(r'^/(?P<action>.*)$', views.action),
 ]

@@ -17,7 +17,6 @@ def view(request):
 
 @is_auth
 def get_status_info(request):
-    req_status = get_req_status()
     context = {
         'flag':"Success",
         'context':{
@@ -27,6 +26,25 @@ def get_status_info(request):
         }
     }
     return HttpResponse(json.dumps(context))
+
+@is_auth
+def service(request):
+    if request.method == 'POST':
+        try:
+            post = json.loads(request.body.decode('utf-8'))
+            action = post.get('action')
+            if action in ('start', 'stop'):
+                if nginx_control(action):
+                    context = {'flag':"Success"}
+
+        except Exception as e:
+            context = {"flag": "Error", "context": str(e)}
+
+    else:
+        context = {"flag": "Error", "context": "method is denied"}
+
+    return HttpResponse(json.dumps(context))
+
 
 @is_auth
 def reset_req_status(request):

@@ -4,6 +4,7 @@ from django.conf import settings
 from proxy.models import proxy_config, upstream_config
 from main.models import main_config
 from settings.models import system_settings
+import xmlrpc.client
 import subprocess
 import platform
 import os
@@ -147,10 +148,14 @@ def get_sys_status():
         if nginx_pid_status:
             nginx_status = True
 
-        nginx_config_status = not bool(test_config()['status'])
     except CalledProcessError:
         nginx_status = False
-
+    
+    try:
+        nginx_config_status = not bool(test_config()['status'])
+    except CalledProcessError:
+        nginx_config_status = False
+    
     conn_ESTABLISHED = 0
     conn_CLOSE_WAIT = 0
     conn_LISTEN = 0
@@ -270,6 +275,21 @@ def get_proxy_upstream_status():
         else:
             _ret = []
         
+    return _ret
+
+def nginx_control(action):
+    _ret = False
+    try:
+        server = xmlrpc.client.ServerProxy('http://127.0.0.1:9001/RPC2')
+        if action == "start":
+            _ret = server.supervisor.startProcess('nginx')
+        elif action == "stop":
+            logger.info(action + "test")
+            _ret = server.supervisor.stopProcess('nginx')
+        
+    except Exception as e:
+        logger.error(str(e))
+
     return _ret
 
 def get_req_status():

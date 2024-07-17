@@ -43,6 +43,7 @@ http {
     underscores_in_headers  on;
     ignore_invalid_headers  on;
     {%- endif %}
+    resolver_timeout 5s;
 
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
@@ -100,7 +101,6 @@ http {
 
         location /up_status {
             healthcheck_status json;
-            {%- if not system.public_metric %}
             allow 127.0.0.1;
             deny all;
             {%- endif %}
