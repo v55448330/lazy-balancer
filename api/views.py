@@ -159,12 +159,13 @@ def Config(request):
         ```
     """
     if request.method == 'GET':
-        if test_config()['status'] != 0:
-            content = {"flag":"Error", "context": "Master nginx config is bad"}
-            return Response(content, status.HTTP_200_OK)
-
         try:
             scope = int(request.query_params.get('scope', 2))
+
+            if test_config()['status'] != 0:
+                content = {"flag":"Error", "context": "Master nginx config is bad"}
+                return Response(content, status.HTTP_200_OK)
+            
             config = get_config(scope)
             if config:
                 content = {"flag":"Success", "context": config}
