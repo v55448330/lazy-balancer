@@ -11,7 +11,7 @@ from proxy.models import proxy_config
 from settings.models import system_settings, sync_status
 from settings.views import save_sync, get_config, import_config
 from django_filters import rest_framework as filters
-from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_upstream_status
+from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_upstream_status, test_config
 from datetime import datetime
 import logging
 
@@ -161,6 +161,11 @@ def Config(request):
     if request.method == 'GET':
         try:
             scope = int(request.query_params.get('scope', 2))
+
+            if test_config()['status'] != 0:
+                content = {"flag":"Error", "context": "Master nginx config is bad"}
+                return Response(content, status.HTTP_200_OK)
+            
             config = get_config(scope)
             if config:
                 content = {"flag":"Success", "context": config}
