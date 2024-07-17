@@ -158,13 +158,11 @@ def Config(request):
         2 - system/main/proxy/upstream config
         ```
     """
-    test_ret = test_config()
-    if test_ret['status'] != 0:
-        logger.error(test_ret['output'])
-        content = {"flag":"Error", "context": "Master nginx config is bad"}
-        return Response(content, status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
     if request.method == 'GET':
+        if test_config()['status'] != 0:
+            content = {"flag":"Error", "context": "Master nginx config is bad"}
+            return Response(content, status.HTTP_200_OK)
+
         try:
             scope = int(request.query_params.get('scope', 2))
             config = get_config(scope)
