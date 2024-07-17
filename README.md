@@ -139,7 +139,7 @@
 * 编译镜像
   
   ```
-  docker build -t <lazy-balancer>:<v1.3.8beta>
+  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.3.9beta> .
   ```
   
   > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
@@ -152,14 +152,7 @@
     --log-opt max-file=3 \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.3.8beta> or v55448330/lazy-balancer:latest
-  ```
-
-* 初始化数据库
-  
-  ```
-  docker exec lazy_balancer python manage.py makemigrations --noinput 2>/dev/null
-  docker exec lazy_balancer python manage.py migrate --run-syncdb
+    <lazy-balancer>:<v1.3.9beta> or v55448330/lazy-balancer:latest
   ```
   
   ### 主机
@@ -168,33 +161,26 @@
 
 > 部署方式参照 `deploy.sh` 脚本
 
-* 初始化数据库
-  
-  ```
-  python manage.py makemigrations --noinput 2>/dev/null
-  python manage.py migrate --run-syncdb 
-  ```
 * 启动服务
   
   ```
   supervisord -c /app/lazy_balancer/service/supervisord_docker.conf
   ```
 
-or
-
-supervisorctl start webui
-supervisorctl start nginx
-
-```
+  or
+    ```
+    supervisorctl start webui
+    supervisorctl start nginx
+    ```
+  
 * 登录系统
-```
-
-http://[IP]:8000/  
-
-```
-> 首次登陆会要求创建管理员用户，如需修改，可在系统配置中重置管理员用户
+  ```
+  http://[IP]:8000/  
+  ```
+  > 首次登陆会要求创建管理员用户，如需修改，可在系统配置中重置管理员用户
 
 ## 演示
+
 ![image](readme_img/1.jpg)
 ![image](readme_img/2.png)
 ![image](readme_img/3.jpg)
