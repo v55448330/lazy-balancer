@@ -106,6 +106,7 @@ def save_sync(config):
             s_config.config_sync_scope = None
             DjangoJobStore().remove_all_jobs()
             scheduler.remove_all_jobs()
+            sync_status.objects.all().delete()
         elif int(config.get('config_sync_type')) == 1:
             if not s_config.access_key:
                 s_config.update_access_key()
@@ -336,6 +337,9 @@ def sync():
             if r.status_code != 200:
                 logger.error('master [' + master_url + '], sync service is disabled or stop')
                 sync_task.change_task_status(3)
+                if settings.config_sync_faild:
+                    nginx_control('stop') 
+                    logger.error('task ' + master_url + ' sync failed, service stoped.')
                 return False
             if bool(settings.config_sync_scope):
                 logger.info('get config from ' + master_url + ', scope is only proxy')
