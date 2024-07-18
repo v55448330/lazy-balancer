@@ -11,6 +11,7 @@ from proxy.models import proxy_config
 from settings.models import system_settings, sync_status
 from settings.views import save_sync, get_config, import_config
 from django_filters import rest_framework as filters
+from django.core.serializers import serialize
 from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_upstream_status, test_config
 from datetime import datetime
 import logging
@@ -192,6 +193,40 @@ def get_ip(meta):
     else:
         ip = meta.get('REMOTE_ADDR')
     return ip
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated|APIKeyPermission])
+def GetSyncStatus(request):
+    """
+    ## 获取同步状态及配置
+    - GET: 获取当前节点同步状态及配置
+    `sync_scope` 定义见 `/settings/config/` API
+    `sync_faild` `[True, False]` 为 `True` 时，同步失败自动停止服务，同步任务不会停止
+    `sync_status` 同步状态列表
+        ```
+        update_date - 同步操作完成时间
+        address - 主节点/从节点地址
+        status - 同步状态码
+            1 - 正在同步
+            2 - 同步完成
+            3 - 同步失败
+        ```
+
+    """
+    if request.method == 'GET':
+        sync_settings = system_settings.objects.last()
+        data = {}
+        if sync_settings:
+            sync_type = sync_settings.config_sync_type
+            data = {'sync_type': sync_type}
+            if sync_type != 0:
+                if sync_type == 2:
+                    data['sync_master_url'] = sync_settings.config_sync_master_url
+                    data['sync_interval'] = sync_settings.config_sync_interval 
+                    data['sync_scope'] = sync_settings.config_sync_scope
+                    data['sync_faild'] = sync_settings.config_sync_faild
+                data['sync_status'] = list(sync_status.objects.all().values())
+        return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated|APIKeyPermission])

@@ -29,5 +29,6 @@ urlpatterns = [
     url(r'^settings/update_accesskey/$', UpdateAccessKey),
     url(r'^settings/config/$', Config),
     url(r'^settings/sync_ack/$', SyncAck),
+    url(r'^settings/sync_status/$', GetSyncStatus),
     url(r'^test/$', TestSetView),
 ]
