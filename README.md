@@ -140,7 +140,7 @@
 * 编译镜像
   
   ```
-  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.3.9beta> .
+  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.3.9.1beta> .
   ```
   
   > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
@@ -153,7 +153,7 @@
     --log-opt max-file=3 \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.3.9beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.3.9.1beta> or v55448330/lazy-balancer:latest
   ```
   
   ### 主机
