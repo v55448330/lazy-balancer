@@ -100,8 +100,8 @@ http {
         }
 
         location /up_status {
-            {%- if not system.public_metric %}
             healthcheck_status json;
+            {%- if not system.public_metric %}
             allow 127.0.0.1;
             deny all;
             {%- endif %}
