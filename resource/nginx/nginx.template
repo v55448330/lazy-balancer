@@ -55,6 +55,14 @@ http {
     # access_log /dev/stdout;
     # error_log /dev/stdout;
 
+    {%- if main.http_log_format %}
+    log_format main {{ main.http_log_format | safe }};
+    {%- else %}
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    {%- endif %}
+
     access_log {{ main.access_log }};
     error_log {{ main.error_log }};
 
@@ -170,10 +178,15 @@ stream {
     server_traffic_status_zone shared:stream_server_traffic_status:128m;
     #server_traffic_status_filter_by_set_key $geoip_country_code country::*;
 
-    log_format proxy '$remote_addr [$time_local] '
+    {%- if main.stream_log_format %}
+    log_format main {{ main.stream_log_format | safe }};
+
+    {%- else %}
+    log_format main '$remote_addr [$time_local] '
         '$protocol $status $bytes_sent $bytes_received '
         '$session_time "$upstream_addr" '
         '"$upstream_bytes_sent" "$upstream_bytes_received" "$upstream_connect_time"';
+    {%- endif %}
 
     include /etc/nginx/conf.d/*-tcp.conf;
 }

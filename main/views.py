@@ -10,7 +10,7 @@ from nginx.views import *
 import json
 import uuid
 import time
-import os
+import html
 
 @login_required(login_url="/login/")
 def view(request):
@@ -36,8 +36,6 @@ def save(request):
     try:
         post = json.loads(request.body.decode('utf-8'))
 
-        # print post
-
         if 'auto_worker_processes' in post:
             worker_processes = "0"
         else:
@@ -50,6 +48,8 @@ def save(request):
             ignore_invalid_headers = True
         else:
             ignore_invalid_headers = False
+        http_log_format = post.get('http_log_format')
+        stream_log_format = post.get('stream_log_format')
         access_log = post.get('access_log')
         error_log = post.get('error_log')
 
@@ -70,14 +70,16 @@ def save(request):
                 'keepalive_timeout' : int(keepalive_timeout),
                 'client_max_body_size' : int(client_max_body_size),
                 'ignore_invalid_headers' : ignore_invalid_headers,
+                'http_log_format': http_log_format.strip().replace('\r\n', '\n').rstrip(';'),
+                'stream_log_format': stream_log_format.strip().replace('\r\n', '\n').rstrip(';'),
                 'access_log' : access_log,
                 'error_log' : error_log,
                 'update_time' : time.time()
             }
 
             s_config = system_settings.objects.all()[0].__dict__
-            #print m_config
             config_context = build_main_config({"main":m_config, "system": s_config})
+            print(config_context)
             write_config(config_path,config_context)
 
             test_ret = test_config()

@@ -11,6 +11,13 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
+## 更新（2024-10-30）
+
+* 新增 全局配置中支持自定义日志格式
+* 优化 新增部分功能提示信息
+
+> 本次更新涉及数据库变动，无法直接升级，请备份配置后，删除数据库并重新还原配置
+
 ## 更新（2024-07-18）
 
 * 优化 修改 DNS 解析超时时间为 5 秒，防止域名解析慢导致的 Nginx 启动失败
@@ -141,7 +148,7 @@
 * 编译镜像
   
   ```
-  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.3.9.1beta> .
+  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.4.0beta> .
   ```
   
   > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
@@ -154,7 +161,7 @@
     --log-opt max-file=3 \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.3.9.1beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.4.0beta> or v55448330/lazy-balancer:latest
   ```
   
   ### 主机

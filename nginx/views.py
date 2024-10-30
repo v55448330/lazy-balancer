@@ -42,6 +42,7 @@ def build_main_config(config):
     return template.render(config)
 
 def build_proxy_config(config):
+
     config_id = config.get('proxy').get('config_id')
     clean_file("/etc/nginx/conf.d/" + config_id + "-http.conf")
     clean_file("/etc/nginx/conf.d/" + config_id + "-tcp.conf")

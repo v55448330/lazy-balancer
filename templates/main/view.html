@@ -74,6 +74,29 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label class="col-sm-2 control-label">* HTTP 日志格式</label>
+                        <div class="col-sm-4">
+                            <div id="div_http_log_format" class="" style="height:150px;width:100%">
+                            </div>
+                            <!--<textarea class="form-control" rows="7" name="http_log_format" id="input_http_log_format" placeholder="HTTP 请求日志格式定义，请输入日志格式正文，不了解请留空。"></textarea>
+                        -->
+                            <span class="control-label pull-right">
+                            <small><a href="https://nginx.org/en/docs/http/ngx_http_log_module.html?#log_format">参考文档</a></small>
+                            </span>
+                        </div>
+
+                        <label class="col-sm-1 control-label">* TCP 日志格式</label>
+                        <div class="col-sm-4">
+                            <div id="div_stream_log_format" class="" style="height:150px;width:100%">
+                            </div>
+                            <!--<textarea class="form-control" rows="7" name="stream_log_format" id="input_stream_log_format" placeholder="TCP 请求日志格式定义，请输入日志格式正文，不了解请留空。"></textarea>
+                        -->
+                            <span class="control-label pull-right">
+                            <small><a href="https://nginx.org/en/docs/stream/ngx_stream_log_module.html#log_format">参考文档</a></small>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label class="col-sm-2 control-label">访问日志</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="access_log" id="input_access_log" placeholder="全局请求日志路径" value="{{ main_config.access_log }}">
@@ -83,6 +106,13 @@
                         <label class="col-sm-2 control-label">错误日志</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="error_log" id="input_error_log" placeholder="全局错误日志路径" value="{{ main_config.error_log }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <span class="control-label pull-right">
+                                <small>Nginx 全局配置（* 为可选项）</small>
+                            </span>
                         </div>
                     </div>
 
@@ -111,6 +141,27 @@
     //input filter
     $("[data-mask]").inputmask();
 
+    var http_log_format_editor = ace.edit('div_http_log_format');
+    var stream_log_format_editor = ace.edit('div_stream_log_format');
+    var http_log_format_body = `{{ main_config.http_log_format | safe }}`
+    var stream_log_format_body = `{{ main_config.stream_log_format | safe }}`
+
+    $(document).ready(function(){
+        http_log_format_editor.setOptions({
+            mode: 'ace/mode/nginx',
+            placeholder: "HTTP 请求日志格式定义，请输入日志格式正文，无需输入 NGINX 关键字，不了解请留空。",
+        })
+        http_log_format_editor.setValue(http_log_format_body, -1);
+        http_log_format_editor.setHighlightActiveLine(false);
+        http_log_format_editor.setHighlightGutterLine(true);
+
+        stream_log_format_editor.setOptions({
+            mode: 'ace/mode/nginx',
+            placeholder: "TCP 请求日志格式定义，请输入日志格式正文，无需输入 NGINX 关键字，不了解请留空。",
+        })
+        stream_log_format_editor.setValue(stream_log_format_body, -1);
+        stream_log_format_editor.setHighlightActiveLine(false);
+    })
 
     function check_auto_process() {
         if ($('#check_worker_processes')[0].checked == true) {
@@ -144,10 +195,12 @@
 
     function save_config() {
         if (confirm("确认要保存这样的配置？")) {
+            var http_log_format = http_log_format_editor.getValue()
+            var stream_log_format = stream_log_format_editor.getValue()
             jQuery.ajax({
                 type: 'post',
                 url: '/main/save/',
-                data: JSON.stringify($('#form_main_config').serializeObject()),
+                data: JSON.stringify(Object.assign({},$('#form_main_config').serializeObject(), {'http_log_format': http_log_format, 'stream_log_format': stream_log_format})),
                 dataType: 'json',
                 success: function(p) {
                     if (p.flag == "Success") {

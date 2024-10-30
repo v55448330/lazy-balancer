@@ -8,6 +8,8 @@ class main_config(models.Model):
     keepalive_timeout = models.IntegerField(null=False)
     client_max_body_size = models.IntegerField(null=False)
     ignore_invalid_headers = models.BooleanField(default=False)
+    http_log_format = models.TextField(null=True)
+    stream_log_format = models.TextField(null=True)
     access_log = models.CharField(max_length=128,null=True)
     error_log = models.CharField(max_length=128,null=True)
     update_time = models.FloatField(null=False)

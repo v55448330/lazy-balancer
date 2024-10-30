@@ -69,10 +69,10 @@
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab_access_log">
-                            <textarea id="tail_access" class="form-control" rows="20" readonly="readonly"></textarea>
+                            <textarea id="tail_access" class="form-control" rows="20" readonly="readonly" placeholder="请稍候 ..."></textarea>
                         </div>
                         <div class="tab-pane" id="tab_error_log">
-                            <textarea id="tail_error" class="form-control" rows="20" readonly="readonly"></textarea>
+                            <textarea id="tail_error" class="form-control" rows="20" readonly="readonly" placeholder="请稍候 ..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -854,7 +854,7 @@
                         } else {
                             $('#check_ssl_status').prop('checked', false)
                         }
-                        editor.setValue(p.context.proxy.custom_config)
+                        editor.setValue(p.context.proxy.custom_config, -1)
                         if (p.context.proxy.backend_protocol == "https") {
                             $('#check_upstream_backend_protocol').prop('checked', true)
                         }

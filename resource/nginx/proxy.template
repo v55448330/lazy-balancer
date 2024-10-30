@@ -72,12 +72,8 @@ server {
     {%- endif %}
     server_name {{ proxy.server_name }};
 
-    {%- if proxy.error_log %}
     error_log {{ proxy.error_log }};
-    {%- endif %}
-    {%- if proxy.access_log %}
-    access_log {{ proxy.access_log }};
-    {%- endif %}
+    access_log {{ proxy.access_log }} main;
 
     root /usr/share/nginx/html;
 
@@ -102,12 +98,8 @@ server {
     {%- endif %}
     server_name {{ proxy.server_name }};
 
-    {%- if proxy.error_log %}
     error_log {{ proxy.error_log }};
-    {%- endif %}
-    {%- if proxy.access_log %}
-    access_log {{ proxy.access_log }};
-    {%- endif %}
+    access_log {{ proxy.access_log }} main;
 
     root /usr/share/nginx/html;
 
@@ -175,9 +167,7 @@ server {
     proxy_connect_timeout 5s;
     proxy_timeout 1800s;
     proxy_pass {{ proxy.config_id | lower }};
-    {%- if proxy.access_log %}
-    access_log {{ proxy.access_log }} proxy;
-    {%- endif %}
+    access_log {{ proxy.access_log }} main;
 }
 {%- endif %}
 
