@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from rest_framework.permissions import IsAuthenticated
-from api.authentication import APIKeyPermission, IsAdminPermission
+from api.authentication import APIKeyPermission, IsAdminPermission, any_of 
 from rest_framework.decorators import action, permission_classes, authentication_classes, api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -29,7 +29,8 @@ class ProxySetView(viewsets.ReadOnlyModelViewSet):
     > `config_id:` 配置/配置文件 ID `[UUID]`
     > `server_name:` 规则绑定域名，支持模糊查询
     """
-    permission_classes = [IsAdminPermission|APIKeyPermission]
+    permission_classes = [any_of(APIKeyPermission, IsAdminPermission)]
+
     filter_backends = (filters.DjangoFilterBackend,)
     # filterset_fields = ('config_id',) 
     filterset_fields = {
@@ -133,7 +134,7 @@ class ProxySetView(viewsets.ReadOnlyModelViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated|APIKeyPermission])
+@permission_classes([any_of(IsAuthenticated,APIKeyPermission)])
 def GetSystemStatus(request):
     """
     ## 获取系统实时状态
@@ -147,7 +148,7 @@ def GetSystemStatus(request):
         return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated|APIKeyPermission])
+@permission_classes([any_of(IsAuthenticated,APIKeyPermission)])
 def GetReqStatus(request):
     """
     ## 获取系统请求统计
@@ -161,7 +162,7 @@ def GetReqStatus(request):
         return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@permission_classes([IsAdminPermission|APIKeyPermission])
+@permission_classes([any_of(IsAdminPermission, APIKeyPermission)])
 def UpdateAccessKey(request):
     """
     ## 更新 API Access Key
@@ -188,7 +189,7 @@ def UpdateAccessKey(request):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([IsAdminPermission|APIKeyPermission])
+@permission_classes([any_of(IsAdminPermission, APIKeyPermission)])
 def Config(request):
     """
     ## 获取配置文件
@@ -217,7 +218,6 @@ def Config(request):
         except Exception as e:
             content = {"flag": "Error", "context": str(e)}
     elif request.method == 'POST':
-        print('abc')
         try:
             post = request.data
             if import_config(post):
@@ -238,7 +238,7 @@ def get_ip(meta):
     return ip
 
 @api_view(['GET'])
-@permission_classes([IsAdminPermission|APIKeyPermission])
+@permission_classes([any_of(IsAdminPermission, APIKeyPermission)])
 def GetSyncStatus(request):
     """
     ## 获取同步状态及配置
@@ -272,7 +272,7 @@ def GetSyncStatus(request):
         return Response(data, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-@permission_classes([IsAdminPermission|APIKeyPermission])
+@permission_classes([any_of(APIKeyPermission, IsAdminPermission)])
 def SyncAck(request):
     """
     ## 配置同步状态通知

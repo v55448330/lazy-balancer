@@ -211,10 +211,7 @@
                     }
                 },
                 error: function(e) {
-                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    if (e.status == 403 ) {
                         alert('权限不足！')
                     } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ArgsError") {
                         alert('保存失败！配置项填写错误！')

@@ -917,11 +917,9 @@
                     }
                 },
                 error: function (e) {
-                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    if (e.status == 403) {
                         alert('权限不足！')
+                        top.location = '/proxy/'
                     } else {
                         alert('删除错误！' + e.responseJSON.context)
                     }
@@ -1090,11 +1088,9 @@
                 error: function (e) {
                     $("#btn_gen_config").text('重新应用配置')
                     $("#btn_gen_config").prop('disabled', false)
-                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    if (e.status == 403) {
                         alert('权限不足！')
+                        top.location = '/proxy/'
                     } else if (e.status == 400 && e.responseJSON.flag == "Error" ) {
                         alert("配置应用失败！请手动检查配置！")
                     } else {
@@ -1121,11 +1117,9 @@
                 error: function (e) {
                     $("#btn_gen_config").text('重新应用配置')
                     $("#btn_gen_config").prop('disabled', false)
-                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    if (e.status == 403) {
                         alert('权限不足！')
+                        top.location = '/proxy/'
                     } else if (e.status == 400 && e.responseJSON.flag == "Error" ) {
                         alert("配置重载失败！请手动检查配置！")
                     } else {
@@ -1161,11 +1155,9 @@
                     if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ConfigError") {
                         alert('变更失败！配置错误，规则已禁用！')
                         top.location = '/proxy/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    } else if (e.status == 403) {
                         alert('权限不足！')
+                        top.location = '/proxy/'
                     } else {
                         alert('变更错误！' + e.responseJSON.context)
                     }
@@ -1237,11 +1229,9 @@
                         alert('保存失败！请填写域名！')
                     } else if (e.status == 404 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ConfigIdnotFound") {
                         alert('保存失败！配置不存在！')
-                    } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    } else if (e.status == 403) {
                         alert('权限不足！')
+                        top.location = '/proxy/'
                     } else {
                         alert('保存错误！其他错误：' + e.responseJSON.context)
                     }
