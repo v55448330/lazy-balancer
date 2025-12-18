@@ -157,7 +157,6 @@
   
   ```
   nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.5.0beta> .
-  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.5.0beta> .
   ```
   
   > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
