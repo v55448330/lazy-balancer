@@ -13,12 +13,14 @@ from settings.views import save_sync, get_config, import_config
 from django_filters import rest_framework as filters
 from django.core.serializers import serialize
 from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_upstream_status, test_config, write_config, reload_config
+from nginx.views import get_sys_info, get_sys_status, get_req_status, get_proxy_upstream_status, test_config, write_config, reload_config
 from datetime import datetime
 import logging
 
 logger = logging.getLogger('django')
 
 class ProxySetView(viewsets.ReadOnlyModelViewSet):
+
 
     """
     ## 获取负载均衡规则
@@ -43,6 +45,46 @@ class ProxySetView(viewsets.ReadOnlyModelViewSet):
     queryset = proxy_config.objects.all().order_by('-pk')
     def get_serializer_class(self):
         return ProxySerializers
+
+    @action(methods=["POST"], detail=False)
+    def update_ssl_cert(self, request):
+        """
+        ## 更新负载均衡规则 SSL 证书 
+        - POST: 
+        > `config_id:` 负载均衡规则唯一 UUID
+        > `ssl_cert:` SSL 证书正文
+        > `ssl_key:` SSL 证书密钥正文 
+        > 以上参数均为必填项
+        """
+        try:
+            request_data = request.data
+            config_id = request_data.get('config_id', '')
+            if config_id:
+                p = proxy_config.objects.filter(config_id=config_id).filter(ssl=True).filter(status=True)
+                if p:
+                    ssl_cert = request_data.get('ssl_cert', '')
+                    ssl_key = request_data.get('ssl_key', '')
+                    if ssl_cert and ssl_key:
+                        if test_config()['status']:
+                            return Response("Nginx config file Error!", status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            cert_path = "/etc/nginx/conf.d/%s.crt" % config_id
+                            key_path = "/etc/nginx/conf.d/%s.key" % config_id
+                            write_config(cert_path, ssl_cert)
+                            write_config(key_path, ssl_key)
+                            if reload_config("proxy", 0, 1):
+                                p[0].update_cert(ssl_cert=ssl_cert, ssl_key=ssl_key)
+                            else:
+                                reload_config("proxy", 1, 0)
+                                return Response("SSL Certificate Error! Rollback...", status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        return Response("SSL Certificate Error!", status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response("Proxy Rule not Found", status=status.HTTP_404_NOT_FOUND)
+        except:
+            return Response("SSL Certificate Update failed!", status=status.HTTP_400_BAD_REQUEST)
+
+        return Response("Success", status.HTTP_200_OK)
 
     @action(methods=["POST"], detail=False)
     def update_ssl_cert(self, request):
@@ -188,6 +230,7 @@ def UpdateAccessKey(request):
             pass
 
 
+
 @api_view(['GET', 'POST'])
 @permission_classes([any_of(IsAdminPermission, APIKeyPermission)])
 def Config(request):
@@ -218,6 +261,7 @@ def Config(request):
         except Exception as e:
             content = {"flag": "Error", "context": str(e)}
     elif request.method == 'POST':
+        print('abc')
         try:
             post = request.data
             if import_config(post):

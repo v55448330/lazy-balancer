@@ -13,6 +13,7 @@
                             <tr>
                                 <td class="pull-right"><strong>Nginx 版本</strong></td>
                                 <td><span id="sp_info_nginx"></span><br/><span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span> {% if user.is_admin %}<button type="button" class="btn btn-xs btn-default" id="btn_nginx_control"></button>{% endif %}</td>
+                                <td><span id="sp_info_nginx"></span><br/><span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span> {% if user.is_admin %}<button type="button" class="btn btn-xs btn-default" id="btn_nginx_control"></button>{% endif %}</td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>主机名</strong></td>
@@ -346,7 +347,10 @@ function nginx_control(action) {
                     alert('权限不足！')
                 } else {
                     alert('请求错误！' + e.responseJSON.context)
+                    alert('请求错误！' + e.responseJSON.context)
                 }
+                $('#btn_nginx_control').attr('disabled', false)
+                top.location = '/dashboard/'
                 $('#btn_nginx_control').attr('disabled', false)
                 top.location = '/dashboard/'
             }
