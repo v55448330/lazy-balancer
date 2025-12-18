@@ -11,6 +11,12 @@
 - 码云 - http://git.oschina.net/v55448330/lazy-balancer
 - OSCHINA - http://www.oschina.net/p/nginx-balancer
 
+## 更新（2025-12-18）
+
+* 新增 证书更新接口，支持使用 allinssl 等工具 webhook 申请并自动更新证书
+* 新增 多用户，支持管理员/普通用户，普通用户只有只读权限
+* 优化 修了一些 Bug
+
 ## 更新（2024-10-31）
 
 * 新增 全局配置中支持自定义日志格式
@@ -149,7 +155,7 @@
 * 编译镜像
   
   ```
-  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.4.0beta> .
+  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.5.0beta> .
   ```
   
   > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
@@ -162,7 +168,7 @@
     --log-opt max-file=3 \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
-    <lazy-balancer>:<v1.4.0beta> or v55448330/lazy-balancer:latest
+    <lazy-balancer>:<v1.5.0beta> or v55448330/lazy-balancer:latest
   ```
   
   ### 主机

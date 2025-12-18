@@ -50,6 +50,16 @@ class proxy_config(models.Model):
 
     class Meta:
        db_table = 't_proxy_config'
+    
+    def update_cert(self, ssl_cert, ssl_key):
+        try:
+            crypto.load_certificate(crypto.FILETYPE_PEM, ssl_cert)
+            self.ssl_cert = ssl_cert
+            self.ssl_key = ssl_key
+            self.save(update_fields=['ssl_cert', 'ssl_key', 'update_time'])
+        except:
+            return False
+        return True
 
     def get_cert_status(self):
         # print(cert_file_path)

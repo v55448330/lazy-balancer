@@ -4,56 +4,12 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h4 class="box-title">管理员密码<small> 修改您的管理员密码</small></h4>
-            </div>
-            <div class="box-body">
-                <form class="form-horizontal" id="form_modify_pass">
-                    <div class="form-group">
-                        <label class="col-sm-1 control-label">原密码</label>
-                        <div class="col-sm-4">
-                            <div id="div_old_password">
-                                <input type="password" class="form-control" name="old_password" id="input_old_password"
-                                    placeholder="请输入当前密码" onblur="check_pass()">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-1 control-label">新密码</label>
-                        <div class="col-sm-4">
-                            <div id="div_new_password">
-                                <input type="password" class="form-control" name="new_password" id="input_new_password"
-                                    placeholder="请输入新密码" onblur="check_pass()">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-1 control-label">新密码</label>
-                        <div class="col-sm-4">
-                            <div id="div_verify_password">
-                                <input type="password" class="form-control" name="verify_password"
-                                    id="input_verify_password" placeholder="再次输入新密码" onblur="check_pass()">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="box-footer">
-                <button type="button" class="btn btn-primary" onclick="modify_pass(1)">重置管理员</button>
-                <button type="button" class="btn btn-primary" onclick="modify_pass(0)">修改密码</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-primary">
-            <div class="box-header with-border">
                 <h4 class="box-title">API 配置<small> 配置 API 访问</small></h4>
             </div>
             <div class="box-body">
                 <form class="form-horizontal">
                     <div class="form-group">
-                        <label class="col-sm-1 control-label">Access Key</label>
+                        <label class="col-sm-1 control-label">accesskey</label>
                         <div class="col-sm-4">
                             <input type="input" class="form-control" name="access_key"
                                 id="input_access_key" readonly>
@@ -237,8 +193,7 @@
 
     <script>
         //init page
-        $('#menu_system_config').addClass('active')
-        $('#menu_service').removeClass('active')
+        $('#menu_system_configuration').addClass('active')
         $('#page_header').text('系统配置')
         $('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
         $('#page_nav').text('系统配置')
@@ -256,11 +211,18 @@
                         if (p.flag == "Success") {
                             alert("保存成功!")
                             top.location = '/settings/'
-                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                        }
+                    },
+                    error: function (e) {
+                        if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
                             alert('认证失败！请重新登录！')
                             top.location = '/login/'
+                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                            alert('权限不足！')
+                        } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "InputFormatError") {
+                            alert('保存失败！请检查输入格式！')
                         } else {
-                            alert("保存失败!请检查参数！")
+                            alert('保存失败！' + e.responseJSON.context)
                         }
                     }
                 })
@@ -283,35 +245,20 @@
                         if (p.flag == "Success") {
                             alert("变更成功!")
                             top.location = '/settings/'
+                        } 
+                    },
+                    error: function (e) {
+                        if (e.status == 403 && e.responseJSON.detail == "AuthFailed") {
+                            alert('认证失败！请重新登录！')
+                            top.location = '/login/'
+                        } else if (e.status == 403 && e.responseJSON.detail == "PermissionDeny") {
+                            alert('权限不足！')
                         } else {
-                            alert("变更失败! " + p.msg)
+                            alert('请求失败！' + e.responseJSON.detail)
                         }
                     }
                 })
             }
-        }
-
-        function check_pass() {
-            var _old_pass = $('#input_old_password')[0]
-            var _new_pass = $('#input_new_password')[0]
-            var _verify_pass = $('#input_verify_password')[0]
-            _return = false
-            $(_new_pass.closest("div")).removeClass()
-            $(_verify_pass.closest("div")).removeClass()
-            if (_new_pass.value.length > 7 && _verify_pass.value.length > 7) {
-                if (_new_pass.value == _verify_pass.value) {
-                    $(_new_pass.closest("div")).toggleClass('has-success')
-                    $(_verify_pass.closest("div")).toggleClass('has-success')
-                    _return = true
-                } else {
-                    $(_new_pass.closest("div")).toggleClass('has-error')
-                    $(_verify_pass.closest("div")).toggleClass('has-error')
-                }
-            } else {
-                $(_new_pass.closest("div")).toggleClass('has-error')
-                $(_verify_pass.closest("div")).toggleClass('has-error')
-            }
-            return _return
         }
 
         function display_sync_form(sync_type) {
@@ -342,15 +289,17 @@
                                 saveAs(blob, "LazyBalancer.bak");
                                 alert("备份成功！")
                                 top.location = '/settings/'
-                            } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                                alert('认证失败！请重新登录！')
-                                top.location = '/login/'
-                            } else {
-                                alert('修改错误！其它错误：' + p.context)
                             }
                         },
                         error: function (e) {
-                            alert('请求失败!')
+                            if (e.status == 403 && e.responseJSON.detail == "AuthFailed") {
+                                alert('认证失败！请重新登录！')
+                                top.location = '/login/'
+                            } else if (e.status == 403 && e.responseJSON.detail == "PermissionDeny") {
+                                alert('权限不足！')
+                            } else {
+                                alert('请求失败！' + e.responseJSON.detail)
+                            }
                         }
                     })
                 }
@@ -373,9 +322,6 @@
                                 if (p.flag == "Success") {
                                     alert("还原完成！")
                                     top.location = '/settings/'
-                                } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                                    alert('认证失败！请重新登录！')
-                                    top.location = '/login/'
                                 } else {
                                     $('#import_config').val('')
                                     alert('还原失败！错误配置已回滚！')
@@ -385,7 +331,14 @@
                                 $('#import_config').val('')
                                 $("#btn_import_config").prop('disabled', false)
                                 $("#btn_import_config").text('还原')
-                                alert('请求失败!')
+                                if (e.status == 403 && e.responseJSON.detail == "AuthFailed") {
+                                    alert('认证失败！请重新登录！')
+                                    top.location = '/login/'
+                                } else if (e.status == 403 && e.responseJSON.detail == "PermissionDeny") {
+                                    alert('权限不足！')
+                                } else {
+                                    alert('请求失败！' + e.responseJSON.detail)
+                                }
                             }
                         })
                     }
@@ -409,71 +362,21 @@
                         if (p.flag == "Success") {
                             alert("保存成功！")
                             top.location = '/settings/'
-                        } else if (p.flag == "Error" && p.context == "InputFormatError") {
-                            alert('保存失败！请检查输入格式！')
-                        } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
-                        } else {
-                            alert('修改错误！其它错误：' + p.context)
                         }
                     },
                     error: function (e) {
-                        alert('请求失败!')
+                        if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                            alert('认证失败！请重新登录！')
+                            top.location = '/login/'
+                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                            alert('权限不足！')
+                        } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "InputFormatError") {
+                            alert('保存失败！请检查输入格式！')
+                        } else {
+                            alert('保存失败！' + e.responseJSON.context)
+                        }
                     }
                 })
-            }
-        }
-
-        function modify_pass(reset_admin) {
-            if (reset_admin == 1) {
-                if (confirm("确认要重置管理员？")) {
-                    jQuery.ajax({
-                        type: 'post',
-                        url: '/settings/admin/reset/',
-                        dataType: 'json',
-                        success: function (p) {
-                            if (p.flag == "Success") {
-                                alert("重置成功！请重新创建管理员账号！")
-                                top.location = '/logout/'
-                            } else {
-                                alert('重置失败！其它错误：' + p.context)
-                            }
-                        },
-                        error: function (e) {
-                            alert('请求失败!')
-                        }
-                    })
-                }
-            } else {
-                if (check_pass()) {
-                    if (confirm("确认要修改密码？")) {
-                        jQuery.ajax({
-                            type: 'post',
-                            url: '/settings/admin/modify/',
-                            data: JSON.stringify($('#form_modify_pass').serializeObject()),
-                            dataType: 'json',
-                            success: function (p) {
-                                if (p.flag == "Success") {
-                                    alert("修改成功！请重新登录！")
-                                    top.location = '/logout/'
-                                } else if (p.flag == "Error" && p.context == "VerifyFaild") {
-                                    alert('修改失败！密码验证失败！')
-                                } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                                    alert('认证失败！请重新登录！')
-                                    top.location = '/login/'
-                                } else {
-                                    alert('修改错误！其它错误：' + p.context)
-                                }
-                            },
-                            error: function (e) {
-                                alert('请求失败!')
-                            }
-                        })
-                    }
-                } else {
-                    alert('密码输入有误！')
-                }
             }
         }
 

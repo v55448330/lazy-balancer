@@ -39,9 +39,6 @@
     <!-- Inputmask -->
     <script src="{% static "plugins/input-mask/inputmask.min.js" %}"></script>
     <script src="{% static "plugins/FileSaver/FileSaver.min.js" %}"></script>
-    <script src="{% static "plugins/input-mask/jquery.inputmask.min.js" %}"></script>
-    <script src="{% static "plugins/input-mask/inputmask.extensions.min.js" %}"></script>
-    <script src="{% static "plugins/input-mask/inputmask.numeric.extensions.min.js" %}"></script>
 
     <script src="{% static "plugins/ace/ace.js" %}"></script>
     <script src="{% static "plugins/ace/mode-nginx.js" %}"></script>
@@ -79,15 +76,23 @@
                                 <!-- The user image in the navbar-->
                                 <img src="{% static "dist/img/user2-160x160.jpg" %}" class="user-image" alt="User Image">
                                 <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                                <span class="hidden-xs">{{ user.name }}</span>
+                                <span class="hidden-xs">{{ user.info.username }}</span>
                             </a>
                             <ul class="dropdown-menu">
                                 <!-- The user image in the menu -->
                                 <li class="user-header">
                                     <img src="{% static "dist/img/user2-160x160.jpg" %}" class="img-circle" alt="User Image">
                                     <p>
-                                        {{ user.name }}
-                                        <small>{{ user.date | timestamp_to_date }}</small>
+                                        {{ user.info.username }}
+                                        <small>{{ user.info.get_full_name }}
+                                        {% if user.is_admin %}
+                                        <td>
+                                        | 管理员
+                                        {% else %}
+                                        | 用户
+                                        {% endif %}
+                                        </small>
+                                        <small>{{ user.info.last_login | timestamp_to_date }}</small>
                                     </p>
                                 </li>
                                 <!-- Menu Footer-->
@@ -115,16 +120,28 @@
                     <li id="menu_dashboard"><a href="/dashboard/"><i class="fa fa-dashboard"></i> <span>服务状态</span></a></li>
                     <li id="menu_service" class="treeview active">
                         <a href="#"><i class="fa fa-server"></i> <span>服务管理</span>
-                    <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                </a>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
                         <ul class="treeview-menu">
                             <li id="menu_main_config"><a href="/main/">全局配置</a></li>
                             <li id="menu_proxy_config"><a href="/proxy/">负载均衡配置</a></li>
                         </ul>
                     </li>
-                    <li id="menu_system_config"><a href="/settings/"><i class="fa fa-cog"></i> <span>系统配置</span></a></li>
+                    {% if user.is_admin %}
+                    <li id="menu_system_config" class="treeview active">
+                        <a href="#"><i class="fa fa-wrench"></i> <span>系统配置</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li id="menu_system_configuration"><a href="/settings/">系统配置</a></li>
+                            <li id="menu_user_management"><a href="/users/">用户管理</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
                 </ul>
                 <!-- /.sidebar-menu -->
             </section>
