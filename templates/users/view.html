@@ -226,11 +226,9 @@
                     }
                 },
                 error: function (e) {
-                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    if (e.status == 403) {
                         alert('权限不足！')
+                        top.location = '/users/'
                     } else if (e.status == 404 && e.responseJSON.flag == "Error" && e.responseJSON.context == "UserNotFound") {
                         alert('用户不存在！')
                     } else {
@@ -262,13 +260,10 @@
                     if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ChangeDeny") {
                         alert('变更失败！禁止修改默认用户状态！')
                         top.location = '/users/'
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    } else if (e.status == 403) {
                         alert('权限不足！')
-                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
+                        top.location = '/users/'
                     } else {
-                        console.log(e)
                         alert('变更错误！' + e.responseJSON.context)
                     }
                 }
@@ -306,13 +301,11 @@
                         $("#btn_save_user").text('保存')
                         if (e.status == 404 && e.responseJSON.flag == "Error" && e.responseJSON.context == "UserNotFound") {
                             alert('保存失败！用户不存在！')
-                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
-                            alert('权限不足！')
                         } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ChangeGroupDeny") {
                             alert('保存失败！默认用户禁止修改权限！')
-                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
+                        } else if (e.status == 403) {
+                            alert('权限不足！')
+                            top.location = '/users/'
                         } else {
                             alert('保存错误！其他错误：' + e.responseJSON.context)
                         }

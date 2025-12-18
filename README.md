@@ -15,6 +15,7 @@
 
 * 新增 证书更新接口，支持使用 allinssl 等工具 webhook 申请并自动更新证书
 * 新增 多用户，支持管理员/普通用户，普通用户只有只读权限
+* 新增 用户同步功能，开启后可以同步主节点的用户信息，角色，密码等
 * 优化 修了一些 Bug
 
 ## 更新（2024-10-31）
@@ -156,6 +157,7 @@
   
   ```
   nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.5.0beta> .
+  nerdctl build --platform=arm64,amd64 -t <lazy-balancer>:<v1.5.0beta> .
   ```
   
   > 也可以 DockerHub `https://hub.docker.com/r/v55448330/lazy-balancer`
@@ -168,6 +170,7 @@
     --log-opt max-file=3 \
     -v <db_dir>:/app/lazy_balancer/db \
     -v <log_dir>:/var/log/nginx \
+    <lazy-balancer>:<v1.5.0beta> or v55448330/lazy-balancer:latest
     <lazy-balancer>:<v1.5.0beta> or v55448330/lazy-balancer:latest
   ```
   

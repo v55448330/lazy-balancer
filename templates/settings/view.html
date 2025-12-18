@@ -10,6 +10,7 @@
                 <form class="form-horizontal">
                     <div class="form-group">
                         <label class="col-sm-1 control-label">accesskey</label>
+                        <label class="col-sm-1 control-label">accesskey</label>
                         <div class="col-sm-4">
                             <input type="input" class="form-control" name="access_key"
                                 id="input_access_key" readonly>
@@ -194,6 +195,7 @@
     <script>
         //init page
         $('#menu_system_configuration').addClass('active')
+        $('#menu_system_configuration').addClass('active')
         $('#page_header').text('系统配置')
         $('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]')
         $('#page_nav').text('系统配置')
@@ -214,14 +216,13 @@
                         }
                     },
                     error: function (e) {
-                        if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
-                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        if (e.status == 403) {
                             alert('权限不足！')
+                            top.location = '/settings/'
                         } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "InputFormatError") {
                             alert('保存失败！请检查输入格式！')
                         } else {
+                            alert('保存失败！' + e.responseJSON.context)
                             alert('保存失败！' + e.responseJSON.context)
                         }
                     }
@@ -248,12 +249,11 @@
                         } 
                     },
                     error: function (e) {
-                        if (e.status == 403 && e.responseJSON.detail == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
-                        } else if (e.status == 403 && e.responseJSON.detail == "PermissionDeny") {
+                        if (e.status == 403) {
                             alert('权限不足！')
+                            top.location = '/settings/'
                         } else {
+                            alert('请求失败！' + e.responseJSON.detail)
                             alert('请求失败！' + e.responseJSON.detail)
                         }
                     }
@@ -292,11 +292,9 @@
                             }
                         },
                         error: function (e) {
-                            if (e.status == 403 && e.responseJSON.detail == "AuthFailed") {
-                                alert('认证失败！请重新登录！')
-                                top.location = '/login/'
-                            } else if (e.status == 403 && e.responseJSON.detail == "PermissionDeny") {
+                            if (e.status == 403) {
                                 alert('权限不足！')
+                                top.location = '/settings/'
                             } else {
                                 alert('请求失败！' + e.responseJSON.detail)
                             }
@@ -331,11 +329,9 @@
                                 $('#import_config').val('')
                                 $("#btn_import_config").prop('disabled', false)
                                 $("#btn_import_config").text('还原')
-                                if (e.status == 403 && e.responseJSON.detail == "AuthFailed") {
-                                    alert('认证失败！请重新登录！')
-                                    top.location = '/login/'
-                                } else if (e.status == 403 && e.responseJSON.detail == "PermissionDeny") {
+                                if (e.status == 403) {
                                     alert('权限不足！')
+                                    top.location = '/settings/'
                                 } else {
                                     alert('请求失败！' + e.responseJSON.detail)
                                 }
@@ -365,11 +361,9 @@
                         }
                     },
                     error: function (e) {
-                        if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
-                            alert('认证失败！请重新登录！')
-                            top.location = '/login/'
-                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        if (e.status == 403) {
                             alert('权限不足！')
+                            top.location = '/settings/'
                         } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "InputFormatError") {
                             alert('保存失败！请检查输入格式！')
                         } else {

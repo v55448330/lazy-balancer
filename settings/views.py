@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.core import serializers
 from django.http import HttpResponse
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -167,13 +167,33 @@ def get_config(scope=0):
         if isinstance(scope, int):
             upstream_config_qc = upstream_config.objects.all()
             proxy_config_qc = proxy_config.objects.all()
+            user_qc = User.objects.all()
 
             config = {
+                "user_list" : {"sha1":"", "config":""},
                 "main_config" : {"sha1":"", "config":""},
                 "system_config" : {"sha1":"", "config":""},
                 "upstream_config" : {"sha1":"", "config":""}, 
                 "proxy_config" : {"sha1":"", "config":""}
             }
+            if user_qc:
+                user_list = []
+                for u in user_qc:
+                    fields = {
+                        'username': u.username,
+                        'email': u.email,
+                        'first_name': u.first_name,
+                        'is_active': u.is_active,
+                        'date_joined': u.date_joined.timestamp(),
+                        'is_staff': u.is_staff,
+                        'is_superuser': u.is_superuser,
+                        'password': u.password,
+                        'is_admin': u.groups.filter(name='Admin').exists()
+                    }
+                    user_list.append(fields)
+
+                u_list = json.dumps(user_list)
+                config['user_list'] = {"sha1":hashlib.sha1(u_list.encode('utf-8')).hexdigest(), "config": u_list}
 
             if upstream_config_qc:
                 u_config = serializers.serialize('json', upstream_config_qc)
@@ -215,6 +235,7 @@ def import_config(config, restore=0):
             logger.info('get backup config...')
             config_bak = get_config(2)
 
+        u_list = config['user_list']
         m_config = config['main_config']
         s_config = config['system_config']
         p_config = config['proxy_config']
@@ -222,6 +243,49 @@ def import_config(config, restore=0):
 
         config_count = 0
         error_count = 0
+
+        if u_list.get('config', False):
+            user_qc = User.objects.all()
+            user_list = []
+            for u in user_qc:
+                fields = {
+                    'username': u.username,
+                    'email': u.email,
+                    'first_name': u.first_name,
+                    'is_active': u.is_active,
+                    'date_joined': u.date_joined.timestamp(),
+                    'is_staff': u.is_staff,
+                    'is_superuser': u.is_superuser,
+                    'password': u.password,
+                    'is_admin': u.groups.filter(name='Admin').exists()
+                }
+                user_list.append(fields)
+
+            if hashlib.sha1(json.dumps(user_list).encode('utf-8')).hexdigest() == u_list.get('sha1'):
+                logger.info('user list no change!')
+            else:
+                if hashlib.sha1(u_list.get('config').encode('utf-8')).hexdigest() == u_list.get('sha1'):
+                    logger.info('import user list started...')
+                    User.objects.all().delete()
+                    admin_group, _ = Group.objects.get_or_create(name='Admin')
+                    for obj in json.loads(u_list.get('config')):
+                        username = obj.get('username')
+                        logger.info(f'import user {username} ...')
+                        user, _ = User.objects.get_or_create(
+                            username=username,
+                            email=obj.get('email',''),
+                            first_name=obj.get('first_name',''),
+                            is_active=obj.get('is_active', True),
+                            is_staff=obj.get('is_staff', False),
+                            is_superuser=obj.get('is_superuser', False),
+                            date_joined=datetime.fromtimestamp(obj.get('date_joined')),
+                            password=obj.get('password')
+                        )
+                        if obj.get('is_admin', False):
+                            user.groups.add(admin_group)
+                        logger.info(f'import user {username} done!')
+                    logger.info('import user list finished!')
+
         if m_config.get('config', False):
             if hashlib.sha1(serializers.serialize('json', main_config_qc).encode('utf-8')).hexdigest() == m_config.get('sha1'):
                 logger.info('main config no change!')
