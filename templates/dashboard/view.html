@@ -12,7 +12,7 @@
                         <tbody>
                             <tr>
                                 <td class="pull-right"><strong>Nginx 版本</strong></td>
-                                <td><span id="sp_info_nginx"></span><br/><span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span> <button type="button" class="btn btn-xs btn-default" id="btn_nginx_control"></button></td>
+                                <td><span id="sp_info_nginx"></span><br/><span id="sp_nginx_status"></span> <span id="sp_nginx_config_status"></span><span id="sp_uptime"></span> {% if user.is_admin %}<button type="button" class="btn btn-xs btn-default" id="btn_nginx_control"></button>{% endif %}</td>
                             </tr>
                             <tr>
                                 <td class="pull-right"><strong>主机名</strong></td>
@@ -339,13 +339,21 @@ function nginx_control(action) {
                 if (p.flag == "Success") {
                     alert('操作成功！')
                     top.location = '/dashboard/'
-                } else if (p.flag == "Error" && p.context == "AuthFailed") {
+                }
+            },
+            error: function(e) {
+                if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
                     alert('认证失败！请重新登录！')
                     top.location = '/login/'
+                } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                    alert('权限不足！')
+                } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "MethodIsDenied") {
+                    alert('请求失败！')
                 } else {
-                    alert('操作失败！')
-                    $('#btn_nginx_control').attr('disabled', false)
+                    alert('请求错误！' + e.responseJSON.context)
                 }
+                $('#btn_nginx_control').attr('disabled', false)
+                top.location = '/dashboard/'
             }
         })
     }

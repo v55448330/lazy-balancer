@@ -19,6 +19,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.view),
-    url(r'^save_sync/$', views.sync_config),
-    url(r'^save_other_settings/$', views.save_other_settings),
+    url(r'^query/$', views.query_user),
+    url(r'^status/$', views.change_status),
+    url(r'^save/$', views.save),
 ]

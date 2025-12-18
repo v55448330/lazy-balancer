@@ -8,7 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
 from proxy.models import *
 from main.models import *
-from lazy_balancer.views import is_auth
+from lazy_balancer.views import is_auth, is_admin
 from nginx.views import reload_config
 from settings.models import system_settings, sync_status
 from datetime import datetime
@@ -31,9 +31,11 @@ except Exception as e:
     scheduler.shutdown()
 
 @login_required(login_url="/login/")
+@is_admin
 def view(request):
     user = {
-        'name':request.user,
+        'info':request.user,
+        'is_admin':request.user.groups.filter(name='Admin').exists(),
         'date':time.time()
     }
 
@@ -46,6 +48,7 @@ def view(request):
     return render_to_response('settings/view.html', {'user': user, 'settings': _system_settings[0], 'sync_status': _sync_status})
 
 @is_auth
+@is_admin
 def save_other_settings(request):
     if request.method == 'POST':
         try:
@@ -59,9 +62,16 @@ def save_other_settings(request):
                         num_per_page = int(num_per_page)
                         if num_per_page >= 10 and num_per_page <= 100:
                             s_config.update_num_per_page(num_per_page)
+                        else:
+                            content = {"flag": "Error", "context": "InputFormatError"}
+                            return HttpResponse(json.dumps(content), status=400)
+                    else:
+                        content = {"flag": "Error", "context": "InputFormatError"}
+                        return HttpResponse(json.dumps(content), status=400)
+
                 else:
                     content = {"flag": "Error", "context": "InputFormatError"}
-                    return HttpResponse(json.dumps(content))
+                    return HttpResponse(json.dumps(content), status=400)
 
                 if "public_metric" in post:
                     s_config.update_public_metric(True)
@@ -71,30 +81,38 @@ def save_other_settings(request):
                     reload_config("main", 1)
 
                 content = {"flag": "Success"}
-                return HttpResponse(json.dumps(content))
+                status = 200
+                return HttpResponse(json.dumps(content), status=status)
 
             else:
                 content = {"flag": "Error", "context": "InputFormatError"}
+                status = 400
         except Exception as e:
             content = {"flag": "Error", "context": str(e)}
+            status = 400
     else:
         content = {"flag": "Error", "context": "method is denied"}
+        status = 403
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(content), status=status)
 
 @is_auth
+@is_admin
 def sync_config(request):
     try:
         post = json.loads(request.body.decode('utf-8'))
         if save_sync(post):
             content = {"flag": "Success"}
+            status = 200
         else:
-            content = {"flag": "Error", "context": "input error"}
+            content = {"flag": "Error", "context": "InputFormatError"}
+            status = 400
 
     except Exception as e:
         content = {"flag": "Error", "context": str(e)}
+        status = 400
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(content), status=status)
 
 def save_sync(config):
     try:
@@ -138,35 +156,6 @@ def save_sync(config):
     except Exception as e:
         logger.error(str(e))
         return False
-
-@is_auth
-def admin_password(request, action):
-    if action == "reset":
-        try:
-            User.objects.all().delete()
-            content = { "flag":"Success" }
-        except Exception as e:
-            content = { "flag":"Error","context":str(e) }
-
-    elif action == "modify":
-        try:
-            post = json.loads(request.body.decode('utf-8'))
-            old_pass = post['old_password']
-            new_pass = post['new_password']
-            verify_pass = post['verify_password']
-            if old_pass and new_pass and verify_pass:
-                user = User.objects.get(username=request.user)
-                if user.check_password(old_pass) and new_pass == verify_pass:
-                    user.set_password(verify_pass)
-                    user.save()
-                    content = { "flag":"Success" }
-                else:
-                    content = { "flag":"Error","context":"VerifyFaild" }
-
-        except Exception as e:
-            content = { "flag":"Error","context":str(e) }
-
-    return HttpResponse(json.dumps(content))
 
 def get_config(scope=0):
     try:

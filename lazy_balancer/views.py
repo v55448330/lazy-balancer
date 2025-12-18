@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.sessions.models import Session
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import logout, login
@@ -39,6 +39,21 @@ def login_view(request):
 
     return render_to_response('login.html', context)
 
+def migrate_superuser():
+    try:
+        admin_group, _ = Group.objects.get_or_create(name='Admin')
+        superusers = User.objects.filter(is_superuser=True)
+    
+        user_list = []
+        for user in superusers:
+            if not user.groups.filter(name="Admin").exists():
+                user.groups.add(admin_group)
+                user_list.append(user.username)
+    
+        return user_list
+    except:
+        return None
+
 def create_superuser(request):
     redirect_to = settings.LOGIN_REDIRECT_URL
 
@@ -48,12 +63,16 @@ def create_superuser(request):
     if request.method == "POST":
         try:
             post = json.loads(request.body.decode('utf-8'))
-            User.objects.create_superuser(post['username'], 'admin@123.com', post['password'])
-            context = {'flag':"Success",}
+            user = User.objects.create_superuser(post['username'], 'admin@123.com', post['password'])
+            group, _ = Group.objects.get_or_create(name='Admin')
+            user.groups.add(group)
+            context = {'flag':"Success"}
+            status = 200
         except Exception as e:
             context = {"flag":"Error", "context":str(e)}
+            status = 403
 
-        return HttpResponse(json.dumps(context))
+        return HttpResponse(json.dumps(context), status=status)
 
     return render_to_response('superuser.html')
 
@@ -69,7 +88,19 @@ def is_auth(view):
                 'flag':"Error",
                 'context':"AuthFailed"
             }
-            return HttpResponse(json.dumps(context))
+            return HttpResponse(json.dumps(context), status=403)
+        else:
+            return view(request, *args, **kwargs)
+    return decorator
+
+def is_admin(view):
+    def decorator(request, *args, **kwargs):
+        if not request.user.groups.filter(name='Admin').exists():
+            context = {
+                'flag':"Error",
+                'context':"PermissionDeny"
+            }
+            return HttpResponse(json.dumps(context), status=403)
         else:
             return view(request, *args, **kwargs)
     return decorator

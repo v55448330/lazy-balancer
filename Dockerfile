@@ -1,7 +1,7 @@
 FROM python:3.9-alpine
 
 ENV TENGINE_VERSION 3.1.0
-ENV LAZYBALANCER_VERSION v1.4.0beta
+ENV LAZYBALANCER_VERSION v1.5.0beta
 
 COPY . /app/lazy_balancer
 

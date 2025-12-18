@@ -74,7 +74,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">* HTTP 日志格式</label>
+                        <label class="col-sm-2 control-label">* HTTP 日志</label>
                         <div class="col-sm-4">
                             <div id="div_http_log_format" class="" style="height:150px;width:100%">
                             </div>
@@ -85,7 +85,7 @@
                             </span>
                         </div>
 
-                        <label class="col-sm-1 control-label">* TCP 日志格式</label>
+                        <label class="col-sm-1 control-label">* TCP 日志</label>
                         <div class="col-sm-4">
                             <div id="div_stream_log_format" class="" style="height:150px;width:100%">
                             </div>
@@ -120,7 +120,9 @@
                 <!-- /.box-body -->
                 <div class="box-footer">
                     <!-- <button type="submit" class="btn btn-default">Cancel</button> -->
+                    {% if user.is_admin %}
                     <button type="button" class="btn btn-primary pull-right" onclick="save_config()">保存</button>
+                    {% endif %}
                 </div>
                 <!-- /.box-footer -->
             </form>
@@ -139,7 +141,7 @@
     $('#page_name').text('全局配置')
 
     //input filter
-    $("[data-mask]").inputmask();
+    Inputmask().mask(document.querySelectorAll("[data-inputmask]"));
 
     var http_log_format_editor = ace.edit('div_http_log_format');
     var stream_log_format_editor = ace.edit('div_stream_log_format');
@@ -149,7 +151,7 @@
     $(document).ready(function(){
         http_log_format_editor.setOptions({
             mode: 'ace/mode/nginx',
-            placeholder: "HTTP 请求日志格式定义，请输入日志格式正文，无需输入 NGINX 关键字，不了解请留空。",
+            placeholder: "HTTP 请求日志格式定义，请输入日志格式正文，不了解请留空。",
         })
         http_log_format_editor.setValue(http_log_format_body, -1);
         http_log_format_editor.setHighlightActiveLine(false);
@@ -157,7 +159,7 @@
 
         stream_log_format_editor.setOptions({
             mode: 'ace/mode/nginx',
-            placeholder: "TCP 请求日志格式定义，请输入日志格式正文，无需输入 NGINX 关键字，不了解请留空。",
+            placeholder: "TCP 请求日志格式定义，请输入日志格式正文，不了解请留空。",
         })
         stream_log_format_editor.setValue(stream_log_format_body, -1);
         stream_log_format_editor.setHighlightActiveLine(false);
@@ -206,17 +208,19 @@
                     if (p.flag == "Success") {
                         alert("保存成功!")
                         top.location = '/main/'
-                    } else if (p.flag == "Error" && p.context == "ArgsError") {
-                        alert('保存失败！配置项填写错误！')
-                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else {
-                        alert('保存错误！其他错误：' + p.context)
                     }
                 },
                 error: function(e) {
-                    alert('请求失败!')
+                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ArgsError") {
+                        alert('保存失败！配置项填写错误！')
+                    } else {
+                        alert('请求错误！' + e.responseJSON.context)
+                    }
                 }
             })
         }

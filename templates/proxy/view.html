@@ -397,7 +397,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                {% if user.is_admin %}
                 <button type="button" class="btn btn-primary" id="btn_save_balancer" onclick="save_balancer()">保存</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -408,8 +410,10 @@
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
+                {% if user.is_admin %}
                     <button type="button" class="btn btn-primary" onclick="edit_balancer(1)">创建负载均衡器</button>
                     <button type="button" class="btn btn-primary" id="btn_gen_config" onclick="gen_config()">重新应用配置</button>
+                {% endif %}
                 <div class="input-group pull-right" style="width: 30%;">
                     <input type="text" name="proxy_filter" id="input_proxy_filter" class="form-control pull-right"
                         placeholder="请输入名称/域名/配置ID/端口" onkeydown='if(event.keyCode==13){proxy_filter()}'>
@@ -486,8 +490,10 @@
                             <td>
                                 <button type="button" class="btn btn-primary btn-xs"
                                     onclick="get_proxy_logs('{{ server.pk }}')">日志</button>
+                                {% if user.is_admin %}
                                 <button type="button" class="btn btn-danger btn-xs"
                                     onclick="delete_proxy('{{ server.pk }}','{{ server.proxy_name }}')">删除</button>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -747,7 +753,7 @@
             tb += '<td><a href="#" onclick="edit_upstream(0,this)"><h5><i class="fa fa-remove"></i></h5></a></td>'
             tb += '</tr></table></form>'
             $('#div_upstream_list').append(tb)
-            $("[data-mask]").inputmask()
+            Inputmask().mask(document.querySelectorAll("[data-inputmask]"));
         } else {
             if (upstream) {
                 $(upstream).parents('form')[0].remove()
@@ -781,7 +787,7 @@
             $('#input_upstream_fail_timeout').val('')
             $('#input_upstream_backend_domain').val('')
             $('#div_upstream_list').empty()
-            $('[data-mask]').inputmask()
+            Inputmask().mask(document.querySelectorAll("[data-inputmask]"));
             check_balancer_ssl()
             change_proxy_protocol('http')
             editor.setValue('')
@@ -908,15 +914,17 @@
                     if (p.flag == "Success") {
                         alert("删除成功!")
                         top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else {
-                        alert('删除错误！' + p.context)
                     }
                 },
                 error: function (e) {
-                    alert('请求失败!')
+                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else {
+                        alert('删除错误！' + e.responseJSON.context)
+                    }
                 }
             })
         }
@@ -1077,14 +1085,21 @@
                     if (p.flag == "Success") {
                         alert("配置应用成功!")
                         top.location = '/proxy/'
-                    } else if (p.flag == "Error") {
-                        alert("配置应用失败！请手动检查配置！")
                     }
                 },
                 error: function (e) {
                     $("#btn_gen_config").text('重新应用配置')
                     $("#btn_gen_config").prop('disabled', false)
-                    alert("请求失败！")
+                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" ) {
+                        alert("配置应用失败！请手动检查配置！")
+                    } else {
+                        alert('请求失败！' + e.responseJSON.context)
+                    }
                 }
             })
         } else if (confirm("是否重新载入配置？")) {
@@ -1101,14 +1116,21 @@
                     if (p.flag == "Success") {
                         alert("配置重载成功!")
                         top.location = '/proxy/'
-                    } else if (p.flag == "Error") {
-                        alert("配置重载失败！请检查配置文件或日志！")
                     }
                 },
                 error: function (e) {
                     $("#btn_gen_config").text('重新应用配置')
                     $("#btn_gen_config").prop('disabled', false)
-                    alert("请求失败！")
+                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" ) {
+                        alert("配置重载失败！请手动检查配置！")
+                    } else {
+                        alert('请求失败！' + e.responseJSON.context)
+                    }
                 }
             })
         };
@@ -1133,18 +1155,20 @@
                     if (p.flag == "Success") {
                         alert("变更成功!")
                         top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.context == "ConfigError") {
-                        alert('变更失败！配置错误，规则已禁用！')
-                        top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else {
-                        alert('变更错误！' + p.context)
                     }
                 },
                 error: function (e) {
-                    alert('请求失败!')
+                    if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ConfigError") {
+                        alert('变更失败！配置错误，规则已禁用！')
+                        top.location = '/proxy/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else {
+                        alert('变更错误！' + e.responseJSON.context)
+                    }
                 }
             })
         }
@@ -1198,23 +1222,29 @@
                     if (p.flag == "Success") {
                         alert("保存成功!")
                         top.location = '/proxy/'
-                    } else if (p.flag == "Error" && p.context == "ArgsError") {
-                        alert('保存失败！配置项填写错误！')
-                    } else if (p.flag == "Error" && p.context == "PortOccupied") {
-                        alert('保存失败！端口被占用！')
-                    } else if (p.flag == "Error" && p.context == "MainConfigNotFound") {
-                        alert('保存失败！请先修改全局配置！')
-                    } else if (p.flag == "Error" && p.context == "AuthFailed") {
-                        alert('认证失败！请重新登录！')
-                        top.location = '/login/'
-                    } else {
-                        alert('保存错误！其他错误：' + p.context)
                     }
                 },
                 error: function (e) {
                     $("#btn_save_balancer").prop('disabled', false)
                     $("#btn_save_balancer").text('保存')
-                    alert('请求失败!')
+                    if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ArgsError") {
+                        alert('保存失败！配置项填写错误！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PortOccupied") {
+                        alert('保存失败！端口被占用！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "MainConfigNotFound") {
+                        alert('保存失败！请先修改全局配置！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ServerNamenotFound") {
+                        alert('保存失败！请填写域名！')
+                    } else if (e.status == 404 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ConfigIdnotFound") {
+                        alert('保存失败！配置不存在！')
+                    } else if (e.status == 400 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else {
+                        alert('保存错误！其他错误：' + e.responseJSON.context)
+                    }
                 }
             })
 

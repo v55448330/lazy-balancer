@@ -1,0 +1,326 @@
+{% extends "base.html" %} {% block content %} {% load custom_filter %}
+<!-- Modal -->
+<div class="modal fade" id="edit_user" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xs">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="edit_user_title"></h4><small id="edit_user_mtitle"></small>
+            </div>
+            <div class="modal-body">
+                    <form class="form-horizontal" id="form_user_info">
+                        <input type="text" name="user_id" id="input_user_id" hidden>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">用户名</label>
+                            <div class="col-sm-9" id="div_username">
+                                <input type="text" class="form-control" name="username"
+                                    id="input_username" placeholder="登录用户名，仅允许小写英文字母和数字"
+                                    onblur="check_form(this)" data-inputmask="'regex': '^[a-z0-9]+$'" data-mask>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">邮箱</label>
+                            <div class="col-sm-9" id="div_listen">
+                                <input type="text" class="form-control" name="email"
+                                    id="input_email" placeholder="电子邮件地址（可选）"
+                                    data-inputmask="'alias': 'email'" data-mask>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">姓名</label>
+                            <div class="col-sm-9" id="div_first_name">
+                                <input type="text" class="form-control" name="user_first_name"
+                                    id="input_user_first_name" placeholder="请输入你的姓名（可选）">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <hr>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">密码</label>
+                            <div class="col-sm-9">
+                                <input type="password" class="form-control" name="user_password"
+                                    id="input_user_password" placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">验证密码</label>
+                            <div class="col-sm-9" id="div_user_verify_password">
+                                <input type="password" class="form-control" onblur="check_form(this)" name="user_verify_password" id="input_verify_password" placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <hr>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">管理员</label>
+                            <div class="col-sm-2">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="user_is_admin" id="check_user_is_admin"
+                                            onchange=""> 启用
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="btn_save_user" onclick="save_user()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                    <button type="button" class="btn btn-primary" onclick="edit_user(0)">创建用户</button>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding table-responsive p-0">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>姓名</th>
+                            <th>状态</th>
+                            <th>角色</th>
+                            <th>最后登录</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                          <td>{{ user.user.pk }}</td>
+                          <td>{{ user.user.username }}</td>
+                          <td>{{ user.user.email }}</td>
+                          <td>{{ user.user.get_full_name }}</td>
+                          {% if user.user.is_active %}
+                          <td>
+                              <button type="button" class="btn btn-success btn-xs"
+                                  onclick="change_status('{{ user.user.pk }}',0)">启用</button>
+                          </td>
+                          {% else %}
+                          <td>
+                              <button type="button" class="btn btn-danger btn-xs"
+                                  onclick="change_status('{{ user.user.pk }}',1)">禁用</button>
+                          </td>
+                          {% endif %} 
+                          <td>
+                          {% if user.is_admin %}
+                          管理员
+                          {% else %}
+                          用户 
+                          {% endif %}
+                          </td>
+                          <td>{{ user.user.last_login | timestamp_to_date }}</td>
+                          <td>
+                            <button type="button" class="btn btn-primary btn-xs"
+                            onclick="edit_user('{{ user.user.pk }}')">修改</button>
+                            <button type="button" class="btn btn-danger btn-xs"
+                            onclick="delete_user('{{ user.user.pk }}')">删除</button>
+                          </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer clearfix">
+                <ul class="pagination pagination-sm no-margin pull-right">
+                    {% if users.has_previous %}
+                    <li><a href="?page=1&filter={{ filter }}"
+                            class="next">首页{{ next_link_decorator|safe }}</a></li>
+                    <li><a href="?page={{ users.previous_page_number }}&filter={{ filter }}"
+                            class="prev">{{ previous_link_decorator|safe }}上一页</a></li>
+                    {% else %}
+                    <li class="paginate_button previous disabled"><span
+                            class="disabled prev">{{ previous_link_decorator|safe }}上一页</span></li>
+                    {% endif %} {% if users.has_next %}
+                    <li><a href="?page={{ users.next_page_number }}&filter={{ filter }}"
+                            class="next">下一页{{ next_link_decorator|safe }}</a></li>
+                    <li><a href="?page={{ users.paginator.num_pages }}&filter={{ filter }}"
+                            class="next">尾页{{ next_link_decorator|safe }}</a></li>
+                    {% else %}
+                    <li class="paginate_button next disabled"><span
+                            class="disabled next">下一页{{ next_link_decorator|safe }}</span></li>
+                    {% endif %}
+                    <li class="paginate_button previous disabled">
+                        <span>第 {{ users.number }} 页 - 共 {{ users.paginator.num_pages }} 页</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#menu_user_management').addClass('active')
+    $('#page_header').text('用户管理')
+    $('#page_header_descript').text('配置[ Nginx 负载均衡管理平台]用户')
+    $('#page_nav').text('系统配置')
+    $('#page_name').text('用户管理')
+
+    $(document).ready(function(){
+        Inputmask().mask(document.querySelectorAll("[data-inputmask]"));
+    })
+
+    function check_form(input) {
+        var input_div = $(input.closest("div"))
+        input_div.removeClass('has-error')
+        input_div.removeClass('has-success')
+        if (($(input).val() == "") || ($(input).attr('name') == "user_verify_password" && $(input).val() != $('#input_user_password').val())) {
+            input_div.addClass('has-error')
+        } else {
+            input_div.addClass('has-success')
+        }
+    }
+
+    function edit_user(user_id) {
+        $('#div_username').removeClass('has-error has-success')
+        $('#div_user_verify_password').removeClass('has-error has-success')
+        if (!user_id) {
+            $('#edit_user_title').text('创建用户')
+            $('#edit_user_mtitle').text('')
+            $('#input_user_id').val(0)
+            $('#input_username').val('')
+            $("#input_username").prop('disabled', false)
+            $('#input_user_first_name').val('')
+            $('#input_email').val('')
+            $('#input_user_password').val('')
+            $('#input_verify_password').val('')
+            $('#check_user_is_admin').attr('checked', false)
+            Inputmask().mask(document.querySelectorAll("[data-inputmask]"));
+            $('#edit_user').modal('show')
+        } else {
+            var post = {
+                user_id: user_id 
+            }
+            jQuery.ajax({
+                type: 'post',
+                url: '/users/query/',
+                data: JSON.stringify(post),
+                dataType: "json",
+                success: function (p) {
+                    if (p.flag == "Success") {
+                        //console.log(p)
+                        $('#edit_user_title').text('修改用户')
+                        $('#input_user_id').val(user_id)
+                        $('#input_username').val(p.context.user.username)
+                        $("#input_username").prop('disabled', true)
+                        $('#input_email').val(p.context.user.email)
+                        $('#input_user_first_name').val(p.context.user.first_name)
+                        if (p.context.user.is_admin) {
+                            $('#check_user_is_admin').prop('checked', true)
+                        } else {
+                            $('#check_user_is_admin').prop('checked', false)
+			            }
+                        $('#edit_user').modal('show')
+                    }
+                },
+                error: function (e) {
+                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else if (e.status == 404 && e.responseJSON.flag == "Error" && e.responseJSON.context == "UserNotFound") {
+                        alert('用户不存在！')
+                    } else {
+                        alert('查询失败！' + e.responseJSON.context)
+                    }
+                }
+            })
+        }
+    }
+
+    function change_status(pk, status) {
+        if (confirm("确认要变更状态？")) {
+            var post = {
+                user_id: pk,
+                status: status
+            }
+            jQuery.ajax({
+                type: 'post',
+                url: '/users/status/',
+                data: JSON.stringify(post),
+                dataType: 'json',
+                success: function (p) {
+                    if (p.flag == "Success") {
+                        alert("变更成功!")
+                        top.location = '/users/'
+                    }
+                },
+                error: function (e) {
+                    if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ChangeDeny") {
+                        alert('变更失败！禁止修改默认用户状态！')
+                        top.location = '/users/'
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                        alert('权限不足！')
+                    } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                        alert('认证失败！请重新登录！')
+                        top.location = '/login/'
+                    } else {
+                        console.log(e)
+                        alert('变更错误！' + e.responseJSON.context)
+                    }
+                }
+            })
+        }
+    }
+
+    function save_user() {
+        var user_password = $('#input_user_password').val()
+        var verify_password = $('#input_verify_password').val()
+        if (!$('#input_username').val()) {
+            alert('请正确输入用户名！')
+        } else if ((user_password != verify_password) || (((!user_password) || (!verify_password)) && ($('#input_user_id').val() == 0))) {
+            alert('请正确输入密码！')
+        } else {
+            if (confirm("确认要保存用户信息？")) {
+                $("#btn_save_user").prop('disabled', true)
+                $("#btn_save_user").text('处理中...')
+                var user_info = $('#form_user_info').serializeObject()
+                jQuery.ajax({
+                    type: 'post',
+                    url: '/users/save/',
+                    data: JSON.stringify(user_info),
+                    dataType: 'json',
+                    success: function (p) {
+                        $("#btn_save_user").prop('disabled', false)
+                        $("#btn_save_user").text('保存')
+                        if (p.flag == "Success") {
+                            alert("保存成功!")
+                            top.location = '/users/'
+                        }
+                    },
+                    error: function (e) {
+                        $("#btn_save_user").prop('disabled', false)
+                        $("#btn_save_user").text('保存')
+                        if (e.status == 404 && e.responseJSON.flag == "Error" && e.responseJSON.context == "UserNotFound") {
+                            alert('保存失败！用户不存在！')
+                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "PermissionDeny") {
+                            alert('权限不足！')
+                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "ChangeGroupDeny") {
+                            alert('保存失败！默认用户禁止修改权限！')
+                        } else if (e.status == 403 && e.responseJSON.flag == "Error" && e.responseJSON.context == "AuthFailed") {
+                            alert('认证失败！请重新登录！')
+                            top.location = '/login/'
+                        } else {
+                            alert('保存错误！其他错误：' + e.responseJSON.context)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+</script>
+{% endblock %}
