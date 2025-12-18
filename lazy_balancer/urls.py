@@ -22,13 +22,17 @@ import os
 
 if os.path.exists(settings.BASE_DIR + '/db/' + 'db.sqlite3'):
    try:
-       from nginx.views import reload_config, clean_dir 
+       from nginx.views import reload_config, clean_dir
        clean_dir("/etc/nginx/conf.d")
        print("clean old config ok")
        reload_config("main", 1)
        print("reload main config ok")
        reload_config("proxy", 1)
        print("reload proxy config ok")
+       from .views import migrate_superuser
+       
+       print("migrate superuser ...")
+       print(f"migrate done {migrate_superuser()}")
    except:
        print("reload config error")
 
@@ -40,6 +44,7 @@ urlpatterns = [
     url(r'^main/', include('main.urls')),
     url(r'^proxy/', include('proxy.urls')),
     url(r'^settings/', include('settings.urls')),
+    url(r'^users/', include('users.urls')),
     url(r'^api/', include('api.urls')),
     url(r'^$', RedirectView.as_view(url='/dashboard/')),
 ]

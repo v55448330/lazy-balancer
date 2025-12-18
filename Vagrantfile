@@ -5,10 +5,10 @@ Vagrant.require_version ">= 1.6.0"
 
 vms = [
     {
-        :name => "balancer1",
-        :eth1 => "192.168.100.101",
+        :name => "lazybalancer",
+        :eth0 => "192.168.100.100",
         :mem => "2048",
-        :cpu => "1"
+        :cpu => "2"
     },
     #{
     #    :name => "balancer2",
@@ -20,7 +20,7 @@ vms = [
 
 Vagrant.configure(2) do |config|
 
-  config.vm.box = "generic/ubuntu1804"
+  config.vm.box = "cloud-image/ubuntu-20.04"
 
   vms.each do |opts|
       config.vm.define opts[:name] do |config|
@@ -29,8 +29,10 @@ Vagrant.configure(2) do |config|
             vb.memory = opts[:mem]
             vb.cpus = opts[:cpu]
           end
-        config.vm.network :private_network, ip: opts[:eth1]
-        config.vm.synced_folder ".", "/app/lazy_balancer"
+        config.vm.network :private_network, ip: opts[:eth0]
+        config.vm.network :public_network, bridge: "en0: Wi-Fi"
+
+        config.vm.synced_folder ".", "/app/lazy_balancer", type: "nfs", mount_options: ['nolock'], nfs_export: false, nfs_udp: false
 
       end
   end

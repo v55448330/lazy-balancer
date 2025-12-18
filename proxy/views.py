@@ -8,7 +8,7 @@ from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.http import HttpResponse
 from django.forms.models import model_to_dict
 from django.db.models import Q
-from lazy_balancer.views import is_auth
+from lazy_balancer.views import is_auth, is_admin
 from proxy.models import proxy_config,upstream_config
 from main.models import main_config
 from settings.models import system_settings
@@ -45,7 +45,8 @@ def view(request):
         contexts = paginator.page(paginator.num_pages)
 
     user = {
-        'name':request.user,
+        'info':request.user,
+        'is_admin':request.user.groups.filter(name='Admin').exists(),
         'date':time.time()
     }
 
@@ -88,6 +89,7 @@ def query_proxy(request):
     pass
 
 @is_auth
+@is_admin
 def delete_proxy(request):
     try:
         post = json.loads(request.body.decode('utf-8'))
@@ -96,40 +98,51 @@ def delete_proxy(request):
         if post.get('gen_config', False):
             reload_config("proxy")
         content = { "flag":"Success" }
+        status = 200
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
-    return HttpResponse(json.dumps(content))
+        status = 400
+    return HttpResponse(json.dumps(content), status=status)
     pass
 
 @is_auth
+@is_admin
 def gen_config(request):
     try:
         if request.method == 'POST':
             if reload_config("proxy", 1):
                 content = { "flag":"Success" }
+                status = 200
             else:
                 content = { "flag":"Error" }
+                status = 400
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
+        status = 400
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(content), status=status)
     pass
 
 @is_auth
+@is_admin
 def load_config(request):
     try:
         if request.method == 'POST':
             if reload_config("", 0, 1):
                 content = { "flag":"Success" }
+                status = 200
             else:
                 content = { "flag":"Error" }
+                status = 400
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
+        status = 400
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(content), status=status)
     pass
 
 @is_auth
+@is_admin
 def change_status(request):
     try:
         post = json.loads(request.body.decode('utf-8'))
@@ -139,17 +152,21 @@ def change_status(request):
         if post.get('gen_config', False):
             if reload_config("proxy"):
                 content = { "flag":"Success" }
+                status = 200
             else:
                 proxy.status = False
                 proxy.save()
                 reload_config("proxy")
                 content = { "flag":"Error","context":"ConfigError"}
+                status = 400
         else:
             content = { "flag":"Success" }
+            status = 200
     except Exception as e:
         content = { "flag":"Error","context":str(e) }
+        status = 400
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(content), status=status)
     pass
 
 @is_auth
@@ -205,6 +222,7 @@ def proxy_logs(request):
     pass
 
 @is_auth
+@is_admin
 def save(request):
     try:
         post = json.loads(request.body.decode('utf-8'))
@@ -213,7 +231,7 @@ def save(request):
         # return HttpResponse(json.dumps(content))
         if not len(main_config.objects.all()):
             content = {"flag":"Error","context":"MainConfigNotFound"}
-            return HttpResponse(json.dumps(content))
+            return HttpResponse(json.dumps(content), status=400)
 
         config_id = post['base_config']['proxy_config_id']
         proxy_name = post['base_config']['proxy_proxy_name']
@@ -252,8 +270,8 @@ def save(request):
                 create_flag = True
             else:
                 if not p_config:
-                    content = {"flag":"Error", "context":"config id not found"}
-                    return HttpResponse(json.dumps(content))
+                    content = {"flag":"Error", "context":"ConfigIdnotFound"}
+                    return HttpResponse(json.dumps(content), status=404)
 
             # config_nginx_path = "/etc/nginx/nginx.conf"
             # config_path = "/etc/nginx/conf.d/%s.conf" % config_id
@@ -303,17 +321,17 @@ def save(request):
                         port_list.remove(p_config[0].listen)
                 if int(listen) in port_list:
                     content = {"flag":"Error", "context":"PortOccupied"}
-                    return HttpResponse(json.dumps(content))
+                    return HttpResponse(json.dumps(content), status=400)
                 config_path = "/etc/nginx/conf.d/%s-tcp.conf" % config_id
             else:
                 port_list = list(proxy_config.objects.filter(protocol=False).values_list('listen', flat=True).iterator())
                 print(port_list)
                 if int(listen) in port_list:
                     content = {"flag":"Error", "context":"PortOccupied"}
-                    return HttpResponse(json.dumps(content))
+                    return HttpResponse(json.dumps(content), status=400)
                 if not server_name:
-                    content = {"flag":"Error", "context":"Server Name not Found"}
-                    return HttpResponse(json.dumps(content))
+                    content = {"flag":"Error", "context":"ServerNamenotFound"}
+                    return HttpResponse(json.dumps(content), status=400)
                 protocol = True
                 config_path = "/etc/nginx/conf.d/%s-http.conf" % config_id
 
@@ -438,22 +456,25 @@ def save(request):
 
                 reload_config("proxy", 0, 1)
                 content = {"flag":"Success"}
+                status = 200
             else:
                 content = {"flag":"Error","context":test_ret['output']}
                 reload_config("proxy", 1)
 
         else:
             content = {"flag":"Error","context":"ArgsError"}
-            return HttpResponse(json.dumps(content))
+            status = 400
+            return HttpResponse(json.dumps(content), status=status)
 
     except Exception as e:
         reload_config("proxy", 1)
         content = {"flag":"Error","context":str(e)}
+        status = 400
 
-    return HttpResponse(json.dumps(content))
+    return HttpResponse(json.dumps(content), status=status)
     pass
 
-# @is_auth
+@is_auth
 def get_cert_status(request):
     try:
         post = json.loads(request.body.decode('utf-8'))

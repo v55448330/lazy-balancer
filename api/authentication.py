@@ -8,14 +8,31 @@ class APIKeyPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         access_key = request.GET.get("access_key", None)
         if not access_key:
-            raise exceptions.NotFound("Access key not provided.")
+            raise exceptions.PermissionDenied("Access key not provided.")
         try:
             system_settings.objects.get(access_key=access_key)
             return True
         except system_settings.DoesNotExist:
             raise exceptions.PermissionDenied("No found the access key or API is disabled")
         except ValueError:
-            raise exceptions.ValidationError("Badly formed hexadecimal UUID string")
+            raise exceptions.PermissionDenied("Badly formed hexadecimal UUID string")
 
         return False
+
+class IsAdminPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        try:
+            if not request.user.is_authenticated:
+                raise exceptions.AuthenticationFailed("AuthFailed")
+            if not request.user.groups.filter(name='Admin').exists():
+                raise exceptions.PermissionDenied("PermissionDeny")
+            
+            print('bcd')
+
+            return True
+        except:
+            raise exceptions.PermissionDenied("PermissionDeny")
+
+            
+
 

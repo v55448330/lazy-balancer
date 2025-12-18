@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'nginx',
     'api',
     'dashboard',
+    'users'
 ]
 
 MIDDLEWARE = [

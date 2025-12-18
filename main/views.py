@@ -3,7 +3,7 @@ from django.shortcuts import render, render_to_response
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from lazy_balancer.views import is_auth
+from lazy_balancer.views import is_auth, is_admin
 from main.models import main_config
 from settings.models import system_settings
 from nginx.views import *
@@ -19,7 +19,8 @@ def view(request):
         m_config = m_config[0]
 
     user = {
-        'name':request.user,
+        'info':request.user,
+        'is_admin':request.user.groups.filter(name='Admin').exists(),
         'date':time.time()
     }
     #print m_config
@@ -28,6 +29,7 @@ def view(request):
     pass
 
 @is_auth
+@is_admin
 def save(request):
     context = {
         'flag':"",
@@ -88,18 +90,22 @@ def save(request):
                 main_config.objects.all().delete()
                 main_config.objects.create(**m_config)
                 context['flag'] = "Success"
+                status = 200
             else:
                 context['error'] = "Error"
                 context['context'] = test_ret['output']
+                status = 400
 
             reload_config("main", 1)
         else:
             context['flag'] = "Error"
             context['context'] = "ArgsError"
+            status = 400
     except Exception as e:
         context['flag'] = "Error"
         context['context'] = str(e)
+        status = 400
 
-    return HttpResponse(json.dumps(context))
+    return HttpResponse(json.dumps(context), status=status)
     pass
 #
