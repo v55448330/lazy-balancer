@@ -460,6 +460,7 @@ def save(request):
             else:
                 content = {"flag":"Error","context":test_ret['output']}
                 reload_config("proxy", 1)
+                status = 400
 
         else:
             content = {"flag":"Error","context":"ArgsError"}

@@ -50,9 +50,9 @@ server {
 
 	location / {
         {%- if proxy.listen == 443 %}
-		return 301 https://{{ proxy.server_name }}$request_uri;
+                return 301 https://$server_name$request_uri;
         {%- else %}
-		return 301 https://{{ proxy.server_name }}:{{ proxy.listen }}$request_uri;
+                return 301 https://$server_name:{{ proxy.listen }}$request_uri;
         {%- endif %}
 	}
 }
